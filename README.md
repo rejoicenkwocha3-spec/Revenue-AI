@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SearchSprout
 
-## Getting Started
+AI-Powered Search and Discovery Platform for B2B SaaS.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 (App Router)
+- TypeScript
+- React 19
+- Tailwind CSS 4
+- Supabase (Auth + PostgreSQL + Storage)
+- Recharts
+- Lucide Icons
+
+## Environment Variables
+
+Create a `.env.local` file in the project root with:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+ANTHROPIC_API_KEY=your_anthropic_api_key     # optional, for AI Assistant
+OPENAI_API_KEY=your_openai_api_key           # optional fallback
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run `supabase/schema.sql` against your Supabase project to create all required tables with Row Level Security policies.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The app deploys to any platform that supports Next.js:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Vercel: connect the GitHub repository and add environment variables
+- Railway, Render, Fly.io: build command `npm run build`, start `npm start`
 
-## Deploy on Vercel
+## Pricing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Payments are processed via Selar:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Starter ($47/mo): https://selar.com/47plan?currency=USD
+- Growth ($57/mo): https://selar.com/57plan?currency=USD
+- Scale ($97/mo): https://selar.com/97plan?currency=USD

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import RemoteSiteLogo from "@/components/RemoteSiteLogo";
+import SearchSproutLogo from "@/components/SearchSproutLogo";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
@@ -39,12 +39,12 @@ export default function ResetPasswordPage() {
       <div style={{ width: "100%", maxWidth: "400px" }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-            <RemoteSiteLogo size={36} />
-            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>RemoteSite</span>
+            <SearchSproutLogo size={36} />
+            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>SearchSprout</span>
           </Link>
         </div>
 
-        <div className="card">
+        <div className="card-ss">
           <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#101828", marginBottom: "0.375rem", textAlign: "center" }}>Set new password</h1>
           <p style={{ color: "#6B7280", fontSize: "0.9375rem", textAlign: "center", marginBottom: "1.75rem" }}>Enter your new password below.</p>
 

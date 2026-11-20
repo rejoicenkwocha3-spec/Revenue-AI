@@ -1,35 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, FolderOpen, Camera, TrendingUp,
-  Brain, FileText, FileStack, Users, Bell, Settings, CreditCard, LogOut
+  LayoutDashboard, FolderOpen, Database, Layers, Sliders, MessageSquare,
+  Star, BarChart3, Settings2, KeyRound, Plug, Users, CreditCard, Settings,
+  LogOut, ChevronLeft, ChevronRight
 } from "lucide-react";
-import RemoteSiteLogo from "./RemoteSiteLogo";
+import SearchSproutLogo from "./SearchSproutLogo";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const navItems = [
+const nav = [
   { href: "/dashboard/overview", icon: LayoutDashboard, label: "Overview" },
-  { href: "/dashboard/projects", icon: FolderOpen, label: "My Projects" },
-  { href: "/dashboard/monitoring", icon: Camera, label: "Site Monitoring" },
-  { href: "/dashboard/progress", icon: TrendingUp, label: "Progress Tracking" },
-  { href: "/dashboard/ai-insights", icon: Brain, label: "AI Insights" },
-  { href: "/dashboard/reports", icon: FileText, label: "Reports" },
-  { href: "/dashboard/documents", icon: FileStack, label: "Documents" },
+  { href: "/dashboard/projects", icon: FolderOpen, label: "Search Projects" },
+  { href: "/dashboard/data-sources", icon: Database, label: "Data Sources" },
+  { href: "/dashboard/indexes", icon: Layers, label: "Search Indexes" },
+  { href: "/dashboard/experience", icon: Sliders, label: "Search Experience" },
+  { href: "/dashboard/ai-assistant", icon: MessageSquare, label: "AI Assistant" },
+  { href: "/dashboard/recommendations", icon: Star, label: "Recommendations" },
+  { href: "/dashboard/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/dashboard/merchandising", icon: Settings2, label: "Merchandising" },
+  { href: "/dashboard/api-keys", icon: KeyRound, label: "API Keys" },
+  { href: "/dashboard/integrations", icon: Plug, label: "Integrations" },
   { href: "/dashboard/team", icon: Users, label: "Team" },
-  { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
-];
-
-const bottomItems = [
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
   { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
+  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -39,87 +41,84 @@ export default function DashboardSidebar() {
   }
 
   return (
-    <aside style={{
-      width: "240px",
-      minWidth: "240px",
-      background: "#101828",
-      display: "flex",
-      flexDirection: "column",
-      padding: "1.25rem 0.75rem",
-      borderRight: "1px solid rgba(255,255,255,0.06)",
-    }}>
+    <aside
+      style={{
+        width: collapsed ? "64px" : "240px",
+        minHeight: "100vh",
+        background: "#071F20",
+        display: "flex",
+        flexDirection: "column",
+        transition: "width 0.2s",
+        flexShrink: 0,
+        position: "sticky",
+        top: 0,
+      }}
+    >
       {/* Logo */}
-      <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none", padding: "0 0.5rem 1.25rem", marginBottom: "0.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <RemoteSiteLogo size={30} />
-        <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#FFFFFF" }}>RemoteSite</span>
-      </Link>
+      <div style={{ padding: collapsed ? "1.25rem 0.75rem" : "1.25rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between" }}>
+        {!collapsed && (
+          <Link href="/dashboard/overview" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
+            <SearchSproutLogo size={28} />
+            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#FFFFFF" }}>SearchSprout</span>
+          </Link>
+        )}
+        {collapsed && <SearchSproutLogo size={28} />}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: "0.375rem", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.6)", flexShrink: 0 }}
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+      </div>
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px", marginTop: "0.75rem" }}>
-        {navItems.map((item) => {
-          const Icon = item.icon;
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: "0.75rem 0.5rem", overflowY: "auto" }}>
+        {nav.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
+              title={collapsed ? item.label : undefined}
               style={{
-                display: "flex", alignItems: "center", gap: "0.75rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
                 padding: "0.5625rem 0.75rem",
                 borderRadius: "0.5rem",
+                marginBottom: "0.125rem",
                 textDecoration: "none",
+                background: active ? "rgba(22,198,83,0.15)" : "transparent",
+                color: active ? "#16C653" : "rgba(255,255,255,0.65)",
                 fontSize: "0.875rem",
                 fontWeight: active ? 600 : 400,
-                color: active ? "#FFFFFF" : "rgba(255,255,255,0.5)",
-                background: active ? "rgba(0,57,255,0.3)" : "transparent",
-                transition: "background-color 0.15s, color 0.15s",
+                transition: "background 0.15s, color 0.15s",
+                justifyContent: collapsed ? "center" : "flex-start",
               }}
             >
-              <Icon size={17} style={{ flexShrink: 0 }} />
-              {item.label}
+              <item.icon size={17} style={{ flexShrink: 0 }} />
+              {!collapsed && <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom nav */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.75rem", marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "2px" }}>
-        {bottomItems.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: "flex", alignItems: "center", gap: "0.75rem",
-                padding: "0.5625rem 0.75rem",
-                borderRadius: "0.5rem",
-                textDecoration: "none",
-                fontSize: "0.875rem",
-                fontWeight: active ? 600 : 400,
-                color: active ? "#FFFFFF" : "rgba(255,255,255,0.5)",
-                background: active ? "rgba(0,57,255,0.3)" : "transparent",
-              }}
-            >
-              <Icon size={17} style={{ flexShrink: 0 }} />
-              {item.label}
-            </Link>
-          );
-        })}
+      {/* Logout */}
+      <div style={{ padding: "0.75rem 0.5rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <button
           onClick={handleLogout}
+          title={collapsed ? "Log out" : undefined}
           style={{
             display: "flex", alignItems: "center", gap: "0.75rem",
             padding: "0.5625rem 0.75rem", borderRadius: "0.5rem",
-            fontSize: "0.875rem", fontWeight: 400,
-            color: "rgba(255,255,255,0.4)",
-            background: "none", border: "none", cursor: "pointer", width: "100%",
-            transition: "color 0.15s",
+            background: "none", border: "none", cursor: "pointer",
+            color: "rgba(255,255,255,0.5)", fontSize: "0.875rem",
+            width: "100%", justifyContent: collapsed ? "center" : "flex-start",
+            transition: "color 0.15s"
           }}
         >
-          <LogOut size={17} style={{ flexShrink: 0 }} />
-          Log out
+          <LogOut size={17} />
+          {!collapsed && <span>Log out</span>}
         </button>
       </div>
     </aside>

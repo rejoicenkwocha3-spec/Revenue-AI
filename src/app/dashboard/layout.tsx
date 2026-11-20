@@ -3,7 +3,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#F7F8FA" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#F7FAF8" }}>
       <DashboardSidebar />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <DashboardHeader />

@@ -1,488 +1,364 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  Camera, BarChart3, Brain, Shield, Users, Bell,
-  ArrowRight, CheckCircle2, Building2, HardHat, Briefcase,
-  TrendingUp, FileText, Eye, Zap, MapPin, Clock
+  Search, Brain, Zap, BarChart3, Star, Users, Code2,
+  ArrowRight, CheckCircle2, Building2, ShoppingBag,
+  BookOpen, Globe, Database, TrendingUp, MessageSquare,
+  Layers, ChevronRight, Play
 } from "lucide-react";
 
 const stats = [
-  { value: "2,400+", label: "Active Construction Sites" },
-  { value: "98%", label: "Client Retention Rate" },
-  { value: "45min", label: "Avg. Time Saved Per Day" },
-  { value: "140+", label: "Countries Supported" },
+  { value: "10B+", label: "Searches Powered" },
+  { value: "99.9%", label: "Uptime SLA" },
+  { value: "<50ms", label: "Average Response Time" },
+  { value: "140+", label: "Countries Served" },
 ];
 
-const howItWorks = [
-  {
-    step: "01",
-    title: "Connect Your Sites",
-    desc: "Add your construction projects, invite your team and link your existing documentation in minutes.",
-  },
-  {
-    step: "02",
-    title: "Upload Site Media",
-    desc: "Capture and upload photos and videos from any device. RemoteSite organises everything by project, date and location.",
-  },
-  {
-    step: "03",
-    title: "Track and Analyse",
-    desc: "Monitor progress against your plan, identify issues early and let AI surface the insights that matter most.",
-  },
-  {
-    step: "04",
-    title: "Report and Collaborate",
-    desc: "Generate professional reports, share updates with stakeholders and keep your entire team aligned.",
-  },
-];
-
-const features = [
-  {
-    icon: Eye,
-    title: "Remote Site Visibility",
-    desc: "Monitor every construction project from a single, unified dashboard. Know what is happening on site without being there.",
-  },
+const aiFeatures = [
   {
     icon: Brain,
-    title: "AI Construction Intelligence",
-    desc: "Ask questions about your projects in plain language. Get instant answers, progress summaries and risk alerts.",
+    title: "AI Understands Intent",
+    desc: "Natural language processing interprets what users mean, not just the words they type. Ambiguous queries return relevant results.",
+  },
+  {
+    icon: Zap,
+    title: "Instant Results",
+    desc: "Display search results as users type. Sub-50ms response times keep experiences fast and fluid across any device.",
+  },
+  {
+    icon: Star,
+    title: "Personalised Discovery",
+    desc: "Adapt search results to individual users based on behaviour, preferences and context to increase engagement.",
+  },
+  {
+    icon: BarChart3,
+    title: "Search Analytics",
+    desc: "Track queries, clicks, conversions and zero-result searches. Use data to continuously improve your search experience.",
   },
   {
     icon: TrendingUp,
-    title: "Progress Tracking",
-    desc: "Compare planned milestones against actual progress with visual timelines and percentage completion indicators.",
+    title: "Smart Recommendations",
+    desc: "Surface relevant products, articles and content that users did not know to search for. Drive discovery beyond search.",
   },
   {
-    icon: Camera,
-    title: "Visual Documentation",
-    desc: "Build a complete visual history of every site with organised photo and video uploads linked to dates and locations.",
-  },
-  {
-    icon: Shield,
-    title: "Issue and Defect Tracking",
-    desc: "Log construction issues, assign them to team members, set priorities and track resolution status in real time.",
-  },
-  {
-    icon: FileText,
-    title: "Automated Reports",
-    desc: "Generate professional project reports with a single click. Export to PDF and share with clients and stakeholders.",
-  },
-  {
-    icon: Users,
-    title: "Team Collaboration",
-    desc: "Invite contractors, engineers and project managers. Assign roles, control access and keep everyone informed.",
-  },
-  {
-    icon: Bell,
-    title: "Notifications and Alerts",
-    desc: "Receive instant notifications about site updates, milestone completions and issues that require your attention.",
+    icon: Code2,
+    title: "Developer First",
+    desc: "Clean APIs, comprehensive SDKs and detailed documentation make integration fast and integration maintenance simple.",
   },
 ];
 
 const solutions = [
-  { icon: Building2, label: "Construction Companies" },
-  { icon: HardHat, label: "General Contractors" },
-  { icon: Briefcase, label: "Project Managers" },
-  { icon: BarChart3, label: "Property Developers" },
-  { icon: MapPin, label: "Civil Engineers" },
-  { icon: Clock, label: "Real Estate Investors" },
+  { icon: ShoppingBag, label: "Ecommerce", desc: "Convert browsers into buyers with product search that understands shopping intent." },
+  { icon: Building2, label: "Enterprise", desc: "Unify knowledge across internal systems with intelligent enterprise search." },
+  { icon: BookOpen, label: "Education", desc: "Help students and educators find the right learning materials instantly." },
+  { icon: Globe, label: "Marketplaces", desc: "Match buyers with sellers through precise, faceted search across large catalogs." },
+  { icon: Database, label: "Knowledge Bases", desc: "Make documentation and support content instantly findable and useful." },
+  { icon: Users, label: "SaaS Platforms", desc: "Embed powerful in-app search to improve user retention and feature discovery." },
 ];
 
+const steps = [
+  { step: "01", title: "Connect Your Data", desc: "Upload content, provide URLs or connect via API. SearchSprout ingests and indexes your information automatically." },
+  { step: "02", title: "Configure Your Experience", desc: "Use the visual dashboard to customise search behaviour, ranking rules, filters and result layouts." },
+  { step: "03", title: "Deploy in Minutes", desc: "Embed the search experience using our UI components or build custom interfaces with the Search API." },
+  { step: "04", title: "Analyse and Optimise", desc: "Monitor search performance, identify gaps and use AI-powered insights to continuously improve results." },
+];
+
+const demoQueries = [
+  "wireless noise cancelling headphones",
+  "refund policy returns",
+  "getting started tutorial",
+  "best plan for small teams",
+  "how to export data",
+];
+
+const demoResults = {
+  "wireless noise cancelling headphones": [
+    { title: "Sony WH-1000XM5 Headphones", cat: "Electronics", score: "99%" },
+    { title: "Bose QuietComfort 45", cat: "Electronics", score: "97%" },
+    { title: "Apple AirPods Max", cat: "Electronics", score: "94%" },
+  ],
+  "refund policy returns": [
+    { title: "Return and Refund Policy", cat: "Help Center", score: "99%" },
+    { title: "How to Initiate a Return", cat: "Help Center", score: "96%" },
+    { title: "Refund Processing Times", cat: "Help Center", score: "91%" },
+  ],
+  "getting started tutorial": [
+    { title: "Quick Start Guide", cat: "Documentation", score: "99%" },
+    { title: "Your First Search Index", cat: "Documentation", score: "95%" },
+    { title: "API Integration Tutorial", cat: "Documentation", score: "90%" },
+  ],
+  "best plan for small teams": [
+    { title: "Starter Plan: Everything Included", cat: "Pricing", score: "99%" },
+    { title: "Team Collaboration Features", cat: "Platform", score: "93%" },
+    { title: "Compare Plans", cat: "Pricing", score: "88%" },
+  ],
+  "how to export data": [
+    { title: "Exporting Search Analytics", cat: "Documentation", score: "99%" },
+    { title: "Data Export API Reference", cat: "Developers", score: "96%" },
+    { title: "Scheduled Data Reports", cat: "Analytics", score: "89%" },
+  ],
+};
+
 export default function HomePage() {
+  const [query, setQuery] = useState("wireless noise cancelling headphones");
+  const [inputValue, setInputValue] = useState("wireless noise cancelling headphones");
+
+  const results = demoResults[query as keyof typeof demoResults] || demoResults["wireless noise cancelling headphones"];
+
+  function handleQuerySelect(q: string) {
+    setQuery(q);
+    setInputValue(q);
+  }
+
   return (
-    <div style={{ background: "#F7F8FA", minHeight: "100vh" }}>
+    <>
       <Navbar />
-
-      {/* Hero */}
-      <section
-        style={{
-          background: "linear-gradient(160deg, #101828 0%, #1a2a4a 60%, #101828 100%)",
-          padding: "5rem 0 6rem",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Background grid */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(0,57,255,0.12) 1px, transparent 0)",
-          backgroundSize: "40px 40px",
-          pointerEvents: "none",
-        }} />
-
-        <div className="container-rs" style={{ position: "relative", textAlign: "center" }}>
-          <div className="badge" style={{ marginBottom: "1.5rem", display: "inline-flex" }}>
-            <Zap size={13} />
-            AI-Powered Construction Intelligence
-          </div>
-
-          <h1 style={{
-            fontFamily: "var(--font-manrope)",
-            fontWeight: 900,
-            fontSize: "clamp(2.25rem, 5vw, 3.75rem)",
-            lineHeight: 1.1,
-            color: "#FFFFFF",
-            maxWidth: "900px",
-            margin: "0 auto 1.5rem",
-          }}>
-            See Every Site. Understand Every Detail. Manage Everything Remotely.
-          </h1>
-
-          <p style={{
-            fontSize: "clamp(1rem, 2vw, 1.1875rem)",
-            color: "rgba(255,255,255,0.72)",
-            maxWidth: "640px",
-            margin: "0 auto 2.5rem",
-            lineHeight: 1.7,
-          }}>
-            RemoteSite gives construction teams complete visibility into their projects with AI-powered site monitoring, progress tracking and intelligent reporting.
-          </p>
-
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" className="btn-primary" style={{ fontSize: "1rem", padding: "0.875rem 2rem" }}>
-              Get Started <ArrowRight size={18} />
-            </Link>
-            <Link href="/platform" className="btn-secondary" style={{ fontSize: "1rem", padding: "0.875rem 2rem", color: "#FFFFFF", borderColor: "rgba(255,255,255,0.25)", backgroundColor: "rgba(255,255,255,0.08)" }}>
-              Explore Platform
-            </Link>
-          </div>
-
-          {/* Dashboard preview mockup */}
-          <div style={{
-            marginTop: "4rem",
-            background: "#FFFFFF",
-            borderRadius: "1rem",
-            border: "1px solid #E2E6F0",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.3)",
-            overflow: "hidden",
-            maxWidth: "900px",
-            margin: "4rem auto 0",
-          }}>
-            {/* Browser chrome */}
-            <div style={{ background: "#F7F8FA", borderBottom: "1px solid #E2E6F0", padding: "0.75rem 1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.375rem" }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#EF4444" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#F59E0B" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10B981" }} />
-              </div>
-              <div style={{ flex: 1, background: "#E2E6F0", borderRadius: "0.25rem", height: "24px", maxWidth: "280px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "0.75rem", color: "#6B7280" }}>app.remotesite.io/dashboard</span>
-              </div>
-            </div>
-
-            {/* Dashboard content */}
-            <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", minHeight: "380px" }}>
-              {/* Sidebar */}
-              <div style={{ background: "#101828", padding: "1.25rem 0.75rem", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0 0.5rem 1rem", marginBottom: "0.5rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div style={{ width: 24, height: 24, borderRadius: "6px", background: "#0039FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ color: "#fff", fontSize: "0.6875rem", fontWeight: 800 }}>RS</span>
-                  </div>
-                  <span style={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8125rem" }}>RemoteSite</span>
-                </div>
-                {["Overview", "My Projects", "Site Monitoring", "AI Insights", "Reports", "Team"].map((item, i) => (
-                  <div key={item} style={{
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "0.375rem",
-                    color: i === 0 ? "#FFFFFF" : "rgba(255,255,255,0.5)",
-                    background: i === 0 ? "rgba(0,57,255,0.3)" : "transparent",
-                    fontSize: "0.8125rem",
-                    marginBottom: "0.125rem",
-                    fontWeight: i === 0 ? 600 : 400,
-                  }}>
-                    {item}
-                  </div>
-                ))}
-              </div>
-
-              {/* Main area */}
-              <div style={{ background: "#F7F8FA", padding: "1.25rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: "1rem", color: "#101828", fontFamily: "var(--font-manrope)" }}>Project Overview</div>
-                    <div style={{ fontSize: "0.75rem", color: "#6B7280" }}>November 2026</div>
-                  </div>
-                  <div style={{ background: "#0039FF", color: "#fff", fontSize: "0.6875rem", padding: "0.25rem 0.625rem", borderRadius: "0.375rem", fontWeight: 600 }}>+ New Project</div>
-                </div>
-
-                {/* Stats row */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.625rem", marginBottom: "1rem" }}>
-                  {[
-                    { label: "Total Projects", val: "12" },
-                    { label: "Active Sites", val: "8" },
-                    { label: "On Track", val: "6" },
-                    { label: "At Risk", val: "2" },
-                  ].map((s) => (
-                    <div key={s.label} style={{ background: "#FFFFFF", borderRadius: "0.5rem", padding: "0.625rem 0.75rem", border: "1px solid #E2E6F0" }}>
-                      <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "#101828", fontFamily: "var(--font-manrope)" }}>{s.val}</div>
-                      <div style={{ fontSize: "0.625rem", color: "#6B7280" }}>{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Project list preview */}
-                <div style={{ background: "#FFFFFF", borderRadius: "0.5rem", border: "1px solid #E2E6F0", overflow: "hidden" }}>
-                  {[
-                    { name: "Riverside Tower", pct: 72, status: "On Track" },
-                    { name: "Harbour View Residences", pct: 45, status: "At Risk" },
-                    { name: "Central Business Hub", pct: 91, status: "On Track" },
-                  ].map((p) => (
-                    <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderBottom: "1px solid #F3F4F6" }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#101828" }}>{p.name}</div>
-                        <div style={{ background: "#E2E6F0", borderRadius: "9999px", height: "4px", marginTop: "0.25rem", overflow: "hidden" }}>
-                          <div style={{ width: `${p.pct}%`, height: "100%", background: "#0039FF", borderRadius: "9999px" }} />
-                        </div>
-                      </div>
-                      <div style={{ fontSize: "0.625rem", fontWeight: 600, color: p.status === "On Track" ? "#065F46" : "#92400E", background: p.status === "On Track" ? "#D1FAE5" : "#FEF3C7", padding: "0.125rem 0.375rem", borderRadius: "9999px" }}>
-                        {p.status}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section style={{ background: "#FFFFFF", padding: "3rem 0", borderBottom: "1px solid #E2E6F0" }}>
-        <div className="container-rs">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "2rem", textAlign: "center" }}>
-            {stats.map((s) => (
-              <div key={s.label}>
-                <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2rem", color: "#0039FF" }}>{s.value}</div>
-                <div style={{ fontSize: "0.875rem", color: "#6B7280", marginTop: "0.25rem" }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="section-padding">
-        <div className="container-rs">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <div className="badge" style={{ marginBottom: "1rem", display: "inline-flex" }}>How RemoteSite Works</div>
-            <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", margin: "0 0 1rem" }}>
-              From site upload to AI insight<br />in four steps
-            </h2>
-            <p style={{ color: "#6B7280", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
-              RemoteSite turns raw site data into structured, actionable project intelligence.
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
-            {howItWorks.map((s) => (
-              <div key={s.step} className="card card-hover">
-                <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2.5rem", color: "#EAF0FF", lineHeight: 1 }}>
-                  {s.step}
-                </div>
-                <h3 style={{ fontSize: "1.0625rem", margin: "0.75rem 0 0.5rem", color: "#101828" }}>{s.title}</h3>
-                <p style={{ fontSize: "0.9375rem", color: "#6B7280", margin: 0, lineHeight: 1.6 }}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="section-padding" style={{ background: "#FFFFFF" }}>
-        <div className="container-rs">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <div className="badge" style={{ marginBottom: "1rem", display: "inline-flex" }}>Platform Capabilities</div>
-            <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", margin: "0 0 1rem" }}>
-              Everything you need to manage<br />construction projects remotely
-            </h2>
-            <p style={{ color: "#6B7280", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
-              RemoteSite combines monitoring, intelligence and collaboration in one unified platform.
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
-            {features.map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.title} className="card card-hover" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: "10px",
-                    background: "#EAF0FF",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Icon size={22} color="#0039FF" />
-                  </div>
-                  <h3 style={{ fontSize: "1rem", margin: 0, color: "#101828" }}>{f.title}</h3>
-                  <p style={{ fontSize: "0.9rem", color: "#6B7280", margin: 0, lineHeight: 1.6 }}>{f.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-            <Link href="/features" className="btn-secondary">
-              See all features <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Section */}
-      <section className="section-padding" style={{ background: "linear-gradient(135deg, #101828 0%, #1a2a4a 100%)" }}>
-        <div className="container-rs">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
-            <div>
-              <div className="badge" style={{ marginBottom: "1.25rem", display: "inline-flex", background: "rgba(0,57,255,0.2)", borderColor: "rgba(0,57,255,0.4)", color: "#7ba7ff" }}>
-                <Brain size={13} />
-                AI Construction Assistant
-              </div>
-              <h2 style={{ color: "#FFFFFF", fontSize: "clamp(1.75rem, 3vw, 2.25rem)", margin: "0 0 1.25rem", lineHeight: 1.2 }}>
-                Ask questions about your projects. Get instant answers.
-              </h2>
-              <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "1.0625rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-                The RemoteSite AI assistant understands your actual project data. Ask it which sites are behind schedule, what issues were reported this week or what needs attention right now.
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {[
-                  "Which projects are falling behind schedule?",
-                  "Summarise the latest site updates across all projects.",
-                  "Generate a weekly construction report for Riverside Tower.",
-                  "What issues need immediate attention?",
-                ].map((q) => (
-                  <div key={q} style={{
-                    display: "flex", alignItems: "center", gap: "0.75rem",
-                    background: "rgba(255,255,255,0.06)", borderRadius: "0.5rem",
-                    padding: "0.75rem 1rem", border: "1px solid rgba(255,255,255,0.1)",
-                  }}>
-                    <CheckCircle2 size={16} color="#0039FF" style={{ flexShrink: 0 }} />
-                    <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>{q}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Chat preview */}
+      <main>
+        {/* Hero */}
+        <section style={{ background: "#071F20", padding: "5rem 0 4rem", overflow: "hidden" }}>
+          <div className="container-ss" style={{ textAlign: "center" }}>
             <div style={{
-              background: "rgba(255,255,255,0.05)", borderRadius: "1rem",
-              border: "1px solid rgba(255,255,255,0.1)", padding: "1.25rem",
+              display: "inline-flex", alignItems: "center", gap: "0.5rem",
+              background: "rgba(22,198,83,0.12)", border: "1px solid rgba(22,198,83,0.3)",
+              borderRadius: "2rem", padding: "0.375rem 1rem", marginBottom: "1.75rem"
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                <Brain size={18} color="#0039FF" />
-                <span style={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.9375rem" }}>AI Assistant</span>
-                <div style={{ marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: "#10B981" }} />
-              </div>
-              {[
-                { role: "user", text: "Which projects are behind schedule?" },
-                { role: "ai", text: "Based on your current data, 2 of your 8 active projects are behind schedule:\n\n• Harbour View Residences: 12 days behind, 45% complete vs 58% planned\n• Westfield Extension: 7 days behind, 23% complete vs 31% planned\n\nWould you like me to generate a detailed report for either project?" },
-              ].map((m, i) => (
-                <div key={i} style={{ marginBottom: "0.875rem", display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-                  <div style={{
-                    background: m.role === "user" ? "#0039FF" : "rgba(255,255,255,0.08)",
-                    borderRadius: m.role === "user" ? "1rem 1rem 0 1rem" : "1rem 1rem 1rem 0",
-                    padding: "0.75rem 1rem",
-                    maxWidth: "88%",
-                    color: "#FFFFFF",
-                    fontSize: "0.875rem",
-                    lineHeight: 1.6,
-                    whiteSpace: "pre-line",
-                  }}>
-                    {m.text}
-                  </div>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16C653", display: "inline-block" }} />
+              <span style={{ color: "#16C653", fontSize: "0.875rem", fontWeight: 500 }}>AI-Powered Search Infrastructure</span>
+            </div>
+
+            <h1 style={{
+              fontFamily: "var(--font-manrope)", fontWeight: 900,
+              fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: 1.1,
+              color: "#FFFFFF", maxWidth: "800px", margin: "0 auto 1.25rem"
+            }}>
+              Search That Understands.<br />
+              <span style={{ color: "#16C653" }}>Discovery That Converts.</span>
+            </h1>
+
+            <p style={{
+              fontSize: "clamp(1rem, 2vw, 1.2rem)", color: "rgba(255,255,255,0.72)",
+              maxWidth: "620px", margin: "0 auto 2.5rem", lineHeight: 1.65
+            }}>
+              SearchSprout helps businesses deliver intelligent search experiences with AI-powered discovery, personalised results and actionable search insights.
+            </p>
+
+            <div style={{ display: "flex", gap: "0.875rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 1.75rem", fontSize: "1rem" }}>
+                Start Building Free <ArrowRight size={16} />
+              </Link>
+              <Link href="/platform" className="btn-outline" style={{ padding: "0.75rem 1.75rem", fontSize: "1rem" }}>
+                Explore Platform <Play size={15} />
+              </Link>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: "2.5rem", marginTop: "3.5rem", flexWrap: "wrap" }}>
+              {stats.map((s) => (
+                <div key={s.label} style={{ textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.75rem", color: "#FFFFFF" }}>{s.value}</div>
+                  <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.55)", marginTop: "0.25rem" }}>{s.label}</div>
                 </div>
               ))}
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                <input disabled placeholder="Ask about your projects..." style={{
-                  flex: 1, padding: "0.625rem 0.875rem", borderRadius: "0.5rem",
-                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", cursor: "not-allowed",
-                }} />
-                <div style={{ background: "#0039FF", borderRadius: "0.5rem", width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <ArrowRight size={16} color="white" />
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Demo */}
+        <section style={{ background: "#F7FAF8", padding: "5rem 0" }}>
+          <div className="container-ss">
+            <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+              <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "0.75rem" }}>
+                See Intelligent Search in Action
+              </h2>
+              <p style={{ color: "#65736D", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
+                Type a natural language query and watch SearchSprout surface the most relevant results instantly.
+              </p>
+            </div>
+
+            <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+              <div style={{ background: "#FFFFFF", borderRadius: "1rem", border: "1px solid #DCE8E2", overflow: "hidden", boxShadow: "0 4px 24px rgba(6,59,56,0.08)" }}>
+                {/* Search bar */}
+                <div style={{ padding: "1.25rem 1.25rem 0", borderBottom: "1px solid #F0F5F2" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "#F7FAF8", borderRadius: "0.625rem", padding: "0.75rem 1rem" }}>
+                    <Search size={18} color="#16C653" />
+                    <input
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") setQuery(inputValue); }}
+                      style={{ flex: 1, border: "none", background: "transparent", fontSize: "1rem", color: "#071F20", outline: "none" }}
+                      placeholder="Search anything..."
+                    />
+                    <span style={{ fontSize: "0.75rem", color: "#65736D", background: "#E8F8EE", padding: "0.25rem 0.5rem", borderRadius: "0.25rem" }}>AI</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", padding: "0.75rem 0", overflowX: "auto", flexWrap: "wrap" }}>
+                    {demoQueries.map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => handleQuerySelect(q)}
+                        style={{
+                          background: query === q ? "#E8F8EE" : "transparent",
+                          border: `1px solid ${query === q ? "#16C653" : "#DCE8E2"}`,
+                          color: query === q ? "#063B38" : "#65736D",
+                          borderRadius: "2rem", padding: "0.3rem 0.75rem",
+                          fontSize: "0.8125rem", cursor: "pointer", fontWeight: 500,
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Results */}
+                <div style={{ padding: "1rem 1.25rem 1.25rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.875rem", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.8125rem", color: "#65736D" }}>{results.length} results for &ldquo;{query}&rdquo;</span>
+                    <span style={{ fontSize: "0.8125rem", color: "#16C653", fontWeight: 500 }}>42ms</span>
+                  </div>
+                  {results.map((r, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "0.875rem 1rem", borderRadius: "0.5rem", marginBottom: "0.5rem",
+                      background: i === 0 ? "#F7FAF8" : "transparent",
+                      border: `1px solid ${i === 0 ? "#DCE8E2" : "transparent"}`,
+                      cursor: "pointer", transition: "background 0.15s"
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: i === 0 ? "#16C653" : "#DCE8E2" }} />
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: "0.9375rem", color: "#071F20" }}>{r.title}</div>
+                          <div style={{ fontSize: "0.8125rem", color: "#65736D" }}>{r.cat}</div>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: "0.8125rem", color: "#16C653", fontWeight: 600 }}>{r.score}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
+        </section>
 
-          <style>{`
-            @media (max-width: 768px) {
-              .ai-grid { grid-template-columns: 1fr !important; }
-            }
-          `}</style>
-        </div>
-      </section>
+        {/* AI Features Grid */}
+        <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+          <div className="container-ss">
+            <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+              <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "0.75rem" }}>
+                Intelligent Search for Modern Businesses
+              </h2>
+              <p style={{ color: "#65736D", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
+                Every capability you need to build search experiences that understand, discover and convert.
+              </p>
+            </div>
 
-      {/* Solutions */}
-      <section className="section-padding">
-        <div className="container-rs">
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <div className="badge" style={{ marginBottom: "1rem", display: "inline-flex" }}>Solutions</div>
-            <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", margin: "0 0 1rem" }}>
-              Built for every construction professional
-            </h2>
-            <p style={{ color: "#6B7280", fontSize: "1.0625rem", maxWidth: "480px", margin: "0 auto" }}>
-              From developers to investors, RemoteSite gives your team the visibility they need.
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-            {solutions.map((s) => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} style={{
-                  display: "flex", alignItems: "center", gap: "0.625rem",
-                  background: "#FFFFFF", border: "1px solid #E2E6F0",
-                  borderRadius: "0.625rem", padding: "0.75rem 1.25rem",
-                  fontSize: "0.9375rem", fontWeight: 500, color: "#252B36",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                }}>
-                  <Icon size={18} color="#0039FF" />
-                  {s.label}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.25rem" }}>
+              {aiFeatures.map((f) => (
+                <div key={f.title} className="card-ss" style={{ transition: "transform 0.15s, box-shadow 0.15s" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "0.625rem", background: "#E8F8EE", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+                    <f.icon size={22} color="#16C653" />
+                  </div>
+                  <h3 style={{ fontSize: "1.0625rem", marginBottom: "0.5rem" }}>{f.title}</h3>
+                  <p style={{ color: "#65736D", fontSize: "0.9375rem", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-          <div style={{ textAlign: "center", marginTop: "2rem" }}>
-            <Link href="/solutions" className="btn-ghost" style={{ color: "#0039FF" }}>
-              View all solutions <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section style={{ background: "#0039FF", padding: "5rem 0" }}>
-        <div className="container-rs" style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#FFFFFF", fontSize: "clamp(1.75rem, 3vw, 2.75rem)", margin: "0 0 1.25rem", fontFamily: "var(--font-manrope)", fontWeight: 800 }}>
-            Ready to see your sites from anywhere?
-          </h2>
-          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.0625rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
-            Join thousands of construction professionals who use RemoteSite to monitor projects, track progress and generate reports remotely.
-          </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" style={{
-              display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              background: "#FFFFFF", color: "#0039FF",
-              fontWeight: 700, fontSize: "1rem",
-              padding: "0.9375rem 2rem", borderRadius: "0.5rem",
-              textDecoration: "none", transition: "opacity 0.15s",
-            }}>
-              Get Started Free <ArrowRight size={18} />
-            </Link>
-            <Link href="/pricing" style={{
-              display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              background: "rgba(255,255,255,0.12)", color: "#FFFFFF",
-              fontWeight: 600, fontSize: "1rem",
-              padding: "0.9375rem 2rem", borderRadius: "0.5rem",
-              border: "1.5px solid rgba(255,255,255,0.3)",
-              textDecoration: "none",
-            }}>
-              View Pricing
+        {/* How it works */}
+        <section style={{ background: "#F7FAF8", padding: "5rem 0" }}>
+          <div className="container-ss">
+            <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+              <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "0.75rem" }}>
+                How SearchSprout Works
+              </h2>
+              <p style={{ color: "#65736D", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
+                From data ingestion to live search experience in four simple steps.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
+              {steps.map((s) => (
+                <div key={s.step} style={{ position: "relative" }}>
+                  <div style={{ fontSize: "3rem", fontFamily: "var(--font-manrope)", fontWeight: 900, color: "#E8F8EE", lineHeight: 1 }}>{s.step}</div>
+                  <h3 style={{ fontSize: "1.0625rem", marginBottom: "0.5rem", marginTop: "0.25rem" }}>{s.title}</h3>
+                  <p style={{ color: "#65736D", fontSize: "0.9375rem", lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Solutions */}
+        <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+          <div className="container-ss">
+            <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+              <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "0.75rem" }}>
+                Built for Every Industry
+              </h2>
+              <p style={{ color: "#65736D", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto" }}>
+                SearchSprout adapts to your business type, delivering the right search experience for your audience.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.25rem" }}>
+              {solutions.map((s) => (
+                <Link key={s.label} href="/solutions" style={{ textDecoration: "none" }}>
+                  <div className="card-ss" style={{ cursor: "pointer", transition: "transform 0.15s, box-shadow 0.15s", height: "100%" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "0.5rem", background: "#063B38", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <s.icon size={20} color="#16C653" />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1rem", color: "#071F20" }}>{s.label}</span>
+                    </div>
+                    <p style={{ color: "#65736D", fontSize: "0.9375rem", lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing preview */}
+        <section style={{ background: "#F7FAF8", padding: "5rem 0" }}>
+          <div className="container-ss" style={{ textAlign: "center" }}>
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "0.75rem" }}>
+              Simple, Transparent Pricing
+            </h2>
+            <p style={{ color: "#65736D", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto 2.5rem" }}>
+              Start free and scale as you grow. No hidden fees, no surprise charges.
+            </p>
+            <Link href="/pricing" className="btn-primary" style={{ fontSize: "1rem", padding: "0.75rem 2rem" }}>
+              View All Plans <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
+        {/* CTA */}
+        <section style={{ background: "#063B38", padding: "5rem 0" }}>
+          <div className="container-ss" style={{ textAlign: "center" }}>
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
+              Search Smarter. Discover More. Grow Faster.
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", maxWidth: "520px", margin: "0 auto 2.5rem", lineHeight: 1.65 }}>
+              Join thousands of businesses already using SearchSprout to transform their search experience.
+            </p>
+            <div style={{ display: "flex", gap: "0.875rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+                Start Building Free <ArrowRight size={16} />
+              </Link>
+              <Link href="/platform" className="btn-outline" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+                Explore Platform <ChevronRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
       <Footer />
-    </div>
+    </>
   );
 }

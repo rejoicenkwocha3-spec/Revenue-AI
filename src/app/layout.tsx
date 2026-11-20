@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RemoteSite: AI-Powered Construction Site Monitoring",
-  description: "RemoteSite gives construction teams complete visibility into their projects with AI-powered site monitoring, progress tracking and intelligent reporting.",
+  title: "SearchSprout: AI-Powered Search and Discovery Platform",
+  description: "SearchSprout helps businesses deliver intelligent search experiences with AI-powered discovery, personalised results and actionable search insights.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

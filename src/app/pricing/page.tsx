@@ -1,242 +1,215 @@
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 
 const plans = [
   {
     name: "Starter",
     price: "$47",
-    period: "per month",
-    desc: "For independent professionals monitoring a small number of construction projects.",
-    checkoutUrl: "https://selar.com/47plan?currency=USD",
+    billing: "per month",
+    desc: "Perfect for small businesses and developers getting started with AI-powered search.",
+    cta: "Get Started",
+    href: "https://selar.com/47plan?currency=USD",
+    featured: false,
     features: [
-      "Up to 3 active projects",
-      "Site photo and video uploads",
-      "Basic progress tracking",
-      "Issue tracking",
-      "AI construction assistant",
-      "2 team members",
-      "PDF report export",
+      "Up to 50,000 search queries/month",
+      "Up to 100,000 indexed records",
+      "AI-powered search and semantic retrieval",
+      "Instant search and autocomplete",
+      "Search analytics dashboard",
+      "3 search projects",
+      "API access and JavaScript SDK",
       "Email support",
     ],
-    highlighted: false,
-    cta: "Get Started",
   },
   {
-    name: "Professional",
+    name: "Growth",
     price: "$57",
-    period: "per month",
-    desc: "For growing construction teams managing multiple active sites with full platform access.",
-    checkoutUrl: "https://selar.com/57plan?currency=USD",
-    features: [
-      "Up to 10 active projects",
-      "Unlimited media uploads",
-      "Advanced progress tracking",
-      "Full issue and defect tracking",
-      "AI construction assistant",
-      "Up to 10 team members",
-      "Automated reports",
-      "Document management",
-      "Portfolio dashboard",
-      "Priority email support",
-    ],
-    highlighted: true,
+    billing: "per month",
+    desc: "For growing businesses that need advanced personalisation and deeper analytics.",
     cta: "Get Started",
+    href: "https://selar.com/57plan?currency=USD",
+    featured: true,
+    features: [
+      "Up to 500,000 search queries/month",
+      "Up to 1,000,000 indexed records",
+      "Everything in Starter",
+      "AI personalisation",
+      "Recommendation engine",
+      "Search merchandising tools",
+      "10 search projects",
+      "AI search assistant",
+      "Priority email and chat support",
+    ],
   },
   {
-    name: "Enterprise",
+    name: "Scale",
     price: "$97",
-    period: "per month",
-    desc: "For large construction companies and consultants managing complex project portfolios.",
-    checkoutUrl: "https://selar.com/97plan?currency=USD",
-    features: [
-      "Unlimited active projects",
-      "Unlimited media storage",
-      "Full progress and milestone tracking",
-      "Advanced issue management",
-      "AI construction assistant",
-      "Unlimited team members",
-      "Custom report templates",
-      "Full document management",
-      "Portfolio analytics",
-      "Role-based permissions",
-      "Dedicated account support",
-    ],
-    highlighted: false,
+    billing: "per month",
+    desc: "For high-volume businesses and agencies that require enterprise-grade performance and control.",
     cta: "Get Started",
+    href: "https://selar.com/97plan?currency=USD",
+    featured: false,
+    features: [
+      "Unlimited search queries",
+      "Unlimited indexed records",
+      "Everything in Growth",
+      "Unlimited search projects",
+      "Advanced analytics and exports",
+      "Team management and permissions",
+      "Custom search ranking models",
+      "Dedicated onboarding support",
+      "99.9% uptime SLA",
+    ],
   },
 ];
 
 const faqs = [
   {
-    q: "Can I change plans after signing up?",
-    a: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing period.",
+    q: "Can I change plans at any time?",
+    a: "Yes. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle.",
   },
   {
-    q: "Is there a free trial available?",
-    a: "We offer a 14-day free trial on the Professional plan. No credit card is required to start.",
+    q: "Is there a free trial?",
+    a: "Every plan includes a 14-day free trial with no credit card required. You can test the full platform before committing.",
   },
   {
-    q: "How is the subscription managed?",
-    a: "Subscriptions are processed through Selar. After completing your checkout, you will receive confirmation and access instructions by email.",
+    q: "What happens if I exceed my query limit?",
+    a: "We will notify you when you approach your limit. Search continues to work and you are billed at a small per-query overage rate rather than experiencing downtime.",
   },
   {
-    q: "What happens to my data if I cancel?",
-    a: "Your data remains accessible for 30 days after cancellation. During this period you can export all your project data, media and reports.",
+    q: "Do I need a developer to get started?",
+    a: "No. The SearchSprout dashboard lets you index content, configure search and deploy an embeddable widget without any code. Developer access is available via API for custom integrations.",
   },
   {
-    q: "Do you offer discounts for annual billing?",
-    a: "Annual billing options with a discount are available. Contact us at support@remotesite.io to discuss annual pricing.",
+    q: "Can I use SearchSprout for multiple websites?",
+    a: "Yes. Each plan includes multiple search projects. The Scale plan includes unlimited projects for agencies and enterprises managing many sites.",
   },
 ];
 
 export default function PricingPage() {
   return (
-    <div style={{ background: "#F7F8FA", minHeight: "100vh" }}>
+    <>
       <Navbar />
-
-      {/* Hero */}
-      <section style={{ background: "linear-gradient(160deg, #101828 0%, #1a2a4a 100%)", padding: "5rem 0 4rem" }}>
-        <div className="container-rs" style={{ textAlign: "center" }}>
-          <div className="badge" style={{ marginBottom: "1.25rem", display: "inline-flex", background: "rgba(0,57,255,0.2)", borderColor: "rgba(0,57,255,0.4)", color: "#7ba7ff" }}>
-            Simple, Transparent Pricing
+      <main>
+        {/* Hero */}
+        <section style={{ background: "#071F20", padding: "5rem 0 4rem", textAlign: "center" }}>
+          <div className="container-ss">
+            <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#FFFFFF", marginBottom: "1.25rem", lineHeight: 1.1 }}>
+              Simple, Transparent Pricing
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "1.125rem", maxWidth: "480px", margin: "0 auto", lineHeight: 1.65 }}>
+              Start free. Scale as you grow. All plans include the full SearchSprout platform with no feature restrictions.
+            </p>
           </div>
-          <h1 style={{ color: "#FFFFFF", fontSize: "clamp(2rem, 4vw, 3rem)", margin: "0 0 1.25rem", fontFamily: "var(--font-manrope)", fontWeight: 900, lineHeight: 1.1 }}>
-            Choose the plan that fits your team
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.1rem", maxWidth: "520px", margin: "0 auto", lineHeight: 1.7 }}>
-            All plans include the core RemoteSite platform. Scale up as your project portfolio grows.
-          </p>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing cards */}
-      <section className="section-padding">
-        <div className="container-rs">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                style={{
-                  background: plan.highlighted ? "#101828" : "#FFFFFF",
-                  border: plan.highlighted ? "2px solid #0039FF" : "1px solid #E2E6F0",
-                  borderRadius: "1rem",
-                  padding: "2rem",
-                  boxShadow: plan.highlighted ? "0 20px 60px rgba(0,57,255,0.2)" : "0 1px 3px rgba(0,0,0,0.04)",
-                  position: "relative",
-                  transform: plan.highlighted ? "scale(1.02)" : "none",
-                }}
-              >
-                {plan.highlighted && (
-                  <div style={{
-                    position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
-                    background: "#0039FF", color: "#FFFFFF",
-                    fontSize: "0.75rem", fontWeight: 700,
-                    padding: "0.3125rem 1rem", borderRadius: "9999px",
-                    whiteSpace: "nowrap",
-                  }}>
-                    Most Popular
-                  </div>
-                )}
-
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <h3 style={{
-                    fontSize: "1.125rem", fontWeight: 700, margin: "0 0 0.375rem",
-                    color: plan.highlighted ? "#FFFFFF" : "#101828",
-                  }}>
-                    {plan.name}
-                  </h3>
-                  <p style={{ fontSize: "0.9rem", color: plan.highlighted ? "rgba(255,255,255,0.6)" : "#6B7280", margin: "0 0 1.25rem" }}>
-                    {plan.desc}
-                  </p>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.375rem" }}>
-                    <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2.75rem", color: plan.highlighted ? "#FFFFFF" : "#101828" }}>
-                      {plan.price}
-                    </span>
-                    <span style={{ color: plan.highlighted ? "rgba(255,255,255,0.5)" : "#9CA3AF", fontSize: "0.9375rem" }}>
-                      {plan.period}
-                    </span>
-                  </div>
-                </div>
-
-                <a
-                  href={plan.checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+        {/* Pricing cards */}
+        <section style={{ background: "#F7FAF8", padding: "5rem 0" }}>
+          <div className="container-ss">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
+              {plans.map((plan) => (
+                <div
+                  key={plan.name}
                   style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                    background: plan.highlighted ? "#0039FF" : "transparent",
-                    color: plan.highlighted ? "#FFFFFF" : "#0039FF",
-                    fontWeight: 700, fontSize: "0.9375rem",
-                    padding: "0.8125rem 1.5rem", borderRadius: "0.5rem",
-                    border: plan.highlighted ? "none" : "1.5px solid #0039FF",
-                    textDecoration: "none",
-                    marginBottom: "1.75rem",
-                    transition: "opacity 0.15s",
-                    width: "100%",
-                    boxSizing: "border-box",
+                    background: plan.featured ? "#063B38" : "#FFFFFF",
+                    border: plan.featured ? "2px solid #16C653" : "1px solid #DCE8E2",
+                    borderRadius: "1rem",
+                    padding: "2rem",
+                    boxShadow: plan.featured ? "0 8px 32px rgba(6,59,56,0.2)" : "0 1px 4px rgba(6,59,56,0.06)",
+                    position: "relative",
                   }}
                 >
-                  {plan.cta} <ArrowRight size={16} />
-                </a>
+                  {plan.featured && (
+                    <div style={{
+                      position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
+                      background: "#16C653", color: "#FFFFFF", fontSize: "0.8125rem", fontWeight: 700,
+                      padding: "0.3rem 1rem", borderRadius: "2rem", whiteSpace: "nowrap"
+                    }}>
+                      Most Popular
+                    </div>
+                  )}
 
-                <div style={{ borderTop: `1px solid ${plan.highlighted ? "rgba(255,255,255,0.1)" : "#E2E6F0"}`, paddingTop: "1.5rem" }}>
-                  <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: plan.highlighted ? "rgba(255,255,255,0.4)" : "#9CA3AF", marginBottom: "0.875rem" }}>
-                    Included in this plan
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <div style={{ fontSize: "1rem", fontWeight: 700, color: plan.featured ? "#16C653" : "#063B38", marginBottom: "0.25rem" }}>{plan.name}</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "0.375rem", marginBottom: "0.75rem" }}>
+                      <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2.5rem", color: plan.featured ? "#FFFFFF" : "#071F20" }}>{plan.price}</span>
+                      <span style={{ fontSize: "0.9375rem", color: plan.featured ? "rgba(255,255,255,0.6)" : "#65736D" }}>{plan.billing}</span>
+                    </div>
+                    <p style={{ fontSize: "0.9rem", color: plan.featured ? "rgba(255,255,255,0.7)" : "#65736D", lineHeight: 1.55, margin: 0 }}>{plan.desc}</p>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+
+                  <a
+                    href={plan.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                      padding: "0.75rem",
+                      background: plan.featured ? "#16C653" : "#071F20",
+                      color: "#FFFFFF",
+                      borderRadius: "0.5rem",
+                      fontWeight: 600, fontSize: "0.9375rem",
+                      textDecoration: "none",
+                      marginBottom: "1.75rem",
+                      transition: "opacity 0.15s"
+                    }}
+                  >
+                    {plan.cta} <ArrowRight size={15} />
+                  </a>
+
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                     {plan.features.map((f) => (
-                      <div key={f} style={{ display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={16} color={plan.highlighted ? "#7ba7ff" : "#0039FF"} style={{ flexShrink: 0, marginTop: "1px" }} />
-                        <span style={{ fontSize: "0.9rem", color: plan.highlighted ? "rgba(255,255,255,0.8)" : "#252B36" }}>{f}</span>
-                      </div>
+                      <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: plan.featured ? "rgba(255,255,255,0.85)" : "#071F20" }}>
+                        <CheckCircle2 size={15} color="#16C653" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
+                        {f}
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <p style={{ textAlign: "center", color: "#65736D", fontSize: "0.875rem", marginTop: "2rem" }}>
+              All plans include a 14-day free trial. No credit card required to start.
+            </p>
           </div>
+        </section>
 
-          <p style={{ textAlign: "center", color: "#6B7280", fontSize: "0.875rem", marginTop: "2rem" }}>
-            Payments are processed securely through Selar. Subscription access is activated after payment confirmation.
-          </p>
-        </div>
-      </section>
-
-      {/* FAQs */}
-      <section className="section-padding" style={{ background: "#FFFFFF" }}>
-        <div className="container-rs" style={{ maxWidth: "720px" }}>
-          <h2 style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", textAlign: "center", margin: "0 0 2.5rem" }}>
-            Frequently asked questions
-          </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            {faqs.map((faq) => (
-              <div key={faq.q} style={{ borderBottom: "1px solid #E2E6F0", paddingBottom: "1.25rem" }}>
-                <div style={{ fontWeight: 700, fontSize: "1rem", color: "#101828", marginBottom: "0.5rem" }}>{faq.q}</div>
-                <div style={{ fontSize: "0.9375rem", color: "#6B7280", lineHeight: 1.65 }}>{faq.a}</div>
-              </div>
-            ))}
+        {/* FAQ */}
+        <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+          <div className="container-ss" style={{ maxWidth: "760px" }}>
+            <h2 style={{ textAlign: "center", fontSize: "clamp(1.5rem, 3vw, 2rem)", marginBottom: "3rem" }}>
+              Frequently Asked Questions
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {faqs.map((faq) => (
+                <div key={faq.q} className="card-ss">
+                  <h3 style={{ fontSize: "1rem", marginBottom: "0.625rem" }}>{faq.q}</h3>
+                  <p style={{ color: "#65736D", fontSize: "0.9375rem", lineHeight: 1.65, margin: 0 }}>{faq.a}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section style={{ background: "#0039FF", padding: "4rem 0" }}>
-        <div className="container-rs" style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#FFFFFF", fontSize: "clamp(1.5rem, 3vw, 2.5rem)", margin: "0 0 1rem", fontFamily: "var(--font-manrope)" }}>
-            Still have questions?
-          </h2>
-          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.0625rem", marginBottom: "2rem" }}>
-            Our team is happy to help. Contact us at support@remotesite.io
-          </p>
-          <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#FFFFFF", color: "#0039FF", fontWeight: 700, fontSize: "1rem", padding: "0.9375rem 2rem", borderRadius: "0.5rem", textDecoration: "none" }}>
-            Start Free Trial <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
-
+        {/* CTA */}
+        <section style={{ background: "#063B38", padding: "5rem 0", textAlign: "center" }}>
+          <div className="container-ss">
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
+              Start Your Free Trial Today
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
+              No credit card required. Full platform access for 14 days.
+            </p>
+            <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+              Start Building Free <ArrowRight size={16} />
+            </Link>
+          </div>
+        </section>
+      </main>
       <Footer />
-    </div>
+    </>
   );
 }

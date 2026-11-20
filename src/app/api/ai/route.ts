@@ -1,91 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { messages, context } = await req.json();
 
-    const { message } = await req.json();
-    if (!message) return NextResponse.json({ error: "No message provided" }, { status: 400 });
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
 
-    // Fetch user's project data to inform the AI
-    const [{ data: projects }, { data: milestones }, { data: issues }] = await Promise.all([
-      supabase.from("projects").select("name, status, completion_pct, start_date, end_date, description").eq("user_id", user.id),
-      supabase.from("milestones").select("title, status, planned_date, actual_date, completion_pct, projects(name)").order("planned_date", { ascending: true }),
-      supabase.from("issues").select("title, priority, status, projects(name)").order("created_at", { ascending: false }).limit(20),
-    ]);
-
-    const projectSummary = (projects || []).map((p) =>
-      `- ${p.name}: ${p.status}, ${p.completion_pct}% complete${p.end_date ? `, due ${p.end_date}` : ""}`
-    ).join("\n");
-
-    const milestoneSummary = (milestones || []).slice(0, 10).map((m) => {
-      const proj = (m.projects as unknown as { name: string } | null)?.name || "Unknown";
-      return `- ${m.title} (${proj}): ${m.status}, ${m.completion_pct}%${m.planned_date ? `, planned ${m.planned_date}` : ""}`;
-    }).join("\n");
-
-    const issueSummary = (issues || []).slice(0, 10).map((i) => {
-      const proj = (i.projects as unknown as { name: string } | null)?.name || "Unknown";
-      return `- ${i.title} (${proj}): ${i.priority} priority, ${i.status}`;
-    }).join("\n");
-
-    const systemPrompt = `You are an AI construction project assistant for RemoteSite. You help construction professionals understand their project data.
-
-You have access to the following data for this user:
-
-PROJECTS (${(projects || []).length} total):
-${projectSummary || "No projects found."}
-
-RECENT MILESTONES:
-${milestoneSummary || "No milestones found."}
-
-RECENT ISSUES:
-${issueSummary || "No issues found."}
-
-Rules:
-- Answer only based on the data provided above.
-- Never fabricate project names, numbers or statistics.
-- If the data is insufficient to answer, say so clearly.
-- Keep responses concise, structured and professional.
-- Use bullet points for lists.
-- Today's date is ${new Date().toLocaleDateString()}.`;
-
-    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({
-        reply: "AI assistant is not configured yet. Please add your ANTHROPIC_API_KEY environment variable to enable AI functionality.",
+      return NextResponse.json(
+        { response: "AI features require an API key. Please add ANTHROPIC_API_KEY or OPENAI_API_KEY to your environment variables in the SearchSprout settings." },
+        { status: 200 }
+      );
+    }
+
+    const systemPrompt = `You are the SearchSprout AI assistant. You help users understand their search performance, analytics and content strategy.
+
+Your role:
+- Analyse search query patterns and trends
+- Identify content gaps from zero-result queries
+- Suggest ways to improve search relevance and click-through rates
+- Recommend content improvements based on search data
+- Provide actionable insights grounded in the user's search analytics
+
+Always be concise, specific and actionable. Format responses with clear structure when appropriate. Do not invent data: acknowledge when you do not have access to real analytics and explain what insights you could provide with that data.`;
+
+    // Try Anthropic first
+    if (process.env.ANTHROPIC_API_KEY) {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": process.env.ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5",
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: messages.slice(-10).map((m: { role: string; content: string }) => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: m.content,
+          })),
+        }),
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        return NextResponse.json({ response: data.content?.[0]?.text || "No response generated." });
+      }
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-5-5",
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: "user", content: message }],
-      }),
-    });
+    // Fallback: OpenAI
+    if (process.env.OPENAI_API_KEY) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages.slice(-10),
+          ],
+          max_tokens: 1024,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Anthropic API error:", errorText);
-      return NextResponse.json({ reply: "The AI assistant encountered an error. Please try again." });
+      if (res.ok) {
+        const data = await res.json();
+        return NextResponse.json({ response: data.choices?.[0]?.message?.content || "No response generated." });
+      }
     }
 
-    const result = await response.json();
-    const reply = result.content?.[0]?.text || "No response generated.";
-
-    return NextResponse.json({ reply });
-  } catch (error) {
-    console.error("AI route error:", error);
-    return NextResponse.json({ reply: "An unexpected error occurred. Please try again." });
+    return NextResponse.json({ response: "Unable to connect to AI service. Please check your API key configuration." });
+  } catch {
+    return NextResponse.json({ response: "An error occurred while processing your request." }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Loader2, CheckCircle2 } from "lucide-react";
-import RemoteSiteLogo from "@/components/RemoteSiteLogo";
+import SearchSproutLogo from "@/components/SearchSproutLogo";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -38,11 +38,11 @@ export default function ForgotPasswordPage() {
         <div style={{ width: "100%", maxWidth: "420px" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-              <RemoteSiteLogo size={40} />
-              <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>RemoteSite</span>
+              <SearchSproutLogo size={40} />
+              <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>SearchSprout</span>
             </Link>
           </div>
-          <div className="card" style={{ padding: "2.5rem", textAlign: "center" }}>
+          <div className="card-ss" style={{ padding: "2.5rem", textAlign: "center" }}>
             <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
               <CheckCircle2 size={30} color="#10B981" />
             </div>
@@ -64,11 +64,11 @@ export default function ForgotPasswordPage() {
       <div style={{ width: "100%", maxWidth: "420px" }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-            <RemoteSiteLogo size={40} />
-            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>RemoteSite</span>
+            <SearchSproutLogo size={40} />
+            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>SearchSprout</span>
           </Link>
         </div>
-        <div className="card" style={{ padding: "2.5rem" }}>
+        <div className="card-ss" style={{ padding: "2.5rem" }}>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, margin: "0 0 0.5rem", color: "#101828", textAlign: "center" }}>Reset your password</h1>
           <p style={{ textAlign: "center", color: "#6B7280", fontSize: "0.9375rem", margin: "0 0 2rem" }}>
             Enter your email and we&apos;ll send you a reset link
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
             </button>
           </form>
           <p style={{ textAlign: "center", fontSize: "0.9rem", color: "#6B7280", margin: "1.5rem 0 0" }}>
-            <Link href="/login" style={{ color: "#0039FF", fontWeight: 600, textDecoration: "none" }}>Back to login</Link>
+            <Link href="/login" style={{ color: "#16C653", fontWeight: 600, textDecoration: "none" }}>Back to login</Link>
           </p>
         </div>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin 1s linear infinite}`}</style>

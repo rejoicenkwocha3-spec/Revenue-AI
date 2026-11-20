@@ -1,231 +1,251 @@
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import {
-  Eye, Brain, TrendingUp, Camera, Shield, FileText,
-  Users, Bell, BarChart3, FolderOpen, FileStack, Layers,
-  ArrowRight, CheckCircle2
-} from "lucide-react";
+import Link from "next/link";
+import { Search, Brain, Layers, Zap, MessageSquare, Star, BarChart3, Settings, Database, Code2, ArrowRight, CheckCircle2 } from "lucide-react";
 
-const features = [
+const featureGroups = [
   {
-    icon: Eye,
-    title: "Remote Site Monitoring",
-    desc: "Monitor every construction project from your laptop, tablet or phone. RemoteSite gives you a complete, real-time view of all active sites without requiring a physical presence.",
-    details: [
-      "Portfolio-level overview dashboard for all active projects",
-      "Per-project status panels with progress indicators",
-      "Date and time-stamped activity feeds for each site",
-      "Mobile-first design for access from any device",
-      "Custom dashboard views and project filters",
-    ],
-  },
-  {
+    id: "ai-search",
     icon: Brain,
-    title: "AI Construction Assistant",
-    desc: "Ask questions about your construction projects in plain language. The AI assistant reads your actual project data and delivers structured, accurate answers without fabricating information.",
-    details: [
-      "Natural language project queries: ask anything about your sites",
-      "Progress summaries and schedule variance analysis",
-      "Issue and risk briefings with prioritised recommendations",
-      "Automated weekly and monthly project summaries",
-      "Secure server-side processing: your data stays protected",
+    title: "AI-Powered Search",
+    tagline: "Search That Understands Intent",
+    desc: "Move beyond simple keyword matching. SearchSprout uses large language models and neural retrieval to understand what users mean, not just what they type. Handle ambiguous queries, conversational search and complex natural language questions with confidence.",
+    items: [
+      "Natural language query understanding",
+      "Intent classification and query expansion",
+      "Typo tolerance and spelling correction",
+      "Multilingual search support",
+      "Query suggestion and autocomplete",
+      "Contextual result reranking",
     ],
   },
   {
-    icon: TrendingUp,
-    title: "Construction Progress Tracking",
-    desc: "Track construction milestones, record completion percentages and compare planned progress against actuals with visual timelines and percentage-based progress indicators.",
-    details: [
-      "Milestone creation with target dates and completion criteria",
-      "Percentage completion recording for phases and milestones",
-      "Planned versus actual progress comparison charts",
-      "Schedule variance detection and delay alerts",
-      "Historical progress timeline for every project",
-    ],
-  },
-  {
-    icon: Camera,
-    title: "Visual Site Documentation",
-    desc: "Build a comprehensive photographic and video record of every construction project. Media is automatically organised by project, date and site location, creating a complete searchable archive.",
-    details: [
-      "Photo and video upload from any device",
-      "Automatic organisation by project, date and location",
-      "Side-by-side comparison of site photos across time periods",
-      "Searchable media library with metadata and custom tags",
-      "High-resolution image storage with secure access control",
-    ],
-  },
-  {
-    icon: Camera,
-    title: "Photo and Video Management",
-    desc: "Manage your construction media library with professional tools designed for the volume and complexity of construction documentation. Every file is linked to a project, a date and a location.",
-    details: [
-      "Bulk upload of photos and videos from site",
-      "Project-based media organisation and folder structure",
-      "Metadata including date, uploader and site location",
-      "Role-based access to control who can view or upload media",
-      "Download and export media for use in reports",
-    ],
-  },
-  {
-    icon: Shield,
-    title: "Issue and Defect Tracking",
-    desc: "Create, assign and track construction issues from identification to resolution. Every issue has a full audit trail including supporting photos, assignment history and resolution notes.",
-    details: [
-      "Structured issue creation with title, description and priority",
-      "Four priority levels: critical, high, medium and low",
-      "Statuses: open, in progress, resolved and closed",
-      "Assignment to team members with due dates",
-      "Supporting photo attachments for every issue",
-    ],
-  },
-  {
-    icon: BarChart3,
-    title: "Project Dashboards",
-    desc: "Each project has its own dedicated dashboard bringing together progress data, media, issues, milestones and team activity in one organised, visual workspace.",
-    details: [
-      "Per-project dashboard with all key metrics at a glance",
-      "Progress charts and milestone status indicators",
-      "Recent media uploads and site activity feed",
-      "Open issue count and priority breakdown",
-      "Team member activity and contribution tracking",
-    ],
-  },
-  {
-    icon: FileText,
-    title: "Automated Reports",
-    desc: "Generate professional project reports at any time. Each report consolidates progress data, media, issues and milestones into a formatted document ready for clients, investors and stakeholders.",
-    details: [
-      "One-click report generation for any project or date range",
-      "Sections: overview, progress, milestones, issues and photos",
-      "AI-generated recommendations and risk commentary",
-      "PDF export for sharing, filing and archiving",
-      "Full report history with version management",
-    ],
-  },
-  {
-    icon: Users,
-    title: "Team Collaboration",
-    desc: "Build your project team inside RemoteSite. Assign roles, control data access and ensure the right people have visibility into the right projects.",
-    details: [
-      "Role-based access: Owner, Admin, Manager, Engineer, Contractor, Viewer",
-      "Project-level team assignment and permission control",
-      "Team member invitation via email",
-      "Activity logs showing who updated what and when",
-      "Notification preferences per team member and project",
-    ],
-  },
-  {
+    id: "hybrid-search",
     icon: Layers,
-    title: "Project Portfolio Management",
-    desc: "Manage your entire construction portfolio from a single dashboard. Filter by status, date and project type to get the information you need instantly.",
-    details: [
-      "Portfolio overview with all active, completed and paused projects",
-      "Filter by project status, start date and project type",
-      "Overall portfolio statistics: completion rate, issues and milestones",
-      "Project comparison side-by-side",
-      "AI-generated portfolio summary reports",
+    title: "Hybrid Search",
+    tagline: "The Best of Keyword and Semantic",
+    desc: "Hybrid search combines traditional BM25 keyword matching with modern semantic vector retrieval. This combination delivers exact matches for specific queries while providing conceptual discovery when users search with natural language.",
+    items: [
+      "BM25 full-text ranking",
+      "Dense vector similarity search",
+      "Configurable hybrid weighting",
+      "Multi-field search boosting",
+      "Attribute-based filtering",
+      "Geo-search capabilities",
     ],
   },
   {
-    icon: FolderOpen,
-    title: "Document Management",
-    desc: "Store and organise project documents alongside your site media. Keep drawings, contracts, specifications and permits linked to the relevant project and accessible to the right team members.",
-    details: [
-      "Document upload and storage for any file type",
-      "Project-linked document organisation",
-      "Version tracking for updated documents",
-      "Role-based access control for sensitive documents",
-      "Document search and filter by project, type and date",
+    id: "instant-search",
+    icon: Zap,
+    title: "Instant Search",
+    tagline: "Results as Fast as You Type",
+    desc: "Users expect instant results. SearchSprout delivers search responses in under 50 milliseconds, allowing you to build reactive search experiences that update results with every keystroke. No loading spinners, no delays.",
+    items: [
+      "Sub-50ms median response time",
+      "Debounced query optimisation",
+      "Incremental result loading",
+      "Client-side caching",
+      "Optimistic UI patterns",
+      "Mobile-first performance",
     ],
   },
   {
-    icon: Bell,
-    title: "Notifications and Alerts",
-    desc: "Stay informed about project updates without constantly checking the platform. RemoteSite sends notifications about the events that matter: milestone completions, new issues and site updates.",
-    details: [
-      "In-platform notification centre",
-      "Email notifications for critical project events",
-      "Notifications for: new site uploads, issue creation, milestone completion",
-      "Per-project and per-role notification preferences",
-      "Notification history and read status tracking",
+    id: "personalisation",
+    icon: Star,
+    title: "AI Personalisation",
+    tagline: "Results That Know Your Users",
+    desc: "Personalise search results for every user based on their behaviour, preferences and session context. Users see more relevant results the more they interact with your search experience, increasing engagement and conversion.",
+    items: [
+      "User profile-based reranking",
+      "Session signal integration",
+      "Collaborative filtering",
+      "Purchase and engagement history",
+      "A/B testing for personalisation rules",
+      "GDPR-compliant preference storage",
+    ],
+  },
+  {
+    id: "analytics",
+    icon: BarChart3,
+    title: "Search Analytics",
+    tagline: "Understand How Your Users Search",
+    desc: "Comprehensive analytics give you a complete picture of how users interact with your search experience. Use these insights to identify content gaps, optimise ranking and improve conversions.",
+    items: [
+      "Total search volume and trends",
+      "Popular queries and click-through rates",
+      "Zero result query tracking",
+      "Search conversion attribution",
+      "Result position performance",
+      "Date-range filtering and exports",
+    ],
+  },
+  {
+    id: "merchandising",
+    icon: Settings,
+    title: "Search Merchandising",
+    tagline: "Take Control of Your Search Results",
+    desc: "Give your business team full control over how search results are ranked and displayed. Promote important content, demote irrelevant results and create rules that reflect your business priorities without touching code.",
+    items: [
+      "Pin results to top positions",
+      "Promote selected content",
+      "Demote or hide unwanted results",
+      "Create query-specific ranking rules",
+      "Configure search redirects",
+      "Visual rule builder with live preview",
+    ],
+  },
+  {
+    id: "recommendations",
+    icon: Database,
+    title: "Recommendation Engine",
+    tagline: "Discover What Users Did Not Know to Search For",
+    desc: "Drive content discovery beyond the search bar. The SearchSprout recommendation engine surfaces relevant products, articles and content based on what users are viewing, browsing and engaging with.",
+    items: [
+      "Related content recommendations",
+      "Trending and popular content",
+      "Category-based discovery",
+      "Behavioural signal integration",
+      "Collaborative filtering models",
+      "Embeddable recommendation widgets",
+    ],
+  },
+  {
+    id: "ai-assistant",
+    icon: MessageSquare,
+    title: "AI Search Assistant",
+    tagline: "Conversational Answers from Your Content",
+    desc: "Let users ask questions in natural language and receive conversational answers grounded in your indexed content. The AI assistant retrieves relevant documents and synthesises accurate responses with source attribution.",
+    items: [
+      "Retrieval-augmented generation",
+      "Source citation for every answer",
+      "Multi-turn conversation support",
+      "Custom assistant persona",
+      "Hallucination safeguards",
+      "Answer quality monitoring",
+    ],
+  },
+  {
+    id: "developer-api",
+    icon: Code2,
+    title: "Search API and Developer Tools",
+    tagline: "Build Anything on Top of SearchSprout",
+    desc: "A complete developer toolkit for integrating SearchSprout into any application. Clean REST and GraphQL APIs, SDKs for all major languages, detailed documentation and a sandbox environment for testing.",
+    items: [
+      "REST and GraphQL API endpoints",
+      "SDKs: JavaScript, Python, PHP, Ruby, Go, Java",
+      "Secure API key management",
+      "Webhook support for real-time events",
+      "API request logs and monitoring",
+      "Rate limiting and usage quotas",
     ],
   },
 ];
 
 export default function FeaturesPage() {
   return (
-    <div style={{ background: "#F7F8FA", minHeight: "100vh" }}>
+    <>
       <Navbar />
-
-      {/* Hero */}
-      <section style={{ background: "linear-gradient(160deg, #101828 0%, #1a2a4a 100%)", padding: "5rem 0 4rem" }}>
-        <div className="container-rs" style={{ textAlign: "center" }}>
-          <div className="badge" style={{ marginBottom: "1.25rem", display: "inline-flex", background: "rgba(0,57,255,0.2)", borderColor: "rgba(0,57,255,0.4)", color: "#7ba7ff" }}>
-            <FileStack size={13} />
-            Product Features
+      <main>
+        {/* Hero */}
+        <section style={{ background: "#071F20", padding: "5rem 0 4rem", textAlign: "center" }}>
+          <div className="container-ss">
+            <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#FFFFFF", marginBottom: "1.25rem", lineHeight: 1.1 }}>
+              Every Feature You Need to Build Brilliant Search
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "1.125rem", maxWidth: "580px", margin: "0 auto 2.5rem", lineHeight: 1.65 }}>
+              SearchSprout combines AI search, semantic retrieval, personalisation, analytics and developer tools into one complete platform.
+            </p>
+            <div style={{ display: "flex", gap: "0.875rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+                Start Building Free <ArrowRight size={16} />
+              </Link>
+              <Link href="/pricing" className="btn-outline" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+                View Pricing
+              </Link>
+            </div>
           </div>
-          <h1 style={{ color: "#FFFFFF", fontSize: "clamp(2rem, 4vw, 3rem)", margin: "0 0 1.25rem", fontFamily: "var(--font-manrope)", fontWeight: 900, lineHeight: 1.1 }}>
-            Every feature your construction team needs
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.1rem", maxWidth: "580px", margin: "0 auto", lineHeight: 1.7 }}>
-            From remote monitoring to AI-generated reports, RemoteSite covers every aspect of construction project management.
-          </p>
-        </div>
-      </section>
+        </section>
 
-      {/* Feature grid */}
-      <section className="section-padding">
-        <div className="container-rs">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem" }}>
-            {features.map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.title} className="card card-hover" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "10px", background: "#EAF0FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Icon size={22} color="#0039FF" />
+        {/* Feature nav */}
+        <section style={{ background: "#F7FAF8", borderBottom: "1px solid #DCE8E2", padding: "1.25rem 0" }}>
+          <div className="container-ss">
+            <div style={{ display: "flex", gap: "0.75rem", overflowX: "auto", flexWrap: "wrap" }}>
+              {featureGroups.map((f) => (
+                <a
+                  key={f.id}
+                  href={`#${f.id}`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "0.4rem",
+                    padding: "0.4rem 0.875rem", borderRadius: "2rem",
+                    background: "#FFFFFF", border: "1px solid #DCE8E2",
+                    fontSize: "0.875rem", fontWeight: 500, color: "#063B38",
+                    textDecoration: "none", whiteSpace: "nowrap"
+                  }}
+                >
+                  <f.icon size={14} />
+                  {f.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        {featureGroups.map((f, i) => (
+          <section
+            key={f.id}
+            id={f.id}
+            style={{ background: i % 2 === 0 ? "#FFFFFF" : "#F7FAF8", padding: "5rem 0" }}
+          >
+            <div className="container-ss">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+                <div style={{ order: i % 2 === 0 ? 0 : 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "0.75rem", background: "#E8F8EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <f.icon size={24} color="#16C653" />
                     </div>
-                    <h3 style={{ fontSize: "1.0625rem", margin: 0, color: "#101828", fontWeight: 700 }}>{f.title}</h3>
                   </div>
-                  <p style={{ fontSize: "0.9375rem", color: "#6B7280", margin: 0, lineHeight: 1.65 }}>{f.desc}</p>
-                  <div style={{ borderTop: "1px solid #E2E6F0", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {f.details.map((d) => (
-                      <div key={d} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={15} color="#0039FF" style={{ flexShrink: 0, marginTop: "2px" }} />
-                        <span style={{ fontSize: "0.875rem", color: "#252B36" }}>{d}</span>
-                      </div>
-                    ))}
+                  <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#16C653", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>{f.tagline}</div>
+                  <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", marginBottom: "1rem", lineHeight: 1.2 }}>{f.title}</h2>
+                  <p style={{ color: "#65736D", fontSize: "1rem", lineHeight: 1.65, marginBottom: "1.75rem" }}>{f.desc}</p>
+                  <Link href="/signup" className="btn-primary">
+                    Try {f.title} Free <ArrowRight size={15} />
+                  </Link>
+                </div>
+
+                <div style={{ order: i % 2 === 0 ? 1 : 0 }}>
+                  <div className="card-ss">
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                      {f.items.map((item) => (
+                        <li key={item} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "0.9375rem", color: "#071F20" }}>
+                          <CheckCircle2 size={16} color="#16C653" style={{ flexShrink: 0 }} />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+              </div>
+            </div>
+          </section>
+        ))}
 
-      {/* CTA */}
-      <section style={{ background: "#0039FF", padding: "4rem 0" }}>
-        <div className="container-rs" style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#FFFFFF", fontSize: "clamp(1.5rem, 3vw, 2.5rem)", margin: "0 0 1rem", fontFamily: "var(--font-manrope)" }}>
-            See all features in action
-          </h2>
-          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.0625rem", marginBottom: "2rem" }}>
-            Start your free trial and explore every capability.
-          </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#FFFFFF", color: "#0039FF", fontWeight: 700, fontSize: "1rem", padding: "0.9375rem 2rem", borderRadius: "0.5rem", textDecoration: "none" }}>
-              Get Started Free <ArrowRight size={18} />
-            </Link>
-            <Link href="/pricing" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.12)", color: "#FFFFFF", fontWeight: 600, fontSize: "1rem", padding: "0.9375rem 2rem", borderRadius: "0.5rem", border: "1.5px solid rgba(255,255,255,0.3)", textDecoration: "none" }}>
-              View Pricing
+        {/* CTA */}
+        <section style={{ background: "#063B38", padding: "5rem 0", textAlign: "center" }}>
+          <div className="container-ss">
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
+              All Features Included on Every Plan
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
+              No feature gating. Every SearchSprout plan includes the full platform. Scale your usage, not your feature access.
+            </p>
+            <Link href="/pricing" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
+              View Pricing Plans <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
-      </section>
-
+        </section>
+      </main>
       <Footer />
-    </div>
+    </>
   );
 }
