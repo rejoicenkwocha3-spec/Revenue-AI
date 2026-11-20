@@ -143,3 +143,59 @@ drop policy if exists "Users can delete own api keys" on public.api_keys;
 create policy "Users can view own api keys" on public.api_keys for select using (auth.uid() = user_id);
 create policy "Users can insert own api keys" on public.api_keys for insert with check (auth.uid() = user_id);
 create policy "Users can delete own api keys" on public.api_keys for delete using (auth.uid() = user_id);
+
+-- ─────────────────────────────────────────
+-- INDEXED RECORDS (full-text search store)
+-- ─────────────────────────────────────────
+create table if not exists public.indexed_records (
+  id uuid default gen_random_uuid() primary key,
+  search_index_id uuid references public.search_indexes on delete cascade not null,
+  title text not null default '',
+  content text not null default '',
+  url text,
+  source_type text not null default 'api',
+  metadata jsonb default '{}',
+  search_vector tsvector generated always as (
+    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(content, ''))
+  ) stored,
+  created_at timestamptz default now()
+);
+
+create index if not exists indexed_records_search_vector_idx
+  on public.indexed_records using gin(search_vector);
+
+create index if not exists indexed_records_index_id_idx
+  on public.indexed_records(search_index_id);
+
+alter table public.indexed_records enable row level security;
+
+drop policy if exists "Users can view own indexed records" on public.indexed_records;
+drop policy if exists "Users can insert own indexed records" on public.indexed_records;
+drop policy if exists "Users can delete own indexed records" on public.indexed_records;
+
+create policy "Users can view own indexed records" on public.indexed_records
+  for select using (
+    exists (
+      select 1 from public.search_indexes
+      where search_indexes.id = indexed_records.search_index_id
+        and search_indexes.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own indexed records" on public.indexed_records
+  for insert with check (
+    exists (
+      select 1 from public.search_indexes
+      where search_indexes.id = indexed_records.search_index_id
+        and search_indexes.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete own indexed records" on public.indexed_records
+  for delete using (
+    exists (
+      select 1 from public.search_indexes
+      where search_indexes.id = indexed_records.search_index_id
+        and search_indexes.user_id = auth.uid()
+    )
+  );
