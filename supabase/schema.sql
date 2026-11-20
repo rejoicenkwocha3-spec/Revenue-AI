@@ -52,9 +52,8 @@ create table if not exists public.search_projects (
   updated_at timestamptz default now()
 );
 
-alter table public.search_projects add column if not exists user_id uuid references auth.users on delete cascade;
 alter table public.search_projects add column if not exists description text;
-alter table public.search_projects add column if not exists status text not null default 'active';
+alter table public.search_projects add column if not exists status text default 'active';
 alter table public.search_projects enable row level security;
 
 drop policy if exists "Users can view own projects" on public.search_projects;
@@ -82,6 +81,9 @@ create table if not exists public.data_sources (
   updated_at timestamptz default now()
 );
 
+alter table public.data_sources add column if not exists url text;
+alter table public.data_sources add column if not exists record_count integer default 0;
+alter table public.data_sources add column if not exists updated_at timestamptz default now();
 alter table public.data_sources enable row level security;
 
 drop policy if exists "Users can view own data sources" on public.data_sources;
@@ -108,6 +110,8 @@ create table if not exists public.search_indexes (
   updated_at timestamptz default now()
 );
 
+alter table public.search_indexes add column if not exists searchable_attributes text[] default '{}';
+alter table public.search_indexes add column if not exists updated_at timestamptz default now();
 alter table public.search_indexes enable row level security;
 
 drop policy if exists "Users can view own indexes" on public.search_indexes;
@@ -134,6 +138,9 @@ create table if not exists public.api_keys (
   created_at timestamptz default now()
 );
 
+alter table public.api_keys add column if not exists key_prefix text default '';
+alter table public.api_keys add column if not exists permissions text default 'read';
+alter table public.api_keys add column if not exists last_used_at timestamptz;
 alter table public.api_keys enable row level security;
 
 drop policy if exists "Users can view own api keys" on public.api_keys;
