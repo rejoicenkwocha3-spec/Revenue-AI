@@ -1,43 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, ChevronDown, User } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Bell, Search } from "lucide-react";
 import Link from "next/link";
 
-export default function DashboardHeader() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+interface DashboardHeaderProps {
+  title: string;
+  user?: { name?: string; email?: string };
+}
 
-  useEffect(() => {
-    async function load() {
-      const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser) return;
-      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", authUser.id).single();
-      setUser({ name: profile?.full_name || authUser.email?.split("@")[0] || "User", email: authUser.email || "" });
-    }
-    load();
-  }, []);
+export default function DashboardHeader({ title, user }: DashboardHeaderProps) {
+  const initials = user?.name
+    ? user.name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.[0].toUpperCase() ?? "U";
 
   return (
-    <header style={{ height: "60px", background: "#FFFFFF", borderBottom: "1px solid #DCE8E2", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2rem", flexShrink: 0 }}>
-      <div style={{ fontSize: "0.875rem", color: "#65736D" }}>
-        SearchSprout Dashboard
-      </div>
-
+    <header
+      style={{
+        height: 64,
+        background: "#ffffff",
+        borderBottom: "1px solid #D1DCF0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 1.5rem",
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+      }}
+    >
+      <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1.125rem", color: "#102A43", margin: 0 }}>{title}</h1>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        <button style={{ background: "none", border: "none", cursor: "pointer", color: "#65736D", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: "0.5rem" }}>
-          <Bell size={18} />
-        </button>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#063B38", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <User size={16} color="#16C653" />
-          </div>
-          {user && (
-            <span style={{ fontSize: "0.875rem", fontWeight: 500, color: "#071F20" }}>{user.name}</span>
-          )}
-          <ChevronDown size={14} color="#65736D" />
+        <Link href="/dashboard/notifications" style={{ color: "#64748B", display: "flex", textDecoration: "none" }}>
+          <Bell size={20} />
+        </Link>
+        <div
+          style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: "#155EEF", color: "white",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "0.875rem",
+            cursor: "pointer",
+          }}
+          title={user?.name ?? user?.email}
+        >
+          {initials}
         </div>
       </div>
     </header>

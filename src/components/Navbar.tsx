@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import ClimateBookLogo from "./ClimateBookLogo";
+import TrueAuthorLogo from "./TrueAuthorLogo";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+
+  const links = [
+    { href: "/platform", label: "Platform" },
+    { href: "/solutions", label: "Solutions" },
+    { href: "/features", label: "Features" },
+    { href: "/pricing", label: "Pricing" },
+  ];
 
   return (
     <nav
@@ -14,84 +21,67 @@ export default function Navbar() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: "rgba(247,248,243,0.92)",
+        background: "rgba(245,248,252,0.94)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #DDE8E2",
+        borderBottom: "1px solid #D1DCF0",
       }}
     >
-      <div className="container-cb" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "68px" }}>
-        {/* Logo + wordmark */}
+      <div className="container-ta" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "68px" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-          <ClimateBookLogo size={36} />
-          <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.125rem", color: "#0B352B", letterSpacing: "-0.02em" }}>
-            ClimateBooks
+          <TrueAuthorLogo size={36} />
+          <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.125rem", color: "#102A43", letterSpacing: "-0.02em" }}>
+            TrueAuthor
           </span>
         </Link>
 
-        {/* Desktop nav */}
         <div style={{ display: "flex", alignItems: "center", gap: "2rem" }} className="desktop-nav">
-          {[
-            { label: "Platform", href: "/platform" },
-            { label: "Solutions", href: "/solutions" },
-            { label: "Features", href: "/features" },
-            { label: "Pricing", href: "/pricing" },
-          ].map((item) => (
+          {links.map((l) => (
             <Link
-              key={item.href}
-              href={item.href}
-              style={{ fontWeight: 500, fontSize: "0.9375rem", color: "#242B27", textDecoration: "none", transition: "color 0.15s" }}
-              onMouseEnter={(e) => ((e.target as HTMLAnchorElement).style.color = "#174D36")}
-              onMouseLeave={(e) => ((e.target as HTMLAnchorElement).style.color = "#242B27")}
+              key={l.href}
+              href={l.href}
+              style={{ color: "#263449", fontWeight: 500, fontSize: "0.9375rem", textDecoration: "none", transition: "color 0.2s" }}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#155EEF")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "#263449")}
             >
-              {item.label}
+              {l.label}
             </Link>
           ))}
         </div>
 
-        {/* Auth buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }} className="desktop-nav">
-          <Link href="/login" className="btn-ghost" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-            Log in
+          <Link href="/login" className="btn-secondary" style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem" }}>
+            Log In
           </Link>
-          <Link href="/signup" className="btn-primary" style={{ padding: "0.5rem 1.125rem", fontSize: "0.875rem" }}>
+          <Link href="/signup" className="btn-primary" style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem" }}>
             Get Started
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           onClick={() => setOpen(!open)}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#242B27", display: "none" }}
+          style={{ display: "none", background: "none", border: "none", cursor: "pointer", color: "#102A43" }}
           className="mobile-menu-btn"
           aria-label="Toggle menu"
         >
-          {open ? <X size={22} /> : <Menu size={22} />}
+          {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile dropdown */}
       {open && (
-        <div style={{ background: "#F7F8F3", borderTop: "1px solid #DDE8E2", padding: "1rem 1.5rem 1.5rem" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-            {[
-              { label: "Platform", href: "/platform" },
-              { label: "Solutions", href: "/solutions" },
-              { label: "Features", href: "/features" },
-              { label: "Pricing", href: "/pricing" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                style={{ fontWeight: 500, fontSize: "1rem", color: "#242B27", textDecoration: "none" }}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div style={{ borderTop: "1px solid #DDE8E2", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-              <Link href="/login" className="btn-ghost" onClick={() => setOpen(false)}>Log in</Link>
-              <Link href="/signup" className="btn-primary" onClick={() => setOpen(false)}>Get Started</Link>
-            </div>
+        <div style={{ background: "#ffffff", borderTop: "1px solid #D1DCF0", padding: "1rem 1.5rem" }}>
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              style={{ display: "block", color: "#263449", fontWeight: 500, fontSize: "1rem", textDecoration: "none", padding: "0.75rem 0", borderBottom: "1px solid #F5F8FC" }}
+              onClick={() => setOpen(false)}
+            >
+              {l.label}
+            </Link>
+          ))}
+          <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+            <Link href="/login" className="btn-secondary" style={{ flex: 1, justifyContent: "center" }}>Log In</Link>
+            <Link href="/signup" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>Get Started</Link>
           </div>
         </div>
       )}
@@ -99,7 +89,7 @@ export default function Navbar() {
       <style>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: flex !important; }
+          .mobile-menu-btn { display: block !important; }
         }
       `}</style>
     </nav>

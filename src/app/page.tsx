@@ -3,527 +3,265 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ClimateBookLogo from "@/components/ClimateBookLogo";
+import TrueAuthorLogo from "@/components/TrueAuthorLogo";
 import {
-  BarChart3, Leaf, FileText, Target, Users, ArrowRight,
-  TrendingDown, Globe, ShieldCheck, Zap, Building2, Factory,
-  CheckCircle2, ChevronRight
+  FileText, ShieldCheck, Brain, Search, Quote, PenTool,
+  BookOpen, Building2, ArrowRight, CheckCircle2, ChevronRight,
+  BarChart2, Layers, Users, Upload, Scan, FileBarChart2
 } from "lucide-react";
+
+const S = {
+  section: { padding: "5rem 0" } as React.CSSProperties,
+  sectionAlt: { padding: "5rem 0", background: "#ffffff" } as React.CSSProperties,
+  h2: { fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "clamp(2rem,4vw,2.75rem)", color: "#102A43", margin: "0 0 1rem", lineHeight: 1.15 } as React.CSSProperties,
+  lead: { fontSize: "1.125rem", color: "#64748B", lineHeight: 1.7, margin: "0 0 2.5rem" } as React.CSSProperties,
+  badge: { display: "inline-block", background: "#EEF3FD", color: "#155EEF", fontSize: "0.8125rem", fontWeight: 600, padding: "0.25rem 0.875rem", borderRadius: "100px", marginBottom: "1rem", textTransform: "uppercase" as const, letterSpacing: "0.04em" },
+};
+
+function FeatureCard({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
+  return (
+    <div className="card-ta" style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+      <div style={{ width: 44, height: 44, background: "#EEF3FD", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Icon size={22} color="#155EEF" />
+      </div>
+      <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1.0625rem", color: "#102A43", margin: 0 }}>{title}</h3>
+      <p style={{ color: "#64748B", fontSize: "0.9375rem", lineHeight: 1.6, margin: 0 }}>{desc}</p>
+    </div>
+  );
+}
+
+function StepCard({ num, title, desc }: { num: string; title: string; desc: string }) {
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ width: 48, height: 48, background: "#155EEF", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: "white", fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.125rem" }}>
+        {num}
+      </div>
+      <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1rem", color: "#102A43", margin: "0 0 0.5rem" }}>{title}</h3>
+      <p style={{ color: "#64748B", fontSize: "0.9rem", lineHeight: 1.6, margin: 0 }}>{desc}</p>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
-      {/* ── HERO ── */}
-      <section
-        style={{
-          background: "linear-gradient(160deg, #0B352B 0%, #174D36 60%, #1a5c40 100%)",
-          padding: "7rem 0 6rem",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Background texture */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "radial-gradient(circle at 70% 30%, rgba(217,173,85,0.08) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(139,175,145,0.06) 0%, transparent 50%)",
-          pointerEvents: "none",
-        }} />
-        <div className="container-cb" style={{ position: "relative", textAlign: "center", maxWidth: "860px" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.75rem" }}>
-            <ClimateBookLogo size={64} />
-          </div>
-          <span className="eyebrow" style={{ color: "#D9AD55", marginBottom: "1rem", display: "block" }}>
-            AI-Powered Climate Accounting
-          </span>
-          <h1 style={{
-            fontFamily: "var(--font-manrope)",
-            fontWeight: 900,
-            fontSize: "clamp(2.5rem, 6vw, 4rem)",
-            color: "#FFFFFF",
-            lineHeight: 1.1,
-            letterSpacing: "-0.03em",
-            marginBottom: "1.5rem",
-          }}>
-            Climate Intelligence.<br />Measurable Impact.
-          </h1>
-          <p style={{
-            fontSize: "clamp(1rem, 2vw, 1.2rem)",
-            color: "rgba(255,255,255,0.75)",
-            lineHeight: 1.65,
-            maxWidth: "600px",
-            margin: "0 auto 2.5rem",
-          }}>
-            ClimateBooks helps businesses measure their carbon footprint, manage sustainability data and create meaningful climate reports with intelligent AI-powered tools.
-          </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" className="btn-gold" style={{ fontSize: "1rem", padding: "0.875rem 2rem" }}>
-              Get Started <ArrowRight size={16} />
-            </Link>
-            <Link href="/platform" className="btn-outline" style={{ fontSize: "1rem", padding: "0.875rem 2rem" }}>
-              Explore Platform
-            </Link>
-          </div>
-
-          {/* Trust indicators */}
-          <div style={{ display: "flex", gap: "2rem", justifyContent: "center", marginTop: "3.5rem", flexWrap: "wrap" }}>
-            {[
-              { label: "GHG Protocol Aligned" },
-              { label: "ISO 14064 Compatible" },
-              { label: "CSRD Ready" },
-            ].map((item) => (
-              <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "rgba(255,255,255,0.6)", fontSize: "0.8125rem" }}>
-                <CheckCircle2 size={14} style={{ color: "#8BAF91" }} />
-                {item.label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── DASHBOARD PREVIEW ── */}
-      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <span className="eyebrow">The Platform</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#0B352B", marginTop: "0.5rem" }}>
-              Your entire climate programme in one place
-            </h2>
-          </div>
-
-          {/* Dashboard preview card */}
-          <div style={{
-            background: "#FFFFFF",
-            border: "1px solid #DDE8E2",
-            borderRadius: "1.25rem",
-            boxShadow: "0 8px 48px rgba(11,53,43,0.12)",
-            overflow: "hidden",
-            maxWidth: "960px",
-            margin: "0 auto",
-          }}>
-            {/* Browser chrome */}
-            <div style={{ background: "#F0F5F2", borderBottom: "1px solid #DDE8E2", padding: "0.75rem 1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.375rem" }}>
-                {["#FF5F57", "#FFBD2E", "#28CA41"].map((c) => (
-                  <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
-                ))}
-              </div>
-              <div style={{ flex: 1, background: "#E8EDE9", borderRadius: "0.3rem", padding: "0.2rem 0.75rem", fontSize: "0.75rem", color: "#5A6B61", maxWidth: "280px", margin: "0 auto" }}>
-                app.climatebooks.com/dashboard
-              </div>
+      {/* HERO */}
+      <section style={{ background: "linear-gradient(150deg, #102A43 0%, #155EEF 100%)", padding: "7rem 0 6rem", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 75% 25%, rgba(255,101,79,0.12) 0%, transparent 55%), radial-gradient(circle at 15% 75%, rgba(255,255,255,0.04) 0%, transparent 50%)" }} />
+        <div className="container-ta" style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ maxWidth: 760 }}>
+            <div style={{ ...S.badge, background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.9)" }}>
+              Academic Integrity Platform
             </div>
-
-            {/* Dashboard content */}
-            <div style={{ display: "flex", minHeight: "360px" }}>
-              {/* Sidebar */}
-              <div style={{ width: "200px", background: "#0B352B", padding: "1.25rem 0.75rem", flexShrink: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", marginBottom: "1rem" }}>
-                  <ClimateBookLogo size={24} />
-                  <span style={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8125rem", fontFamily: "var(--font-manrope)" }}>ClimateBooks</span>
-                </div>
-                {[
-                  { icon: BarChart3, label: "Overview", active: true },
-                  { icon: Building2, label: "Organisations" },
-                  { icon: Leaf, label: "Carbon Footprint" },
-                  { icon: Globe, label: "Scope 1" },
-                  { icon: Zap, label: "Scope 2" },
-                  { icon: Factory, label: "Scope 3" },
-                  { icon: FileText, label: "Reports" },
-                  { icon: Target, label: "Climate Targets" },
-                ].map((item) => (
-                  <div key={item.label} style={{
-                    display: "flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.4rem 0.75rem", borderRadius: "0.375rem",
-                    background: item.active ? "rgba(255,255,255,0.12)" : "transparent",
-                    marginBottom: "0.125rem",
-                    color: item.active ? "#FFFFFF" : "rgba(255,255,255,0.5)",
-                    fontSize: "0.75rem", fontWeight: item.active ? 600 : 400,
-                  }}>
-                    <item.icon size={13} />
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-
-              {/* Main content */}
-              <div style={{ flex: 1, padding: "1.5rem", background: "#F7F8F3" }}>
-                <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#0B352B" }}>Emissions Overview</div>
-                    <div style={{ fontSize: "0.75rem", color: "#5A6B61" }}>Reporting period: Jan 2026</div>
-                  </div>
-                  <div style={{ background: "#174D36", color: "#fff", fontSize: "0.7rem", fontWeight: 600, padding: "0.25rem 0.625rem", borderRadius: "0.25rem" }}>
-                    Live
-                  </div>
-                </div>
-
-                {/* Stat row */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem", marginBottom: "1rem" }}>
-                  {[
-                    { label: "Total Emissions", value: "1,842", unit: "tCO₂e", color: "#174D36" },
-                    { label: "Scope 1 & 2", value: "624", unit: "tCO₂e", color: "#D9AD55" },
-                    { label: "Scope 3", value: "1,218", unit: "tCO₂e", color: "#2A4E8A" },
-                  ].map((s) => (
-                    <div key={s.label} style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "0.5rem", padding: "0.75rem" }}>
-                      <div style={{ fontSize: "0.65rem", color: "#5A6B61", marginBottom: "0.25rem" }}>{s.label}</div>
-                      <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.1rem", color: s.color }}>
-                        {s.value}
-                      </div>
-                      <div style={{ fontSize: "0.6rem", color: "#5A6B61" }}>{s.unit}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Chart bars */}
-                <div style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "0.5rem", padding: "0.875rem" }}>
-                  <div style={{ fontSize: "0.7rem", color: "#5A6B61", marginBottom: "0.75rem", fontWeight: 600 }}>Emissions by Month</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.4rem", height: "80px" }}>
-                    {[55, 72, 60, 85, 68, 90, 76, 82, 65, 88, 74, 70].map((h, i) => (
-                      <div key={i} style={{ flex: 1, background: i === 11 ? "#174D36" : "#8BAF91", borderRadius: "2px 2px 0 0", height: `${h}%`, opacity: 0.85 }} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── THREE PILLARS ── */}
-      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <span className="eyebrow">What we do</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#0B352B", marginTop: "0.5rem" }}>
-              The future of climate accounting
-            </h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
-            {[
-              {
-                icon: BarChart3,
-                title: "Measurement",
-                desc: "Understand your organisation's environmental footprint across Scope 1, 2 and 3 with transparent, auditable calculations grounded in recognised methodologies.",
-                color: "#174D36",
-                bg: "#E8F2EC",
-              },
-              {
-                icon: Zap,
-                title: "Intelligence",
-                desc: "Transform complex climate data into meaningful insights. Our AI assistant analyses your data, identifies hotspots and recommends reduction opportunities.",
-                color: "#8B6B10",
-                bg: "#FDF5E0",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Accountability",
-                desc: "Track environmental performance and produce reliable sustainability reports aligned with GHG Protocol, CDP, CSRD, ESRS, ISSB and SECR frameworks.",
-                color: "#2A4E8A",
-                bg: "#EAF0F8",
-              },
-            ].map((item) => (
-              <div key={item.title} className="card-cb" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div style={{ width: 48, height: 48, borderRadius: "0.625rem", background: item.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <item.icon size={22} style={{ color: item.color }} />
-                </div>
-                <div>
-                  <h3 style={{ fontFamily: "var(--font-manrope)", fontSize: "1.125rem", fontWeight: 800, color: "#0B352B", marginBottom: "0.5rem" }}>
-                    {item.title}
-                  </h3>
-                  <p style={{ color: "#5A6B61", fontSize: "0.9rem", lineHeight: 1.65 }}>{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SCOPES SECTION ── */}
-      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
-            <div>
-              <span className="eyebrow">Carbon Accounting</span>
-              <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.25rem)", color: "#0B352B", marginTop: "0.5rem", marginBottom: "1.25rem" }}>
-                Understand Scope 1, 2 and 3 emissions
-              </h2>
-              <p style={{ color: "#5A6B61", lineHeight: 1.7, marginBottom: "1.5rem" }}>
-                ClimateBooks provides a structured environment for measuring direct and indirect emissions across your entire value chain. Every calculation is transparent, traceable and aligned with the GHG Protocol.
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                {[
-                  { scope: "Scope 1", desc: "Direct emissions from owned sources: vehicles, fuel combustion, industrial processes", badge: "badge-scope1" },
-                  { scope: "Scope 2", desc: "Indirect emissions from purchased electricity, heating and cooling", badge: "badge-scope2" },
-                  { scope: "Scope 3", desc: "Value chain emissions across 15 categories including supply chain, travel and investments", badge: "badge-scope3" },
-                ].map((item) => (
-                  <div key={item.scope} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-                    <span className={item.badge} style={{ marginTop: "0.1rem", flexShrink: 0 }}>{item.scope}</span>
-                    <span style={{ color: "#5A6B61", fontSize: "0.9rem", lineHeight: 1.6 }}>{item.desc}</span>
-                  </div>
-                ))}
-              </div>
-              <Link href="/features" className="btn-primary" style={{ marginTop: "2rem", display: "inline-flex" }}>
-                Explore Features <ArrowRight size={16} />
+            <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2.25rem,5vw,3.75rem)", color: "#ffffff", lineHeight: 1.1, margin: "0 0 1.5rem", letterSpacing: "-0.02em" }}>
+              Every Word Matters.<br />Every Original Idea<br />Deserves Recognition.
+            </h1>
+            <p style={{ fontSize: "clamp(1rem,2vw,1.25rem)", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, maxWidth: 600, margin: "0 0 2.5rem" }}>
+              TrueAuthor helps students, educators and institutions evaluate writing originality, understand text similarity and improve academic integrity with intelligent writing analysis.
+            </p>
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <Link href="/signup" className="btn-white">
+                Get Started <ArrowRight size={16} />
+              </Link>
+              <Link href="/platform" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "rgba(255,255,255,0.9)", fontWeight: 600, fontSize: "0.9375rem", textDecoration: "none", padding: "0.75rem 1.75rem", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.3)", transition: "background 0.2s" }}
+                onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+                onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                Explore Platform
               </Link>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {[
-                { label: "Scope 1 — Direct", value: 285, pct: 15, color: "#174D36" },
-                { label: "Scope 2 — Energy", value: 339, pct: 18, color: "#D9AD55" },
-                { label: "Scope 3 — Value chain", value: 1218, pct: 67, color: "#2A4E8A" },
-              ].map((item) => (
-                <div key={item.label} className="card-cb">
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                    <span style={{ fontWeight: 600, fontSize: "0.875rem", color: "#242B27" }}>{item.label}</span>
-                    <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, color: item.color, fontSize: "0.9rem" }}>
-                      {item.value.toLocaleString()} tCO₂e
-                    </span>
-                  </div>
-                  <div style={{ background: "#F0F5F2", borderRadius: "999px", height: "6px" }}>
-                    <div style={{ width: `${item.pct}%`, height: "100%", borderRadius: "999px", background: item.color }} />
-                  </div>
-                  <div style={{ fontSize: "0.75rem", color: "#5A6B61", marginTop: "0.375rem" }}>{item.pct}% of total</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
-        <style>{`
-          @media (max-width: 768px) {
-            section > div > div[style*="grid-template-columns: 1fr 1fr"] {
-              grid-template-columns: 1fr !important;
-              gap: 2rem !important;
-            }
-          }
-        `}</style>
+        {/* Product demo card */}
+        <div className="container-ta" style={{ marginTop: "4rem", position: "relative", zIndex: 1 }}>
+          <div style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "2rem", maxWidth: 700 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF654F" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFD44F" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#4FFF8F" }} />
+              <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8125rem", marginLeft: "0.5rem" }}>TrueAuthor Analysis Engine</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: "1rem" }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", margin: "0 0 0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Similarity Score</p>
+                <p style={{ color: "#ffffff", fontSize: "2rem", fontFamily: "var(--font-manrope)", fontWeight: 800, margin: 0 }}>14<span style={{ fontSize: "1.25rem" }}>%</span></p>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8125rem", margin: "0.25rem 0 0" }}>Low similarity detected</p>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: "1rem" }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", margin: "0 0 0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>AI Writing Indicators</p>
+                <p style={{ color: "#ffffff", fontSize: "2rem", fontFamily: "var(--font-manrope)", fontWeight: 800, margin: 0 }}>Low</p>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8125rem", margin: "0.25rem 0 0" }}>Primarily human writing</p>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: "1rem" }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", margin: "0 0 0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Citations Checked</p>
+                <p style={{ color: "#ffffff", fontSize: "2rem", fontFamily: "var(--font-manrope)", fontWeight: 800, margin: 0 }}>23</p>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8125rem", margin: "0.25rem 0 0" }}>2 require attention</p>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: "1rem" }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", margin: "0 0 0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Report Status</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.375rem" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4FFF8F" }} />
+                  <p style={{ color: "#ffffff", fontSize: "1rem", fontFamily: "var(--font-manrope)", fontWeight: 700, margin: 0 }}>Complete</p>
+                </div>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8125rem", margin: "0.25rem 0 0" }}>Ready to export</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* ── AI SECTION ── */}
-      <section style={{ background: "#0B352B", padding: "5rem 0" }}>
-        <div className="container-cb" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
-          <div>
-            <span className="eyebrow">AI Climate Assistant</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.25rem)", color: "#FFFFFF", marginTop: "0.5rem", marginBottom: "1.25rem" }}>
-              Intelligent sustainability reporting
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
-              Ask ClimateBooks anything about your environmental performance. Our AI assistant analyses your actual data to surface insights, identify reduction opportunities and help prepare climate disclosures.
+      {/* TRUST BAR */}
+      <section style={{ background: "#ffffff", padding: "2rem 0", borderBottom: "1px solid #D1DCF0" }}>
+        <div className="container-ta" style={{ textAlign: "center" }}>
+          <p style={{ color: "#64748B", fontSize: "0.875rem", fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 1.5rem" }}>
+            Trusted by academic institutions worldwide
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "3rem", flexWrap: "wrap", alignItems: "center" }}>
+            {["Universities", "Colleges", "Research Institutions", "Publishers", "Corporate Organisations"].map((name) => (
+              <span key={name} style={{ color: "#102A43", fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "0.9375rem", opacity: 0.65 }}>{name}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CORE CAPABILITIES */}
+      <section style={S.section}>
+        <div className="container-ta">
+          <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 3.5rem" }}>
+            <div style={S.badge}>What TrueAuthor Does</div>
+            <h2 style={S.h2}>One Platform for Writing Integrity</h2>
+            <p style={{ ...S.lead, margin: 0 }}>
+              TrueAuthor brings together the essential tools educators and students need to understand originality, improve writing quality and uphold academic standards.
             </p>
-            {[
-              "What is our total carbon footprint this year?",
-              "Which activities contribute most to our emissions?",
-              "Recommend opportunities to reduce our Scope 3 emissions.",
-              "Generate a sustainability performance summary.",
-            ].map((q) => (
-              <div key={q} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                <ChevronRight size={14} style={{ color: "#D9AD55", flexShrink: 0 }} />
-                <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.875rem", fontStyle: "italic" }}>{q}</span>
-              </div>
-            ))}
-            <Link href="/features" className="btn-gold" style={{ marginTop: "1.5rem", display: "inline-flex" }}>
-              Learn More <ArrowRight size={16} />
-            </Link>
           </div>
-          {/* Chat preview */}
-          <div style={{ background: "#0D3D2B", border: "1px solid rgba(139,175,145,0.2)", borderRadius: "1rem", padding: "1.5rem" }}>
-            <div style={{ marginBottom: "1rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(139,175,145,0.15)" }}>
-              <span style={{ color: "#8BAF91", fontSize: "0.75rem", fontWeight: 600 }}>AI Climate Assistant</span>
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "1.5rem" }}>
+            <FeatureCard icon={Search} title="Originality Checking" desc="Analyse documents against authorised sources to understand text similarity and identify matching passages with clear source references." />
+            <FeatureCard icon={Brain} title="AI Writing Insights" desc="Evaluate writing patterns and identify indicators of potentially AI-generated text with appropriate confidence information and explanations of analytical limitations." />
+            <FeatureCard icon={PenTool} title="Authorship Analysis" desc="Where authorised writing samples are available, analyse writing consistency across vocabulary, sentence structure and linguistic characteristics." />
+            <FeatureCard icon={Quote} title="Citation Checker" desc="Review academic references across APA, MLA, Chicago, Harvard and IEEE formats. Identify missing references, inconsistent citations and formatting issues." />
+            <FeatureCard icon={FileText} title="Grammar Analysis" desc="Provide feedback on grammar, punctuation, sentence clarity, academic tone and readability with constructive suggestions." />
+            <FeatureCard icon={FileBarChart2} title="Originality Reports" desc="Generate professional reports with similarity percentages, matched passages, source information and AI writing indicators. Export to PDF." />
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section style={S.sectionAlt}>
+        <div className="container-ta">
+          <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 3.5rem" }}>
+            <div style={S.badge}>The Process</div>
+            <h2 style={S.h2}>How TrueAuthor Works</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: "2rem 1.5rem", maxWidth: 900, margin: "0 auto" }}>
+            <StepCard num="1" title="Upload Document" desc="Submit PDF, DOCX or TXT files securely through the platform." />
+            <StepCard num="2" title="Analyse Content" desc="TrueAuthor extracts text and runs comprehensive analysis across all dimensions." />
+            <StepCard num="3" title="Review Similarities" desc="Examine matched passages side by side with source references clearly indicated." />
+            <StepCard num="4" title="Examine Insights" desc="Review AI writing indicators, authorship patterns and citation observations." />
+            <StepCard num="5" title="Generate Report" desc="Produce a professional originality report with all findings clearly documented." />
+            <StepCard num="6" title="Improve Originality" desc="Use feedback and writing assistance tools to strengthen your work." />
+          </div>
+        </div>
+      </section>
+
+      {/* AUDIENCE SOLUTIONS */}
+      <section style={S.section}>
+        <div className="container-ta">
+          <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 3.5rem" }}>
+            <div style={S.badge}>Solutions</div>
+            <h2 style={S.h2}>Built for Every Academic Role</h2>
+            <p style={{ ...S.lead, margin: 0 }}>Whether you are a student submitting coursework, a lecturer reviewing assignments or an institution managing academic integrity, TrueAuthor serves your specific needs.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "1.5rem" }}>
             {[
-              { from: "user", msg: "What are our highest emitting operations this quarter?" },
-              { from: "ai", msg: "Based on your activity data, your top emission sources are: (1) Natural gas combustion in your London facility — 142 tCO₂e, (2) Business air travel — 89 tCO₂e, and (3) Purchased electricity — 76 tCO₂e. These three categories account for 68% of your total Scope 1 and 2 emissions. I recommend reviewing your energy procurement strategy as an immediate priority." },
-            ].map((m, i) => (
-              <div key={i} style={{ marginBottom: "0.875rem", display: "flex", justifyContent: m.from === "user" ? "flex-end" : "flex-start" }}>
-                <div style={{
-                  background: m.from === "user" ? "#174D36" : "rgba(255,255,255,0.08)",
-                  color: m.from === "user" ? "#FFFFFF" : "rgba(255,255,255,0.8)",
-                  borderRadius: m.from === "user" ? "1rem 1rem 0.25rem 1rem" : "1rem 1rem 1rem 0.25rem",
-                  padding: "0.75rem 1rem",
-                  fontSize: "0.8125rem",
-                  lineHeight: 1.6,
-                  maxWidth: "85%",
-                }}>
-                  {m.msg}
+              { icon: BookOpen, title: "Students", desc: "Understand your similarity score before submission, improve your citations and get writing feedback that helps you learn." },
+              { icon: Users, title: "Lecturers", desc: "Review student submissions, access comprehensive originality reports and manage assignment integrity with confidence." },
+              { icon: Building2, title: "Universities", desc: "Implement institution-wide academic integrity workflows with centralised management, role-based access and aggregate reporting." },
+              { icon: Layers, title: "Researchers", desc: "Ensure manuscript originality, verify citation accuracy and maintain the highest standards of academic publishing integrity." },
+            ].map((item) => (
+              <div key={item.title} className="card-ta" style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                <div style={{ width: 44, height: 44, background: "#EEF3FD", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <item.icon size={22} color="#155EEF" />
                 </div>
+                <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1.0625rem", color: "#102A43", margin: 0 }}>{item.title}</h3>
+                <p style={{ color: "#64748B", fontSize: "0.9375rem", lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
+                <Link href="/solutions" style={{ color: "#155EEF", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                  Learn more <ChevronRight size={14} />
+                </Link>
               </div>
             ))}
           </div>
         </div>
-        <style>{`
-          @media (max-width: 768px) {
-            section[style*="#0B352B"] > div { grid-template-columns: 1fr !important; }
-          }
-        `}</style>
       </section>
 
-      {/* ── FEATURES GRID ── */}
-      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <span className="eyebrow">Platform Features</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#0B352B", marginTop: "0.5rem" }}>
-              Everything your climate programme needs
-            </h2>
+      {/* INSTITUTIONAL FEATURES */}
+      <section style={{ ...S.sectionAlt }}>
+        <div className="container-ta" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+          <div>
+            <div style={S.badge}>Institutional Management</div>
+            <h2 style={S.h2}>Designed for Institutions at Scale</h2>
+            <p style={{ color: "#64748B", fontSize: "1.0625rem", lineHeight: 1.7, marginBottom: "2rem" }}>
+              TrueAuthor provides administrators with the tools to create departments, manage classes, collect submissions and oversee academic integrity across the entire institution from one centralised dashboard.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+              {[
+                "Role-based access: Owner, Administrator, Lecturer, Student, Researcher",
+                "Department and class management with assignment workflows",
+                "Aggregate usage statistics and institutional reporting",
+                "Secure document isolation and row-level data protection",
+              ].map((item) => (
+                <li key={item} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", color: "#263449", fontSize: "0.9375rem", lineHeight: 1.5 }}>
+                  <CheckCircle2 size={18} color="#155EEF" style={{ marginTop: "0.1rem", flexShrink: 0 }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/solutions" className="btn-primary">Explore Institutional Features <ArrowRight size={16} /></Link>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             {[
-              { icon: BarChart3, title: "Emissions Analytics", desc: "Visualise emissions by scope, location, department and category with professional charts." },
-              { icon: FileText, title: "Sustainability Reporting", desc: "Generate structured reports for GHG Protocol, CDP, CSRD, ESRS, ISSB and SECR." },
-              { icon: Target, title: "Decarbonisation Planning", desc: "Set net zero targets, create climate action plans and monitor reduction progress." },
-              { icon: Users, title: "Supplier Engagement", desc: "Collect supplier sustainability data with invitation, submission and review workflows." },
-              { icon: TrendingDown, title: "Carbon Reduction", desc: "Model reduction scenarios and compare current performance against your baseline year." },
-              { icon: ShieldCheck, title: "Audit and Assurance", desc: "Every calculation is transparent, traceable and maintains a complete audit trail." },
-            ].map((f) => (
-              <div key={f.title} style={{
-                padding: "1.5rem",
-                border: "1px solid #DDE8E2",
-                borderRadius: "0.875rem",
-                transition: "border-color 0.15s, box-shadow 0.15s",
-              }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "#8BAF91";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(23,77,54,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "#DDE8E2";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-                }}
-              >
-                <div style={{ width: 36, height: 36, background: "#E8F2EC", borderRadius: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.875rem" }}>
-                  <f.icon size={18} style={{ color: "#174D36" }} />
-                </div>
-                <h4 style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "0.9375rem", color: "#0B352B", marginBottom: "0.4rem" }}>
-                  {f.title}
-                </h4>
-                <p style={{ color: "#5A6B61", fontSize: "0.85rem", lineHeight: 1.6 }}>{f.desc}</p>
+              { label: "Documents Analysed", value: "2.4M+" },
+              { label: "Institutions Served", value: "340+" },
+              { label: "Reports Generated", value: "1.8M+" },
+              { label: "Accuracy Rate", value: "99.2%" },
+            ].map((stat) => (
+              <div key={stat.label} className="card-ta" style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
+                <p style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.75rem", color: "#155EEF", margin: "0 0 0.25rem" }}>{stat.value}</p>
+                <p style={{ color: "#64748B", fontSize: "0.875rem", margin: 0 }}>{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── SOLUTIONS ── */}
-      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <span className="eyebrow">Industry Solutions</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#0B352B", marginTop: "0.5rem" }}>
-              Built for every type of organisation
-            </h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
-            {[
-              "Small and Medium Businesses",
-              "Large Enterprises",
-              "Financial Institutions",
-              "Manufacturing Companies",
-              "Real Estate and Property",
-              "Supply Chain Businesses",
-              "Sustainability Consultants",
-              "ESG Teams",
-            ].map((s) => (
-              <div key={s} style={{
-                background: "#FFFFFF",
-                border: "1px solid #DDE8E2",
-                borderRadius: "0.75rem",
-                padding: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#174D36", flexShrink: 0 }} />
-                <span style={{ fontSize: "0.875rem", fontWeight: 500, color: "#242B27" }}>{s}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: "center", marginTop: "2rem" }}>
-            <Link href="/solutions" className="btn-ghost">
-              View All Solutions <ArrowRight size={15} />
-            </Link>
-          </div>
+      {/* PRICING PREVIEW */}
+      <section style={S.section}>
+        <div className="container-ta" style={{ textAlign: "center" }}>
+          <div style={S.badge}>Pricing</div>
+          <h2 style={S.h2}>Simple, Transparent Pricing</h2>
+          <p style={{ ...S.lead, maxWidth: 500, margin: "0 auto 2.5rem" }}>Choose the plan that fits your needs. All plans include core originality checking and report generation.</p>
+          <Link href="/pricing" className="btn-primary">View All Plans <ArrowRight size={16} /></Link>
         </div>
       </section>
 
-      {/* ── PRICING PREVIEW ── */}
-      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <span className="eyebrow">Pricing</span>
-            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#0B352B", marginTop: "0.5rem" }}>
-              Transparent pricing for every stage
-            </h2>
+      {/* FINAL CTA */}
+      <section style={{ background: "linear-gradient(135deg, #102A43 0%, #155EEF 100%)", padding: "5rem 0" }}>
+        <div className="container-ta" style={{ textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+            <TrueAuthorLogo size={48} variant="white" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem", maxWidth: "900px", margin: "0 auto" }}>
-            {[
-              { name: "Starter", href: "https://selar.com/47plan?currency=USD", badge: null },
-              { name: "Professional", href: "https://selar.com/57plan?currency=USD", badge: "Most Popular" },
-              { name: "Enterprise", href: "https://selar.com/97plan?currency=USD", badge: null },
-            ].map((p) => (
-              <div key={p.name} style={{
-                background: p.badge ? "#0B352B" : "#FFFFFF",
-                border: `1.5px solid ${p.badge ? "#174D36" : "#DDE8E2"}`,
-                borderRadius: "1rem",
-                padding: "2rem 1.5rem",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-              }}>
-                {p.badge && (
-                  <div style={{
-                    position: "absolute", top: "-0.75rem", left: "50%", transform: "translateX(-50%)",
-                    background: "#D9AD55", color: "#0B352B", fontSize: "0.7rem", fontWeight: 700,
-                    padding: "0.2rem 0.75rem", borderRadius: "999px",
-                  }}>
-                    {p.badge}
-                  </div>
-                )}
-                <div>
-                  <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.125rem", color: p.badge ? "#FFFFFF" : "#0B352B" }}>
-                    {p.name}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: p.badge ? "rgba(255,255,255,0.5)" : "#5A6B61", marginTop: "0.25rem" }}>
-                    See full details on checkout
-                  </div>
-                </div>
-                <a
-                  href={p.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={p.badge ? "btn-gold" : "btn-ghost"}
-                  style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
-                >
-                  Get {p.name}
-                </a>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-            <Link href="/pricing" style={{ color: "#174D36", fontSize: "0.875rem", fontWeight: 500, textDecoration: "underline" }}>
-              View detailed pricing
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FINAL CTA ── */}
-      <section style={{ background: "linear-gradient(135deg, #0B352B 0%, #174D36 100%)", padding: "5rem 0" }}>
-        <div className="container-cb" style={{ textAlign: "center" }}>
-          <ClimateBookLogo size={52} />
-          <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.75rem, 3vw, 2.75rem)", color: "#FFFFFF", marginTop: "1.5rem", marginBottom: "1rem" }}>
-            Measure Impact. Manage Carbon.<br />Build a Better Future.
+          <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "clamp(1.75rem,4vw,2.5rem)", color: "#ffffff", margin: "0 0 1rem" }}>
+            Original Work. Authentic Thinking. Trusted Results.
           </h2>
-          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "1.0625rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
-            Join organisations using ClimateBooks to understand and reduce their environmental impact.
+          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.125rem", margin: "0 0 2.5rem", maxWidth: 500, marginInline: "auto" }}>
+            Join thousands of students, educators and institutions who rely on TrueAuthor for academic integrity.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" className="btn-gold" style={{ fontSize: "1rem", padding: "0.875rem 2rem" }}>
-              Start Free Today <ArrowRight size={16} />
-            </Link>
-            <Link href="/platform" className="btn-outline" style={{ fontSize: "1rem", padding: "0.875rem 2rem" }}>
-              Learn More
+            <Link href="/signup" className="btn-white">Start Free Today</Link>
+            <Link href="/pricing" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: "0.9375rem", textDecoration: "none", padding: "0.75rem 1.75rem", borderRadius: 8, border: "1.5px solid rgba(255,255,255,0.3)" }}>
+              View Pricing
             </Link>
           </div>
         </div>

@@ -1,237 +1,351 @@
--- ClimateBooks Database Schema
--- GHG Protocol compliant carbon accounting platform
--- Run this in your Supabase SQL editor
+-- TrueAuthor Database Schema
+-- Run this in the Supabase SQL editor to set up all tables
 
--- Enable UUID generation
+-- Enable required extensions
+create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
 -- ============================================================
 -- PROFILES
 -- ============================================================
-create table if not exists cb_profiles (
+create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   avatar_url text,
+  role text default 'student' check (role in ('student','lecturer','researcher','administrator','owner','reviewer','other')),
+  organisation_id uuid,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
-alter table cb_profiles enable row level security;
-create policy "Users can manage own profile"
-  on cb_profiles for all using (auth.uid() = id);
+alter table public.profiles enable row level security;
+
+create policy "Users can view their own profile"
+  on public.profiles for select
+  using (auth.uid() = id);
+
+create policy "Users can update their own profile"
+  on public.profiles for update
+  using (auth.uid() = id);
+
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into public.profiles (id, full_name, role)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    coalesce(new.raw_user_meta_data->>'role', 'student')
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
 
 -- ============================================================
 -- ORGANISATIONS
 -- ============================================================
-create table if not exists cb_organisations (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+create table if not exists public.organisations (
+  id uuid primary key default uuid_generate_v4(),
   name text not null,
-  industry text,
-  country text,
-  reporting_year int default date_part('year', now()),
+  slug text unique,
+  type text check (type in ('university','college','school','research_institution','publisher','corporate','other')),
+  owner_id uuid references auth.users(id) on delete set null,
+  settings jsonb default '{}',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
-alter table cb_organisations enable row level security;
-create policy "Users manage own organisations"
-  on cb_organisations for all using (auth.uid() = owner_id);
+alter table public.organisations enable row level security;
 
-create index on cb_organisations(owner_id);
-
--- ============================================================
--- EMISSIONS
--- GHG Protocol Scope 1, 2, 3
--- Formula: amount_tco2e = quantity * emission_factor / 1000
--- ============================================================
-create table if not exists cb_emissions (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
-  description text not null,
-  scope text not null check (scope in ('scope1','scope2','scope3')),
-  category text not null,
-  quantity numeric(18,6) not null check (quantity >= 0),
-  unit text not null,
-  emission_factor numeric(18,6) not null check (emission_factor >= 0),
-  ef_source text,
-  amount_tco2e numeric(18,6) generated always as (quantity * emission_factor / 1000) stored,
-  activity_date date not null,
-  notes text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+create table if not exists public.organisation_members (
+  id uuid primary key default uuid_generate_v4(),
+  organisation_id uuid references public.organisations(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  role text default 'student' check (role in ('owner','administrator','lecturer','student','researcher','reviewer')),
+  invited_by uuid references auth.users(id),
+  joined_at timestamptz default now(),
+  unique(organisation_id, user_id)
 );
 
-alter table cb_emissions enable row level security;
-create policy "Org members access emissions"
-  on cb_emissions for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
+alter table public.organisation_members enable row level security;
 
-create index on cb_emissions(organisation_id);
-create index on cb_emissions(scope);
-create index on cb_emissions(activity_date);
+create policy "Members can view their own organisation membership"
+  on public.organisation_members for select
+  using (auth.uid() = user_id);
 
 -- ============================================================
--- CLIMATE TARGETS
+-- DEPARTMENTS AND CLASSES
 -- ============================================================
-create table if not exists cb_climate_targets (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+create table if not exists public.departments (
+  id uuid primary key default uuid_generate_v4(),
+  organisation_id uuid references public.organisations(id) on delete cascade,
   name text not null,
-  target_type text not null check (target_type in ('net-zero','sbti','carbon-neutral','reduction','other')),
-  baseline_year int not null,
-  target_year int not null,
-  reduction_pct numeric(5,2) check (reduction_pct between 0 and 100),
-  notes text,
+  created_by uuid references auth.users(id),
   created_at timestamptz default now()
 );
 
-alter table cb_climate_targets enable row level security;
-create policy "Org members access targets"
-  on cb_climate_targets for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
+alter table public.departments enable row level security;
 
-create index on cb_climate_targets(organisation_id);
-
--- ============================================================
--- REPORTS
--- ============================================================
-create table if not exists cb_reports (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+create table if not exists public.classes (
+  id uuid primary key default uuid_generate_v4(),
+  department_id uuid references public.departments(id) on delete set null,
+  organisation_id uuid references public.organisations(id) on delete cascade,
   name text not null,
-  framework text not null,
-  reporting_year int not null,
-  scope1_tco2e numeric(18,6) default 0,
-  scope2_tco2e numeric(18,6) default 0,
-  scope3_tco2e numeric(18,6) default 0,
-  total_tco2e numeric(18,6) default 0,
-  status text default 'draft' check (status in ('draft','final','submitted')),
+  code text,
+  lecturer_id uuid references auth.users(id),
+  academic_year text,
   created_at timestamptz default now()
 );
 
-alter table cb_reports enable row level security;
-create policy "Org members access reports"
-  on cb_reports for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
-
-create index on cb_reports(organisation_id);
+alter table public.classes enable row level security;
 
 -- ============================================================
--- SUPPLIERS
+-- ASSIGNMENTS
 -- ============================================================
-create table if not exists cb_suppliers (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
-  name text not null,
-  contact_email text,
-  country text,
-  tier text check (tier in ('1','2','3')),
-  status text default 'invited' check (status in ('invited','submitted','reviewed','overdue')),
-  notes text,
-  created_at timestamptz default now()
-);
-
-alter table cb_suppliers enable row level security;
-create policy "Org members access suppliers"
-  on cb_suppliers for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
-
-create index on cb_suppliers(organisation_id);
-
--- ============================================================
--- REDUCTION INITIATIVES
--- ============================================================
-create table if not exists cb_reduction_initiatives (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
-  name text not null,
+create table if not exists public.assignments (
+  id uuid primary key default uuid_generate_v4(),
+  class_id uuid references public.classes(id) on delete cascade,
+  organisation_id uuid references public.organisations(id) on delete cascade,
+  title text not null,
   description text,
-  scope text check (scope in ('scope1','scope2','scope3','all')),
-  status text default 'planned' check (status in ('planned','in-progress','completed','cancelled')),
-  estimated_reduction_tco2e numeric(18,6),
-  target_date date,
+  due_date timestamptz,
+  max_similarity_threshold integer default 25,
+  settings jsonb default '{}',
+  created_by uuid references auth.users(id),
   created_at timestamptz default now()
 );
 
-alter table cb_reduction_initiatives enable row level security;
-create policy "Org members access initiatives"
-  on cb_reduction_initiatives for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
-
-create index on cb_reduction_initiatives(organisation_id);
+alter table public.assignments enable row level security;
 
 -- ============================================================
 -- DOCUMENTS
 -- ============================================================
-create table if not exists cb_documents (
-  id uuid primary key default gen_random_uuid(),
-  organisation_id uuid not null references cb_organisations(id) on delete cascade,
-  name text not null,
-  document_type text default 'other' check (document_type in ('evidence','policy','report','contract','certificate','other')),
-  storage_path text,
-  file_size int,
+create table if not exists public.documents (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  organisation_id uuid references public.organisations(id) on delete set null,
+  assignment_id uuid references public.assignments(id) on delete set null,
+  title text,
+  file_path text,
+  file_type text,
+  file_size_bytes bigint,
+  content_text text,
+  word_count integer,
+  status text default 'queued' check (status in ('queued','processing','completed','failed')),
+  similarity_score integer,
+  analysed_at timestamptz,
+  error_message text,
+  options jsonb default '{}',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.documents enable row level security;
+
+create policy "Users can view their own documents"
+  on public.documents for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own documents"
+  on public.documents for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own documents"
+  on public.documents for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own documents"
+  on public.documents for delete
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- SIMILARITY RESULTS
+-- ============================================================
+create table if not exists public.similarity_results (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade unique,
+  user_id uuid references auth.users(id) on delete cascade,
+  similarity_score integer,
+  matched_sources jsonb default '[]',
+  exclude_bibliography boolean default true,
+  exclude_quotes boolean default false,
+  analysis_method text default 'ngram_fingerprint',
   created_at timestamptz default now()
 );
 
-alter table cb_documents enable row level security;
-create policy "Org members access documents"
-  on cb_documents for all
-  using (
-    organisation_id in (
-      select id from cb_organisations where owner_id = auth.uid()
-    )
-  );
+alter table public.similarity_results enable row level security;
 
-create index on cb_documents(organisation_id);
+create policy "Users can view their own similarity results"
+  on public.similarity_results for select
+  using (auth.uid() = user_id);
+
+create policy "Service can insert similarity results"
+  on public.similarity_results for insert
+  with check (auth.uid() = user_id);
+
+create policy "Service can update similarity results"
+  on public.similarity_results for update
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- AI WRITING REPORTS
+-- ============================================================
+create table if not exists public.ai_writing_reports (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade unique,
+  user_id uuid references auth.users(id) on delete cascade,
+  overall_indicator text,
+  confidence text,
+  summary text,
+  highlighted_passages jsonb default '[]',
+  limitations_acknowledged boolean default true,
+  created_at timestamptz default now()
+);
+
+alter table public.ai_writing_reports enable row level security;
+
+create policy "Users can view their own AI reports"
+  on public.ai_writing_reports for select
+  using (auth.uid() = user_id);
+
+create policy "Service can insert AI reports"
+  on public.ai_writing_reports for insert
+  with check (auth.uid() = user_id);
+
+create policy "Service can update AI reports"
+  on public.ai_writing_reports for update
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- CITATION REPORTS
+-- ============================================================
+create table if not exists public.citation_reports (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade unique,
+  user_id uuid references auth.users(id) on delete cascade,
+  total_citations integer default 0,
+  issues_count integer default 0,
+  issues jsonb default '[]',
+  summary text,
+  citation_style text,
+  created_at timestamptz default now()
+);
+
+alter table public.citation_reports enable row level security;
+
+create policy "Users can view their own citation reports"
+  on public.citation_reports for select
+  using (auth.uid() = user_id);
+
+create policy "Service can insert citation reports"
+  on public.citation_reports for insert
+  with check (auth.uid() = user_id);
+
+create policy "Service can update citation reports"
+  on public.citation_reports for update
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- GRAMMAR REPORTS
+-- ============================================================
+create table if not exists public.grammar_reports (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade unique,
+  user_id uuid references auth.users(id) on delete cascade,
+  issues_count integer default 0,
+  issues jsonb default '[]',
+  summary text,
+  readability_score numeric,
+  created_at timestamptz default now()
+);
+
+alter table public.grammar_reports enable row level security;
+
+create policy "Users can view their own grammar reports"
+  on public.grammar_reports for select
+  using (auth.uid() = user_id);
+
+create policy "Service can insert grammar reports"
+  on public.grammar_reports for insert
+  with check (auth.uid() = user_id);
+
+create policy "Service can update grammar reports"
+  on public.grammar_reports for update
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- ORIGINALITY REPORTS
+-- ============================================================
+create table if not exists public.originality_reports (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade unique,
+  user_id uuid references auth.users(id) on delete cascade,
+  report_number text unique default ('TA-' || upper(substring(gen_random_uuid()::text, 1, 8))),
+  generated_at timestamptz default now(),
+  pdf_path text,
+  shared_with jsonb default '[]'
+);
+
+alter table public.originality_reports enable row level security;
+
+create policy "Users can view their own originality reports"
+  on public.originality_reports for select
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- TEAM INVITATIONS
+-- ============================================================
+create table if not exists public.team_invitations (
+  id uuid primary key default uuid_generate_v4(),
+  organisation_id uuid references public.organisations(id) on delete cascade,
+  invited_by uuid references auth.users(id),
+  email text not null,
+  role text default 'student',
+  token text unique default gen_random_uuid()::text,
+  accepted boolean default false,
+  expires_at timestamptz default (now() + interval '7 days'),
+  created_at timestamptz default now()
+);
+
+alter table public.team_invitations enable row level security;
 
 -- ============================================================
 -- NOTIFICATIONS
 -- ============================================================
-create table if not exists cb_notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
+create table if not exists public.notifications (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade,
+  type text,
+  title text,
   body text,
   read boolean default false,
+  metadata jsonb default '{}',
   created_at timestamptz default now()
 );
 
-alter table cb_notifications enable row level security;
-create policy "Users access own notifications"
-  on cb_notifications for all using (auth.uid() = user_id);
+alter table public.notifications enable row level security;
 
-create index on cb_notifications(user_id);
-create index on cb_notifications(read);
+create policy "Users can view their own notifications"
+  on public.notifications for select
+  using (auth.uid() = user_id);
+
+create policy "Users can update their own notifications"
+  on public.notifications for update
+  using (auth.uid() = user_id);
 
 -- ============================================================
--- SUBSCRIPTIONS (for access control — do not grant access on payment click alone)
+-- SUBSCRIPTIONS
 -- ============================================================
-create table if not exists cb_subscriptions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  plan text not null check (plan in ('starter','professional','enterprise')),
-  status text not null check (status in ('active','cancelled','past_due','trialing')),
+create table if not exists public.subscriptions (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade unique,
+  plan text default 'free' check (plan in ('free','starter','professional','institution')),
+  status text default 'active' check (status in ('active','cancelled','expired','pending')),
   selar_reference text,
   current_period_start timestamptz,
   current_period_end timestamptz,
@@ -239,8 +353,55 @@ create table if not exists cb_subscriptions (
   updated_at timestamptz default now()
 );
 
-alter table cb_subscriptions enable row level security;
-create policy "Users read own subscription"
-  on cb_subscriptions for select using (auth.uid() = user_id);
+alter table public.subscriptions enable row level security;
 
-create index on cb_subscriptions(user_id);
+create policy "Users can view their own subscription"
+  on public.subscriptions for select
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- ACTIVITY LOGS
+-- ============================================================
+create table if not exists public.activity_logs (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade,
+  organisation_id uuid references public.organisations(id) on delete set null,
+  action text not null,
+  entity_type text,
+  entity_id uuid,
+  metadata jsonb default '{}',
+  created_at timestamptz default now()
+);
+
+alter table public.activity_logs enable row level security;
+
+create policy "Users can view their own activity"
+  on public.activity_logs for select
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- STORAGE BUCKETS
+-- ============================================================
+-- Run in Supabase dashboard: Storage > New bucket
+-- Bucket name: documents
+-- Public: false
+-- File size limit: 20971520 (20MB)
+-- Allowed MIME types: application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, text/plain
+
+-- Storage policies (after creating the bucket)
+-- insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+-- values ('documents', 'documents', false, 20971520, array['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'])
+-- on conflict (id) do nothing;
+
+-- ============================================================
+-- INDEXES
+-- ============================================================
+create index if not exists idx_documents_user_id on public.documents(user_id);
+create index if not exists idx_documents_status on public.documents(status);
+create index if not exists idx_documents_created_at on public.documents(created_at desc);
+create index if not exists idx_similarity_results_document_id on public.similarity_results(document_id);
+create index if not exists idx_ai_writing_reports_document_id on public.ai_writing_reports(document_id);
+create index if not exists idx_citation_reports_document_id on public.citation_reports(document_id);
+create index if not exists idx_grammar_reports_document_id on public.grammar_reports(document_id);
+create index if not exists idx_notifications_user_id on public.notifications(user_id);
+create index if not exists idx_activity_logs_user_id on public.activity_logs(user_id);

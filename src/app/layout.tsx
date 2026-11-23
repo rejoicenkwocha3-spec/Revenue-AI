@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ClimateBooks: AI-Powered Climate Accounting and Sustainability Platform",
-  description: "ClimateBooks helps businesses measure their carbon footprint, manage sustainability data and create meaningful climate reports with intelligent AI-powered tools.",
+  title: "TrueAuthor: AI-Powered Academic Integrity and Writing Intelligence Platform",
+  description: "TrueAuthor helps students, educators and institutions evaluate writing originality, understand text similarity and improve academic integrity with intelligent writing analysis.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,95 +1,128 @@
+"use client";
+
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowRight, Building2, Factory, TrendingDown, Globe, Landmark, Truck, Users, BarChart3 } from "lucide-react";
+import { ArrowRight, BookOpen, Users, Building2, Layers, GraduationCap, FileSearch, Briefcase, FlaskConical, Printer } from "lucide-react";
+
+const badge = { display: "inline-block", background: "#EEF3FD", color: "#155EEF", fontSize: "0.8125rem", fontWeight: 600, padding: "0.25rem 0.875rem", borderRadius: "100px", marginBottom: "1rem", textTransform: "uppercase" as const, letterSpacing: "0.04em" };
 
 const solutions = [
   {
     icon: Building2,
-    audience: "Small and Medium Businesses",
-    problem: "SMBs face growing pressure from customers, lenders and regulators to demonstrate environmental responsibility, but lack the internal resources or expertise to manage complex climate reporting.",
+    audience: "Universities",
+    headline: "Institution-Wide Academic Integrity at Scale",
+    challenge: "Universities face the challenge of managing academic integrity consistently across multiple faculties, departments and thousands of students. Manual review processes are slow, inconsistent and difficult to audit.",
     benefits: [
-      "Get started quickly with guided data entry and clear methodology",
-      "Understand your carbon footprint without specialist knowledge",
-      "Generate credible sustainability reports for stakeholders",
-      "Identify your highest-impact reduction opportunities",
+      "Centralised submission and review workflows for all departments",
+      "Role-based access for administrators, lecturers and students",
+      "Aggregate reporting and usage statistics across the institution",
+      "Secure document isolation with row-level data protection",
+      "Assignment management with configurable integrity policies",
     ],
   },
   {
-    icon: Globe,
-    audience: "Large Enterprises",
-    problem: "Enterprise organisations managing multiple sites, departments and reporting entities need a centralised platform to consolidate emissions data, enforce data quality and produce board-level climate disclosures.",
+    icon: GraduationCap,
+    audience: "Colleges",
+    headline: "Professional Academic Standards for College Programmes",
+    challenge: "Colleges need robust academic integrity tools that work for professional and vocational programmes without the overhead of enterprise systems.",
     benefits: [
-      "Manage multiple organisations and reporting entities",
-      "Consolidate Scope 1, 2 and 3 data across all locations",
-      "Produce CSRD, ESRS and ISSB-aligned disclosures",
-      "Track performance against science-based targets",
+      "Straightforward submission and analysis workflows",
+      "Similarity reports tailored to assignment context",
+      "Citation support for professional academic writing",
+      "AI writing insights for assessed coursework",
+      "Department-level management and reporting",
     ],
   },
   {
-    icon: Landmark,
-    audience: "Financial Institutions",
-    problem: "Banks, asset managers and insurers must assess, disclose and manage the climate risks and financed emissions within their portfolios to meet TCFD, SFDR and regulatory requirements.",
+    icon: BookOpen,
+    audience: "Secondary Schools",
+    headline: "Building Good Academic Habits from the Start",
+    challenge: "Secondary schools need to teach responsible academic writing practices and help students understand the difference between research, citation and copying before they enter higher education.",
     benefits: [
-      "Measure financed and facilitated emissions (Scope 3 Category 15)",
-      "Assess transition and physical climate risks",
-      "Produce investor and regulatory climate disclosures",
-      "Engage portfolio companies on sustainability performance",
+      "Student-friendly originality reports with clear explanations",
+      "Writing feedback focused on improvement and learning",
+      "Citation checker supporting APA, MLA and Chicago styles",
+      "Grammar and clarity analysis appropriate for secondary level",
+      "Teacher oversight with class-level submission management",
     ],
   },
   {
-    icon: Factory,
-    audience: "Manufacturing Companies",
-    problem: "Manufacturers face emissions from energy-intensive processes, complex supply chains and product lifecycles. Measuring and reducing industrial emissions requires detailed activity-level tracking.",
+    icon: BookOpen,
+    audience: "Students",
+    headline: "Understand Your Work Before You Submit",
+    challenge: "Students want to submit confident, well-cited, original work. Without visibility into similarity and citation issues before submission, they risk unintentional academic integrity breaches.",
     benefits: [
-      "Track direct emissions from manufacturing processes (Scope 1)",
-      "Measure purchased energy and industrial energy intensity (Scope 2)",
-      "Map supply chain emissions across material inputs (Scope 3)",
-      "Support product carbon footprint calculations",
+      "Pre-submission originality checking with actionable results",
+      "Citation checker to review and correct references",
+      "Grammar and writing feedback for academic improvement",
+      "AI writing insights with transparent explanations",
+      "Downloadable originality reports for personal records",
     ],
   },
   {
-    icon: Building2,
-    audience: "Real Estate and Property",
-    problem: "Property developers and real estate investors must account for operational emissions from buildings, embodied carbon in construction and tenant energy consumption.",
+    icon: Users,
+    audience: "Lecturers",
+    headline: "Faster, Fairer Assignment Review",
+    challenge: "Lecturers reviewing large volumes of student submissions need reliable, consistent originality analysis without spending hours on manual checks.",
     benefits: [
-      "Track energy consumption and emissions across property portfolios",
-      "Measure tenant emissions under Scope 3",
-      "Support green building certifications and EPC requirements",
-      "Report to GRESB and other real estate ESG frameworks",
+      "Batch submission review with prioritised similarity flags",
+      "Side-by-side source comparison for matched passages",
+      "Complete originality reports exportable as PDF",
+      "AI writing indicator review with appropriate context",
+      "Class-level submission management and status tracking",
     ],
   },
   {
-    icon: Truck,
-    audience: "Supply Chain Businesses",
-    problem: "Logistics, distribution and supply chain businesses face increasing pressure from enterprise customers to disclose and reduce their emissions as part of Scope 3 supplier engagement programmes.",
+    icon: Layers,
+    audience: "Academic Researchers",
+    headline: "Publication-Ready Manuscript Integrity",
+    challenge: "Researchers preparing manuscripts for publication need to verify originality, check citation accuracy and ensure their work meets the standards expected by academic journals.",
     benefits: [
-      "Calculate freight emissions across transport modes",
-      "Respond to customer supplier data requests",
-      "Manage and report on logistics emissions intensity",
-      "Build credibility with enterprise procurement teams",
+      "Full manuscript originality analysis before submission",
+      "Citation verification across IEEE, APA, Chicago and Harvard",
+      "Writing consistency and authorship analysis across drafts",
+      "Grammar and academic tone review for formal manuscripts",
+      "Professional originality reports suitable for editorial review",
     ],
   },
   {
-    icon: TrendingDown,
-    audience: "Sustainability Consultants",
-    problem: "Sustainability consultants managing multiple client accounts need a scalable platform to collect data, calculate emissions, produce reports and demonstrate value to each client.",
+    icon: Printer,
+    audience: "Publishers",
+    headline: "Editorial Integrity at Every Stage",
+    challenge: "Academic and professional publishers must verify the originality of submitted manuscripts, identify potential similarity issues and maintain rigorous publication standards.",
     benefits: [
-      "Manage multiple client organisations from one account",
-      "Streamline data collection and emissions calculation",
-      "Generate professional client reports in minutes",
-      "Scale your practice without multiplying manual effort",
+      "Manuscript similarity analysis across authorised sources",
+      "AI writing insights for editorial decision-making",
+      "Authorship analysis for multi-author submissions",
+      "Detailed originality reports for editorial records",
+      "Secure document handling for confidential manuscripts",
     ],
   },
   {
-    icon: BarChart3,
-    audience: "ESG Teams",
-    problem: "In-house ESG and sustainability teams need reliable tools to collect, verify and report environmental data to leadership, investors and regulators under tight timelines.",
+    icon: FlaskConical,
+    audience: "Research Institutions",
+    headline: "Protecting Research Integrity Across the Organisation",
+    challenge: "Research institutions require consistent standards for evaluating the originality and integrity of research outputs produced across multiple teams and projects.",
     benefits: [
-      "Centralise all ESG data in one auditable environment",
-      "Automate emissions calculations with sourced factors",
-      "Support CSRD, CDP, ISSB and SECR reporting workflows",
-      "Collaborate with internal stakeholders and external auditors",
+      "Organisational submission and review workflows",
+      "Team-level collaboration and document sharing",
+      "Role-based access aligned to research hierarchy",
+      "Citation checking across scientific and academic formats",
+      "Aggregate institution reporting for research governance",
+    ],
+  },
+  {
+    icon: Briefcase,
+    audience: "Corporate Organisations",
+    headline: "Intellectual Property Protection in the Workplace",
+    challenge: "Corporations producing whitepapers, reports and published content need to verify originality, protect intellectual property and ensure writing standards across teams.",
+    benefits: [
+      "Document originality analysis for published content",
+      "Grammar and writing quality review for professional reports",
+      "Team collaboration with role-based access and sharing",
+      "Citation checking for research-based corporate documents",
+      "Secure document storage and professional report export",
     ],
   },
 ];
@@ -99,65 +132,55 @@ export default function SolutionsPage() {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
-      <section style={{ background: "linear-gradient(160deg, #0B352B 0%, #174D36 100%)", padding: "5rem 0 4rem" }}>
-        <div className="container-cb" style={{ textAlign: "center", maxWidth: "720px" }}>
-          <span className="eyebrow">Solutions</span>
-          <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.25rem)", color: "#FFFFFF", marginTop: "0.75rem", marginBottom: "1.25rem", lineHeight: 1.1 }}>
-            Built for every type of organisation
+      <section style={{ background: "linear-gradient(150deg, #102A43 0%, #2864DC 100%)", padding: "5rem 0 4rem" }}>
+        <div className="container-ta">
+          <div style={badge}>Solutions</div>
+          <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem,5vw,3.25rem)", color: "#ffffff", lineHeight: 1.1, maxWidth: 700, margin: "0 0 1.25rem", letterSpacing: "-0.02em" }}>
+            The Right Solution for Every Academic Role
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
-            ClimateBooks adapts to your organisation's size, sector and regulatory context. Explore the solution designed for your team.
+          <p style={{ fontSize: "1.125rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, maxWidth: 600, margin: "0 0 2rem" }}>
+            TrueAuthor serves students, lecturers, universities, researchers, publishers and organisations with purpose-built academic integrity workflows.
           </p>
         </div>
       </section>
 
-      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
-        <div className="container-cb">
-          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-            {solutions.map((s, i) => (
-              <div key={s.audience} className="card-cb" style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "2rem", alignItems: "start" }}>
-                <div style={{ width: 52, height: 52, borderRadius: "0.75rem", background: "#E8F2EC", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <s.icon size={24} style={{ color: "#174D36" }} />
-                </div>
-                <div>
-                  <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.1875rem", color: "#0B352B", marginBottom: "0.625rem" }}>
-                    {s.audience}
-                  </h2>
-                  <p style={{ color: "#5A6B61", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1rem" }}>{s.problem}</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem 1.5rem" }}>
-                    {s.benefits.map((b) => (
-                      <div key={b} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#174D36", marginTop: "0.45rem", flexShrink: 0 }} />
-                        <span style={{ fontSize: "0.8375rem", color: "#242B27", lineHeight: 1.5 }}>{b}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <Link
-                  href="/signup"
-                  className="btn-primary"
-                  style={{ fontSize: "0.8125rem", padding: "0.5rem 1rem", whiteSpace: "nowrap", flexShrink: 0 }}
-                >
-                  Get Started
-                </Link>
-                <style>{`@media(max-width:640px){.card-cb{grid-template-columns:1fr !important}}`}</style>
+      {solutions.map((s, i) => (
+        <section key={s.audience} style={{ padding: "4rem 0", background: i % 2 === 0 ? "#F5F8FC" : "#ffffff", borderBottom: "1px solid #D1DCF0" }}>
+          <div className="container-ta">
+            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "2rem 3rem", alignItems: "start", maxWidth: 900 }}>
+              <div style={{ width: 56, height: 56, background: "#EEF3FD", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <s.icon size={28} color="#155EEF" />
               </div>
-            ))}
+              <div>
+                <p style={{ color: "#155EEF", fontWeight: 700, fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 0.375rem" }}>{s.audience}</p>
+                <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "clamp(1.375rem,3vw,1.875rem)", color: "#102A43", margin: "0 0 0.875rem", lineHeight: 1.2 }}>{s.headline}</h2>
+                <p style={{ color: "#64748B", fontSize: "1rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>{s.challenge}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {s.benefits.map((b) => (
+                    <li key={b} style={{ display: "flex", gap: "0.625rem", alignItems: "flex-start", color: "#263449", fontSize: "0.9375rem" }}>
+                      <span style={{ color: "#155EEF", fontWeight: 700, fontSize: "1rem", lineHeight: "1.5rem", flexShrink: 0 }}>+</span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup" className="btn-primary" style={{ fontSize: "0.875rem", padding: "0.625rem 1.375rem" }}>
+                  Get Started <ArrowRight size={15} />
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ))}
 
-      <section style={{ background: "#0B352B", padding: "4.5rem 0" }}>
-        <div className="container-cb" style={{ textAlign: "center" }}>
-          <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
-            Not sure which solution fits?
+      <section style={{ background: "linear-gradient(135deg, #102A43 0%, #155EEF 100%)", padding: "4rem 0" }}>
+        <div className="container-ta" style={{ textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "clamp(1.75rem,4vw,2.25rem)", color: "#ffffff", margin: "0 0 1rem" }}>
+            Find the Solution Built for You
           </h2>
-          <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "2rem" }}>
-            Start a free account and explore the platform. ClimateBooks adapts to your organisation's structure and reporting requirements.
+          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.0625rem", margin: "0 0 2rem", maxWidth: 480, marginInline: "auto" }}>
+            Start with a free account and explore the platform features relevant to your role.
           </p>
-          <Link href="/signup" className="btn-gold">
-            Start Free <ArrowRight size={16} />
-          </Link>
+          <Link href="/signup" className="btn-white">Create Free Account <ArrowRight size={16} /></Link>
         </div>
       </section>
 
