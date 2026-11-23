@@ -1,150 +1,105 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import DashboardHeader from "@/components/DashboardHeader";
 import { createClient } from "@/lib/supabase/client";
-import { Building2, Plus, Edit2, MapPin, ChevronRight, AlertCircle } from "lucide-react";
+import { Building2, AlertCircle } from "lucide-react";
 
-interface Organisation {
-  id: string;
-  name: string;
-  industry: string;
-  country: string;
-  reporting_year: number;
-  created_at: string;
-}
-
-export default function OrganisationsPage() {
-  const [orgs, setOrgs] = useState<Organisation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving] = useState(false);
+export default function CreateOrganisationPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [type, setType] = useState("university");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", industry: "", country: "", reporting_year: new Date().getFullYear() });
 
-  const supabase = createClient();
-
-  useEffect(() => {
-    loadOrgs();
-  }, []);
-
-  async function loadOrgs() {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data } = await supabase
-      .from("cb_organisations")
-      .select("*")
-      .eq("owner_id", user!.id)
-      .order("created_at", { ascending: false });
-    setOrgs(data || []);
-    setLoading(false);
-  }
-
-  async function handleCreate(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError("");
+    setLoading(true);
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const { error: err } = await supabase.from("cb_organisations").insert({
-      owner_id: user!.id,
-      ...form,
-    });
-    if (err) { setError(err.message); setSaving(false); return; }
-    setForm({ name: "", industry: "", country: "", reporting_year: new Date().getFullYear() });
-    setShowForm(false);
-    setSaving(false);
-    loadOrgs();
-  }
+    if (!user) { router.push("/login"); return; }
 
-  const industries = ["Agriculture", "Construction", "Energy", "Finance", "Healthcare", "Hospitality", "Manufacturing", "Professional Services", "Real Estate", "Retail", "Technology", "Transport and Logistics", "Waste Management", "Other"];
+    // Create organisation
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const { data: org, error: orgErr } = await supabase
+      .from("organisations")
+      .insert({ name: name.trim(), type, slug: `${slug}-${Date.now()}`, owner_id: user.id })
+      .select("id")
+      .single();
+
+    if (orgErr || !org) {
+      setError(orgErr?.message ?? "Failed to create organisation.");
+      setLoading(false);
+      return;
+    }
+
+    // Add user as owner member
+    await supabase.from("organisation_members").insert({
+      organisation_id: org.id,
+      user_id: user.id,
+      role: "owner",
+      invited_by: user.id,
+    });
+
+    // Update profile
+    await supabase.from("profiles").update({ organisation_id: org.id }).eq("id", user.id);
+
+    router.push("/dashboard/team");
+  }
 
   return (
-    <div style={{ padding: "2rem 2.5rem", maxWidth: "1000px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.625rem", color: "#0B352B", marginBottom: "0.25rem" }}>Organisations</h1>
-          <p style={{ color: "#5A6B61", fontSize: "0.875rem" }}>Manage the organisations you are measuring emissions for</p>
+    <>
+      <DashboardHeader title="Create Organisation" />
+      <div style={{ padding: "2rem", flex: 1, maxWidth: 560 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+          <div style={{ width: 48, height: 48, background: "#EEF3FD", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Building2 size={24} color="#155EEF" />
+          </div>
+          <div>
+            <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#102A43", margin: 0 }}>Create an Organisation</h2>
+            <p style={{ color: "#64748B", fontSize: "0.875rem", margin: 0 }}>Invite team members, manage departments and collect submissions.</p>
+          </div>
         </div>
-        <button className="btn-primary" style={{ fontSize: "0.875rem", padding: "0.5rem 1rem" }} onClick={() => setShowForm(true)}>
-          <Plus size={15} /> Add Organisation
-        </button>
-      </div>
 
-      {showForm && (
-        <div style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "1rem", padding: "1.75rem", marginBottom: "1.5rem", boxShadow: "0 4px 20px rgba(11,53,43,0.08)" }}>
-          <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.0625rem", color: "#0B352B", marginBottom: "1.25rem" }}>New Organisation</h3>
-          {error && (
-            <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: "0.5rem", padding: "0.75rem", marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
-              <AlertCircle size={14} style={{ color: "#DC2626" }} />
-              <span style={{ fontSize: "0.875rem", color: "#DC2626" }}>{error}</span>
-            </div>
-          )}
-          <form onSubmit={handleCreate} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-            <div style={{ gridColumn: "1/-1" }}>
-              <label className="label-cb">Organisation name</label>
-              <input required className="input-cb" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Acme Corporation" />
-            </div>
-            <div>
-              <label className="label-cb">Industry</label>
-              <select className="input-cb" value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
-                <option value="">Select industry</option>
-                {industries.map((i) => <option key={i} value={i}>{i}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label-cb">Country</label>
-              <input className="input-cb" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="United Kingdom" />
-            </div>
-            <div>
-              <label className="label-cb">Reporting year</label>
-              <input type="number" className="input-cb" value={form.reporting_year} onChange={(e) => setForm({ ...form, reporting_year: parseInt(e.target.value) })} min={2000} max={2100} />
-            </div>
-            <div style={{ gridColumn: "1/-1", display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "0.5rem" }}>
-              <button type="button" className="btn-ghost" onClick={() => setShowForm(false)}>Cancel</button>
-              <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Creating..." : "Create Organisation"}</button>
-            </div>
-          </form>
-        </div>
-      )}
+        {error && (
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", background: "#FFF5F5", border: "1px solid #FCC", borderRadius: 8, padding: "0.875rem 1rem", marginBottom: "1.5rem" }}>
+            <AlertCircle size={18} color="#D44" style={{ flexShrink: 0 }} />
+            <p style={{ color: "#922", fontSize: "0.9rem", margin: 0 }}>{error}</p>
+          </div>
+        )}
 
-      {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {[1,2].map((i) => <div key={i} style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "0.875rem", height: "80px", animation: "pulse 1.5s infinite" }} />)}
-        </div>
-      ) : orgs.length === 0 ? (
-        <div style={{ background: "#FFFFFF", border: "1.5px dashed #DDE8E2", borderRadius: "1rem", padding: "3.5rem 2rem", textAlign: "center" }}>
-          <Building2 size={40} style={{ color: "#DDE8E2", margin: "0 auto 1rem", display: "block" }} />
-          <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.125rem", color: "#0B352B", marginBottom: "0.5rem" }}>No organisations yet</h3>
-          <p style={{ color: "#5A6B61", fontSize: "0.875rem", maxWidth: "360px", margin: "0 auto 1.5rem" }}>
-            Create your first organisation to begin measuring emissions.
-          </p>
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <Plus size={15} /> Create Organisation
+        <form onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid #D1DCF0", borderRadius: 12, padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#263449", marginBottom: "0.375rem" }}>Organisation name</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. University of Example"
+              style={{ width: "100%", padding: "0.75rem 1rem", border: "1.5px solid #D1DCF0", borderRadius: 8, fontSize: "0.9375rem", color: "#263449", background: "#ffffff", outline: "none" }}
+              onFocus={(e) => (e.target.style.border = "1.5px solid #155EEF")}
+              onBlur={(e) => (e.target.style.border = "1.5px solid #D1DCF0")} />
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#263449", marginBottom: "0.375rem" }}>Organisation type</label>
+            <select value={type} onChange={(e) => setType(e.target.value)}
+              style={{ width: "100%", padding: "0.75rem 1rem", border: "1.5px solid #D1DCF0", borderRadius: 8, fontSize: "0.9375rem", color: "#263449", background: "#ffffff", outline: "none" }}
+              onFocus={(e) => (e.target.style.border = "1.5px solid #155EEF")}
+              onBlur={(e) => (e.target.style.border = "1.5px solid #D1DCF0")}>
+              <option value="university">University</option>
+              <option value="college">College</option>
+              <option value="school">Secondary School</option>
+              <option value="research_institution">Research Institution</option>
+              <option value="publisher">Publisher</option>
+              <option value="corporate">Corporate Organisation</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <button type="submit" disabled={loading} className="btn-primary" style={{ justifyContent: "center", opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Creating..." : "Create Organisation"}
           </button>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {orgs.map((org) => (
-            <div key={org.id} className="card-cb" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "0.625rem", background: "#E8F2EC", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Building2 size={20} style={{ color: "#174D36" }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "1rem", color: "#0B352B" }}>{org.name}</div>
-                <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
-                  {org.industry && <span style={{ fontSize: "0.75rem", color: "#5A6B61" }}>{org.industry}</span>}
-                  {org.country && (
-                    <span style={{ display: "flex", gap: "0.25rem", alignItems: "center", fontSize: "0.75rem", color: "#5A6B61" }}>
-                      <MapPin size={11} /> {org.country}
-                    </span>
-                  )}
-                  <span style={{ fontSize: "0.75rem", color: "#5A6B61" }}>Reporting year: {org.reporting_year}</span>
-                </div>
-              </div>
-              <ChevronRight size={16} style={{ color: "#DDE8E2" }} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        </form>
+      </div>
+    </>
   );
 }
