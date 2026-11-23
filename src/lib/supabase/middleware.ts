@@ -2,11 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+  // If env vars are missing, pass through without crashing
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -23,22 +28,26 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  const isDashboard = path.startsWith("/dashboard");
-  const isAuth = path === "/login" || path === "/signup";
+    const path = request.nextUrl.pathname;
+    const isDashboard = path.startsWith("/dashboard");
+    const isAuth = path === "/login" || path === "/signup";
 
-  if (!user && isDashboard) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+    if (!user && isDashboard) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
 
-  if (user && isAuth) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard/overview";
-    return NextResponse.redirect(url);
+    if (user && isAuth) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/overview";
+      return NextResponse.redirect(url);
+    }
+  } catch {
+    // Auth error — pass through safely
   }
 
   return supabaseResponse;
