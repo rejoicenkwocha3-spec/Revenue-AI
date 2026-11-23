@@ -1,81 +1,117 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
-import SearchSproutLogo from "@/components/SearchSproutLogo";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import ClimateBookLogo from "@/components/ClimateBookLogo";
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const router = useRouter();
+  const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    // Supabase sets the session from the URL hash on load
-    const supabase = createClient();
-    supabase.auth.getSession();
-  }, []);
-
-  async function handleSubmit(e: React.FormEvent) {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (password !== confirm) { setError("Passwords do not match."); return; }
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     const supabase = createClient();
-    const { error: err } = await supabase.auth.updateUser({ password });
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+
+    if (updateError) {
+      setError(updateError.message);
+      setLoading(false);
+      return;
+    }
+
+    setDone(true);
     setLoading(false);
-    if (err) { setError(err.message); return; }
-    setSuccess(true);
     setTimeout(() => router.push("/dashboard/overview"), 2000);
-  }
+  };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F8FA", padding: "1.5rem" }}>
-      <div style={{ width: "100%", maxWidth: "400px" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-            <SearchSproutLogo size={36} />
-            <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.25rem", color: "#101828" }}>SearchSprout</span>
-          </Link>
-        </div>
+    <div style={{ minHeight: "100vh", background: "#F7F8F3", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid #DDE8E2", background: "#FFFFFF" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", width: "fit-content" }}>
+          <ClimateBookLogo size={32} />
+          <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#0B352B" }}>ClimateBooks</span>
+        </Link>
+      </div>
 
-        <div className="card-ss">
-          <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#101828", marginBottom: "0.375rem", textAlign: "center" }}>Set new password</h1>
-          <p style={{ color: "#6B7280", fontSize: "0.9375rem", textAlign: "center", marginBottom: "1.75rem" }}>Enter your new password below.</p>
-
-          {success ? (
-            <div style={{ textAlign: "center", padding: "1rem 0" }}>
-              <div style={{ width: 48, height: 48, background: "#D1FAE5", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p style={{ fontWeight: 600, color: "#101828", marginBottom: "0.5rem" }}>Password updated</p>
-              <p style={{ color: "#6B7280", fontSize: "0.9rem" }}>Redirecting to your dashboard...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {error && (
-                <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "0.5rem", padding: "0.75rem 1rem", color: "#DC2626", fontSize: "0.875rem" }}>
-                  {error}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1rem" }}>
+        <div style={{ width: "100%", maxWidth: "400px" }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "1rem", padding: "2rem", boxShadow: "0 2px 12px rgba(11,53,43,0.07)" }}>
+            {done ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ width: 52, height: 52, background: "#E8F2EC", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
+                  <CheckCircle2 size={26} style={{ color: "#174D36" }} />
                 </div>
-              )}
-              <div>
-                <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#374151", marginBottom: "0.4rem" }}>New password</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} className="input-field" placeholder="At least 8 characters" />
+                <h2 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.375rem", color: "#0B352B", marginBottom: "0.5rem" }}>Password updated</h2>
+                <p style={{ color: "#5A6B61", fontSize: "0.9rem" }}>Redirecting you to your dashboard...</p>
               </div>
-              <div>
-                <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#374151", marginBottom: "0.4rem" }}>Confirm password</label>
-                <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required className="input-field" placeholder="Repeat your password" />
-              </div>
-              <button type="submit" disabled={loading} className="btn-primary" style={{ marginTop: "0.25rem", justifyContent: "center" }}>
-                {loading ? "Updating..." : "Update password"}
-              </button>
-            </form>
-          )}
+            ) : (
+              <>
+                <h1 style={{ fontFamily: "var(--font-manrope)", fontSize: "1.5rem", fontWeight: 900, color: "#0B352B", marginBottom: "0.5rem" }}>Set a new password</h1>
+                <p style={{ color: "#5A6B61", fontSize: "0.875rem", marginBottom: "1.5rem" }}>Choose a password with at least 8 characters.</p>
+
+                {error && (
+                  <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: "0.5rem", padding: "0.75rem", marginBottom: "1.25rem", display: "flex", gap: "0.5rem" }}>
+                    <AlertCircle size={15} style={{ color: "#DC2626", flexShrink: 0 }} />
+                    <span style={{ color: "#DC2626", fontSize: "0.875rem" }}>{error}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleReset} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <div>
+                    <label className="label-cb">New password</label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="input-cb"
+                        placeholder="At least 8 characters"
+                        style={{ paddingRight: "2.75rem" }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#5A6B61" }}>
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="label-cb">Confirm password</label>
+                    <input
+                      type="password"
+                      required
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      className="input-cb"
+                      placeholder="Repeat your password"
+                    />
+                  </div>
+                  <button type="submit" disabled={loading} className="btn-primary" style={{ opacity: loading ? 0.7 : 1 }}>
+                    {loading ? "Updating..." : "Update password"}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

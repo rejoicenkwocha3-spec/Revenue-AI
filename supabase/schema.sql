@@ -1,212 +1,246 @@
--- SearchSprout Database Schema
--- Safe to re-run against any existing Supabase project
+-- ClimateBooks Database Schema
+-- GHG Protocol compliant carbon accounting platform
+-- Run this in your Supabase SQL editor
 
--- ─────────────────────────────────────────
+-- Enable UUID generation
+create extension if not exists "pgcrypto";
+
+-- ============================================================
 -- PROFILES
--- ─────────────────────────────────────────
-create table if not exists public.profiles (
-  id uuid references auth.users on delete cascade primary key,
+-- ============================================================
+create table if not exists cb_profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   avatar_url text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
-alter table public.profiles add column if not exists full_name text;
-alter table public.profiles add column if not exists avatar_url text;
-alter table public.profiles enable row level security;
+alter table cb_profiles enable row level security;
+create policy "Users can manage own profile"
+  on cb_profiles for all using (auth.uid() = id);
 
-drop policy if exists "Users can view own profile" on public.profiles;
-drop policy if exists "Users can update own profile" on public.profiles;
-drop policy if exists "Users can insert own profile" on public.profiles;
+-- ============================================================
+-- ORGANISATIONS
+-- ============================================================
+create table if not exists cb_organisations (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  industry text,
+  country text,
+  reporting_year int default date_part('year', now()),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
 
-create policy "Users can view own profile" on public.profiles for select using (auth.uid() = id);
-create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
-create policy "Users can insert own profile" on public.profiles for insert with check (auth.uid() = id);
+alter table cb_organisations enable row level security;
+create policy "Users manage own organisations"
+  on cb_organisations for all using (auth.uid() = owner_id);
 
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, full_name)
-  values (new.id, new.raw_user_meta_data->>'full_name')
-  on conflict (id) do nothing;
-  return new;
-end;
-$$ language plpgsql security definer;
+create index on cb_organisations(owner_id);
 
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- ============================================================
+-- EMISSIONS
+-- GHG Protocol Scope 1, 2, 3
+-- Formula: amount_tco2e = quantity * emission_factor / 1000
+-- ============================================================
+create table if not exists cb_emissions (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+  description text not null,
+  scope text not null check (scope in ('scope1','scope2','scope3')),
+  category text not null,
+  quantity numeric(18,6) not null check (quantity >= 0),
+  unit text not null,
+  emission_factor numeric(18,6) not null check (emission_factor >= 0),
+  ef_source text,
+  amount_tco2e numeric(18,6) generated always as (quantity * emission_factor / 1000) stored,
+  activity_date date not null,
+  notes text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
 
--- ─────────────────────────────────────────
--- SEARCH PROJECTS
--- ─────────────────────────────────────────
-create table if not exists public.search_projects (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
+alter table cb_emissions enable row level security;
+create policy "Org members access emissions"
+  on cb_emissions for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
+    )
+  );
+
+create index on cb_emissions(organisation_id);
+create index on cb_emissions(scope);
+create index on cb_emissions(activity_date);
+
+-- ============================================================
+-- CLIMATE TARGETS
+-- ============================================================
+create table if not exists cb_climate_targets (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+  name text not null,
+  target_type text not null check (target_type in ('net-zero','sbti','carbon-neutral','reduction','other')),
+  baseline_year int not null,
+  target_year int not null,
+  reduction_pct numeric(5,2) check (reduction_pct between 0 and 100),
+  notes text,
+  created_at timestamptz default now()
+);
+
+alter table cb_climate_targets enable row level security;
+create policy "Org members access targets"
+  on cb_climate_targets for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
+    )
+  );
+
+create index on cb_climate_targets(organisation_id);
+
+-- ============================================================
+-- REPORTS
+-- ============================================================
+create table if not exists cb_reports (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+  name text not null,
+  framework text not null,
+  reporting_year int not null,
+  scope1_tco2e numeric(18,6) default 0,
+  scope2_tco2e numeric(18,6) default 0,
+  scope3_tco2e numeric(18,6) default 0,
+  total_tco2e numeric(18,6) default 0,
+  status text default 'draft' check (status in ('draft','final','submitted')),
+  created_at timestamptz default now()
+);
+
+alter table cb_reports enable row level security;
+create policy "Org members access reports"
+  on cb_reports for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
+    )
+  );
+
+create index on cb_reports(organisation_id);
+
+-- ============================================================
+-- SUPPLIERS
+-- ============================================================
+create table if not exists cb_suppliers (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+  name text not null,
+  contact_email text,
+  country text,
+  tier text check (tier in ('1','2','3')),
+  status text default 'invited' check (status in ('invited','submitted','reviewed','overdue')),
+  notes text,
+  created_at timestamptz default now()
+);
+
+alter table cb_suppliers enable row level security;
+create policy "Org members access suppliers"
+  on cb_suppliers for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
+    )
+  );
+
+create index on cb_suppliers(organisation_id);
+
+-- ============================================================
+-- REDUCTION INITIATIVES
+-- ============================================================
+create table if not exists cb_reduction_initiatives (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
   name text not null,
   description text,
-  status text not null default 'active',
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
-alter table public.search_projects add column if not exists user_id uuid references auth.users on delete cascade;
-alter table public.search_projects add column if not exists description text;
-alter table public.search_projects add column if not exists status text default 'active';
-alter table public.search_projects enable row level security;
-
-drop policy if exists "Users can view own projects" on public.search_projects;
-drop policy if exists "Users can insert own projects" on public.search_projects;
-drop policy if exists "Users can update own projects" on public.search_projects;
-drop policy if exists "Users can delete own projects" on public.search_projects;
-
-create policy "Users can view own projects" on public.search_projects for select using (auth.uid() = user_id);
-create policy "Users can insert own projects" on public.search_projects for insert with check (auth.uid() = user_id);
-create policy "Users can update own projects" on public.search_projects for update using (auth.uid() = user_id);
-create policy "Users can delete own projects" on public.search_projects for delete using (auth.uid() = user_id);
-
--- ─────────────────────────────────────────
--- DATA SOURCES
--- ─────────────────────────────────────────
-create table if not exists public.data_sources (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  name text not null,
-  type text not null default 'url',
-  url text,
-  status text not null default 'pending',
-  record_count integer not null default 0,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
-alter table public.data_sources add column if not exists user_id uuid references auth.users on delete cascade;
-alter table public.data_sources add column if not exists url text;
-alter table public.data_sources add column if not exists record_count integer default 0;
-alter table public.data_sources add column if not exists updated_at timestamptz default now();
-alter table public.data_sources enable row level security;
-
-drop policy if exists "Users can view own data sources" on public.data_sources;
-drop policy if exists "Users can insert own data sources" on public.data_sources;
-drop policy if exists "Users can update own data sources" on public.data_sources;
-drop policy if exists "Users can delete own data sources" on public.data_sources;
-
-create policy "Users can view own data sources" on public.data_sources for select using (auth.uid() = user_id);
-create policy "Users can insert own data sources" on public.data_sources for insert with check (auth.uid() = user_id);
-create policy "Users can update own data sources" on public.data_sources for update using (auth.uid() = user_id);
-create policy "Users can delete own data sources" on public.data_sources for delete using (auth.uid() = user_id);
-
--- ─────────────────────────────────────────
--- SEARCH INDEXES
--- ─────────────────────────────────────────
-create table if not exists public.search_indexes (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  name text not null,
-  status text not null default 'active',
-  record_count integer not null default 0,
-  searchable_attributes text[] default '{}',
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
-alter table public.search_indexes add column if not exists user_id uuid references auth.users on delete cascade;
-alter table public.search_indexes add column if not exists searchable_attributes text[] default '{}';
-alter table public.search_indexes add column if not exists updated_at timestamptz default now();
-alter table public.search_indexes enable row level security;
-
-drop policy if exists "Users can view own indexes" on public.search_indexes;
-drop policy if exists "Users can insert own indexes" on public.search_indexes;
-drop policy if exists "Users can update own indexes" on public.search_indexes;
-drop policy if exists "Users can delete own indexes" on public.search_indexes;
-
-create policy "Users can view own indexes" on public.search_indexes for select using (auth.uid() = user_id);
-create policy "Users can insert own indexes" on public.search_indexes for insert with check (auth.uid() = user_id);
-create policy "Users can update own indexes" on public.search_indexes for update using (auth.uid() = user_id);
-create policy "Users can delete own indexes" on public.search_indexes for delete using (auth.uid() = user_id);
-
--- ─────────────────────────────────────────
--- API KEYS
--- ─────────────────────────────────────────
-create table if not exists public.api_keys (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  name text not null,
-  key_prefix text not null,
-  key_hash text not null,
-  permissions text not null default 'read',
-  last_used_at timestamptz,
+  scope text check (scope in ('scope1','scope2','scope3','all')),
+  status text default 'planned' check (status in ('planned','in-progress','completed','cancelled')),
+  estimated_reduction_tco2e numeric(18,6),
+  target_date date,
   created_at timestamptz default now()
 );
 
-alter table public.api_keys add column if not exists user_id uuid references auth.users on delete cascade;
-alter table public.api_keys add column if not exists key_prefix text default '';
-alter table public.api_keys add column if not exists permissions text default 'read';
-alter table public.api_keys add column if not exists last_used_at timestamptz;
-alter table public.api_keys enable row level security;
+alter table cb_reduction_initiatives enable row level security;
+create policy "Org members access initiatives"
+  on cb_reduction_initiatives for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
+    )
+  );
 
-drop policy if exists "Users can view own api keys" on public.api_keys;
-drop policy if exists "Users can insert own api keys" on public.api_keys;
-drop policy if exists "Users can delete own api keys" on public.api_keys;
+create index on cb_reduction_initiatives(organisation_id);
 
-create policy "Users can view own api keys" on public.api_keys for select using (auth.uid() = user_id);
-create policy "Users can insert own api keys" on public.api_keys for insert with check (auth.uid() = user_id);
-create policy "Users can delete own api keys" on public.api_keys for delete using (auth.uid() = user_id);
-
--- ─────────────────────────────────────────
--- INDEXED RECORDS (full-text search store)
--- ─────────────────────────────────────────
-create table if not exists public.indexed_records (
-  id uuid default gen_random_uuid() primary key,
-  search_index_id uuid references public.search_indexes on delete cascade not null,
-  title text not null default '',
-  content text not null default '',
-  url text,
-  source_type text not null default 'api',
-  metadata jsonb default '{}',
-  search_vector tsvector generated always as (
-    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(content, ''))
-  ) stored,
+-- ============================================================
+-- DOCUMENTS
+-- ============================================================
+create table if not exists cb_documents (
+  id uuid primary key default gen_random_uuid(),
+  organisation_id uuid not null references cb_organisations(id) on delete cascade,
+  name text not null,
+  document_type text default 'other' check (document_type in ('evidence','policy','report','contract','certificate','other')),
+  storage_path text,
+  file_size int,
   created_at timestamptz default now()
 );
 
-create index if not exists indexed_records_search_vector_idx
-  on public.indexed_records using gin(search_vector);
-
-create index if not exists indexed_records_index_id_idx
-  on public.indexed_records(search_index_id);
-
-alter table public.indexed_records enable row level security;
-
-drop policy if exists "Users can view own indexed records" on public.indexed_records;
-drop policy if exists "Users can insert own indexed records" on public.indexed_records;
-drop policy if exists "Users can delete own indexed records" on public.indexed_records;
-
-create policy "Users can view own indexed records" on public.indexed_records
-  for select using (
-    exists (
-      select 1 from public.search_indexes
-      where search_indexes.id = indexed_records.search_index_id
-        and search_indexes.user_id = auth.uid()
+alter table cb_documents enable row level security;
+create policy "Org members access documents"
+  on cb_documents for all
+  using (
+    organisation_id in (
+      select id from cb_organisations where owner_id = auth.uid()
     )
   );
 
-create policy "Users can insert own indexed records" on public.indexed_records
-  for insert with check (
-    exists (
-      select 1 from public.search_indexes
-      where search_indexes.id = indexed_records.search_index_id
-        and search_indexes.user_id = auth.uid()
-    )
-  );
+create index on cb_documents(organisation_id);
 
-create policy "Users can delete own indexed records" on public.indexed_records
-  for delete using (
-    exists (
-      select 1 from public.search_indexes
-      where search_indexes.id = indexed_records.search_index_id
-        and search_indexes.user_id = auth.uid()
-    )
-  );
+-- ============================================================
+-- NOTIFICATIONS
+-- ============================================================
+create table if not exists cb_notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  body text,
+  read boolean default false,
+  created_at timestamptz default now()
+);
+
+alter table cb_notifications enable row level security;
+create policy "Users access own notifications"
+  on cb_notifications for all using (auth.uid() = user_id);
+
+create index on cb_notifications(user_id);
+create index on cb_notifications(read);
+
+-- ============================================================
+-- SUBSCRIPTIONS (for access control — do not grant access on payment click alone)
+-- ============================================================
+create table if not exists cb_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  plan text not null check (plan in ('starter','professional','enterprise')),
+  status text not null check (status in ('active','cancelled','past_due','trialing')),
+  selar_reference text,
+  current_period_start timestamptz,
+  current_period_end timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table cb_subscriptions enable row level security;
+create policy "Users read own subscription"
+  on cb_subscriptions for select using (auth.uid() = user_id);
+
+create index on cb_subscriptions(user_id);

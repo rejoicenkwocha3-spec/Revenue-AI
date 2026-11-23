@@ -2,14 +2,14 @@ export default function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid #DCE8E2",
-        background: "#FFFFFF",
-        padding: "1.5rem",
+        background: "#0B352B",
+        borderTop: "1px solid rgba(139,175,145,0.2)",
+        padding: "1.5rem 0",
         textAlign: "center",
       }}
     >
-      <p style={{ fontSize: "0.875rem", color: "#65736D", margin: 0 }}>
-        &copy; 2026 SearchSprout
+      <p style={{ color: "rgba(139,175,145,0.7)", fontSize: "0.875rem", fontWeight: 400, margin: 0 }}>
+        © 2026 ClimateBooks
       </p>
     </footer>
   );

@@ -3,17 +3,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* SearchSprout Brand Colors */
-  --color-ss-green: #16C653;
-  --color-ss-green-bright: #28D765;
-  --color-ss-teal: #063B38;
-  --color-ss-dark: #071F20;
-  --color-ss-bg: #F7FAF8;
-  --color-ss-white: #FFFFFF;
-  --color-ss-soft-green: #E8F8EE;
-  --color-ss-muted: #65736D;
-  --color-ss-border: #DCE8E2;
-  --color-ss-text: #071F20;
+  /* ClimateBooks Brand Colors */
+  --color-cb-forest: #174D36;
+  --color-cb-emerald: #0B352B;
+  --color-cb-sage: #8BAF91;
+  --color-cb-gold: #D9AD55;
+  --color-cb-off-white: #F7F8F3;
+  --color-cb-white: #FFFFFF;
+  --color-cb-charcoal: #242B27;
+  --color-cb-muted: #5A6B61;
+  --color-cb-border: #DDE8E2;
+  --color-cb-light-gold: #F5EDD3;
 
   --font-inter: 'Inter', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
@@ -26,8 +26,8 @@
 
   body {
     font-family: var(--font-inter);
-    color: var(--color-ss-text);
-    background: var(--color-ss-bg);
+    color: #242B27;
+    background: #F7F8F3;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -35,7 +35,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-manrope);
     font-weight: 700;
-    color: var(--color-ss-dark);
+    color: #0B352B;
   }
 
   * {
@@ -44,23 +44,25 @@
 }
 
 @layer components {
-  .container-ss {
+  .container-cb {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
   }
 
+  /* Primary button: Forest Green fill */
   .btn-primary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    background: #16C653;
+    background: #174D36;
     color: #FFFFFF;
     font-family: var(--font-inter);
     font-weight: 600;
     font-size: 0.9375rem;
-    padding: 0.625rem 1.375rem;
+    padding: 0.6875rem 1.5rem;
     border-radius: 0.5rem;
     border: none;
     cursor: pointer;
@@ -68,49 +70,72 @@
     transition: background-color 0.15s, transform 0.1s;
     white-space: nowrap;
   }
-
   .btn-primary:hover {
-    background: #28D765;
+    background: #0B352B;
   }
-
   .btn-primary:active {
     transform: scale(0.98);
   }
 
+  /* Gold accent button */
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #D9AD55;
+    color: #0B352B;
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.6875rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-gold:hover {
+    background: #c99c44;
+  }
+
+  /* Ghost/outline button */
   .btn-ghost {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     background: transparent;
-    color: #063B38;
+    color: #174D36;
     font-family: var(--font-inter);
     font-weight: 500;
     font-size: 0.9375rem;
-    padding: 0.625rem 1.125rem;
+    padding: 0.6875rem 1.375rem;
     border-radius: 0.5rem;
-    border: 1px solid #DCE8E2;
+    border: 1.5px solid #DDE8E2;
     cursor: pointer;
     text-decoration: none;
     transition: background-color 0.15s, border-color 0.15s;
     white-space: nowrap;
   }
-
   .btn-ghost:hover {
-    background: #E8F8EE;
-    border-color: #16C653;
-    color: #063B38;
+    background: #F0F5F2;
+    border-color: #8BAF91;
   }
 
+  /* White outline for dark backgrounds */
   .btn-outline {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     background: transparent;
     color: #FFFFFF;
     font-family: var(--font-inter);
     font-weight: 500;
     font-size: 0.9375rem;
-    padding: 0.625rem 1.375rem;
+    padding: 0.6875rem 1.375rem;
     border-radius: 0.5rem;
     border: 1.5px solid rgba(255,255,255,0.4);
     cursor: pointer;
@@ -118,43 +143,98 @@
     transition: background-color 0.15s, border-color 0.15s;
     white-space: nowrap;
   }
-
   .btn-outline:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.12);
     border-color: rgba(255,255,255,0.7);
   }
 
-  .card-ss {
+  .card-cb {
     background: #FFFFFF;
-    border: 1px solid #DCE8E2;
+    border: 1px solid #DDE8E2;
     border-radius: 0.875rem;
     padding: 1.5rem;
-    box-shadow: 0 1px 4px rgba(6,59,56,0.06);
+    box-shadow: 0 1px 4px rgba(11,53,43,0.06);
   }
 
-  .input-ss {
+  .input-cb {
     width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1.5px solid #DCE8E2;
+    padding: 0.6875rem 0.875rem;
+    border: 1.5px solid #DDE8E2;
     border-radius: 0.5rem;
     font-family: var(--font-inter);
     font-size: 0.9375rem;
-    color: #071F20;
+    color: #242B27;
     background: #FFFFFF;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-
-  .input-ss:focus {
-    border-color: #16C653;
-    box-shadow: 0 0 0 3px rgba(22,198,83,0.12);
+  .input-cb:focus {
+    border-color: #174D36;
+    box-shadow: 0 0 0 3px rgba(23,77,54,0.12);
+  }
+  .input-cb::placeholder {
+    color: #9BAF9A;
   }
 
-  .label-ss {
+  .label-cb {
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #071F20;
+    color: #242B27;
     margin-bottom: 0.375rem;
+  }
+
+  /* Stat tile */
+  .stat-tile {
+    background: #FFFFFF;
+    border: 1px solid #DDE8E2;
+    border-radius: 0.875rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(11,53,43,0.05);
+  }
+
+  /* Section badge/eyebrow */
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #D9AD55;
+  }
+
+  /* Scope badges */
+  .badge-scope1 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #E8F2EC;
+    color: #174D36;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .badge-scope2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #FDF5E0;
+    color: #8B6B10;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .badge-scope3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #EAF0F8;
+    color: #2A4E8A;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
   }
 }

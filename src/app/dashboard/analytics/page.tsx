@@ -1,144 +1,144 @@
 "use client";
 
-import { useState } from "react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { Search, MousePointerClick, AlertCircle, TrendingUp } from "lucide-react";
-
-const volumeByDay = [
-  { date: "Nov 14", queries: 980 },
-  { date: "Nov 15", queries: 1240 },
-  { date: "Nov 16", queries: 1890 },
-  { date: "Nov 17", queries: 2100 },
-  { date: "Nov 18", queries: 1750 },
-  { date: "Nov 19", queries: 2340 },
-  { date: "Nov 20", queries: 1120 },
-];
-
-const topQueries = [
-  { query: "pricing plans", volume: 342, ctr: "68%", trend: "+12%" },
-  { query: "getting started", volume: 287, ctr: "72%", trend: "+8%" },
-  { query: "api documentation", volume: 234, ctr: "61%", trend: "-4%" },
-  { query: "integrations list", volume: 198, ctr: "54%", trend: "+19%" },
-  { query: "export data", volume: 156, ctr: "49%", trend: "+3%" },
-  { query: "team permissions", volume: 134, ctr: "58%", trend: "+7%" },
-  { query: "billing upgrade", volume: 112, ctr: "71%", trend: "+22%" },
-  { query: "search widget embed", volume: 98, ctr: "45%", trend: "-2%" },
-];
-
-const zeroResults = [
-  { query: "enterprise sso", volume: 45 },
-  { query: "bulk delete api", volume: 38 },
-  { query: "custom domain", volume: 31 },
-  { query: "gdpr export", volume: 24 },
-  { query: "white label", volume: 19 },
-];
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState("7d");
+  const [data, setData] = useState<{ scope1: number; scope2: number; scope3: number }>({ scope1: 0, scope2: 0, scope3: 0 });
+  const [monthly, setMonthly] = useState<{ month: string; scope1: number; scope2: number; scope3: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: "Total Queries", value: "11,420", change: "+12%", icon: Search },
-    { label: "Click-Through Rate", value: "63.4%", change: "+4%", icon: MousePointerClick },
-    { label: "Zero Result Rate", value: "3.2%", change: "-1%", icon: AlertCircle },
-    { label: "Avg Position (CTR)", value: "2.1", change: "-0.3", icon: TrendingUp },
-  ];
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    setLoading(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: orgs } = await supabase.from("cb_organisations").select("id").eq("owner_id", user!.id);
+    const orgIds = (orgs || []).map((o) => o.id);
+    if (orgIds.length === 0) { setLoading(false); return; }
+
+    const { data: emissions } = await supabase.from("cb_emissions").select("scope, amount_tco2e, activity_date").in("organisation_id", orgIds);
+
+    const agg = { scope1: 0, scope2: 0, scope3: 0 };
+    const byMonth: Record<string, { scope1: number; scope2: number; scope3: number }> = {};
+
+    (emissions || []).forEach((e) => {
+      const key = e.scope as keyof typeof agg;
+      if (key in agg) agg[key] += e.amount_tco2e || 0;
+      const month = e.activity_date?.substring(0, 7) || "unknown";
+      if (!byMonth[month]) byMonth[month] = { scope1: 0, scope2: 0, scope3: 0 };
+      if (key in byMonth[month]) byMonth[month][key] += e.amount_tco2e || 0;
+    });
+
+    setData(agg);
+    const sorted = Object.entries(byMonth)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, vals]) => ({
+        month: new Date(month + "-01").toLocaleDateString("en-GB", { month: "short", year: "2-digit" }),
+        ...vals,
+      }));
+    setMonthly(sorted);
+    setLoading(false);
+  }
+
+  const total = data.scope1 + data.scope2 + data.scope3;
+  const pieData = [
+    { name: "Scope 1", value: parseFloat(data.scope1.toFixed(2)), color: "#174D36" },
+    { name: "Scope 2", value: parseFloat(data.scope2.toFixed(2)), color: "#D9AD55" },
+    { name: "Scope 3", value: parseFloat(data.scope3.toFixed(2)), color: "#2A4E8A" },
+  ].filter((d) => d.value > 0);
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem", flexWrap: "wrap", gap: "1rem" }}>
-        <div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#071F20", margin: "0 0 0.25rem" }}>Search Analytics</h1>
-          <p style={{ color: "#65736D", fontSize: "0.9375rem", margin: 0 }}>Understand how users are searching your content.</p>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          {["7d", "30d", "90d"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setDateRange(r)}
-              style={{
-                padding: "0.375rem 0.875rem", borderRadius: "0.375rem", border: "1px solid #DCE8E2",
-                background: dateRange === r ? "#063B38" : "#FFFFFF",
-                color: dateRange === r ? "#FFFFFF" : "#65736D",
-                fontSize: "0.875rem", fontWeight: 500, cursor: "pointer"
-              }}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
+    <div style={{ padding: "2rem 2.5rem", maxWidth: "1200px" }}>
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.625rem", color: "#0B352B", marginBottom: "0.25rem" }}>Emissions Analytics</h1>
+        <p style={{ color: "#5A6B61", fontSize: "0.875rem" }}>Visualise emissions across scopes, months and categories</p>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-        {stats.map((s) => (
-          <div key={s.label} className="card-ss">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
-              <span style={{ fontSize: "0.8125rem", color: "#65736D" }}>{s.label}</span>
-              <s.icon size={17} color="#16C653" />
+      {/* Total */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+        {[
+          { label: "Total", value: total, color: "#0B352B" },
+          { label: "Scope 1", value: data.scope1, color: "#174D36" },
+          { label: "Scope 2", value: data.scope2, color: "#8B6B10" },
+          { label: "Scope 3", value: data.scope3, color: "#2A4E8A" },
+        ].map((s) => (
+          <div key={s.label} className="stat-tile">
+            <div style={{ fontSize: "0.8125rem", color: "#5A6B61", marginBottom: "0.5rem" }}>{s.label}</div>
+            <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.5rem", color: s.color, fontVariantNumeric: "tabular-nums" }}>
+              {loading ? "—" : s.value.toFixed(1)}
             </div>
-            <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.75rem", color: "#071F20", marginBottom: "0.25rem" }}>{s.value}</div>
-            <div style={{ fontSize: "0.8125rem", color: "#16C653" }}>{s.change} vs previous period</div>
+            <div style={{ fontSize: "0.75rem", color: "#5A6B61" }}>tCO₂e</div>
           </div>
         ))}
       </div>
 
-      {/* Volume chart */}
-      <div className="card-ss" style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ fontSize: "1rem", marginBottom: "1.25rem" }}>Search Volume</h2>
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={volumeByDay} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-            <defs>
-              <linearGradient id="ssGradA" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#16C653" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#16C653" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="date" tick={{ fontSize: 12, fill: "#65736D" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12, fill: "#65736D" }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ fontSize: 13, borderRadius: 8, border: "1px solid #DCE8E2" }} />
-            <Area type="monotone" dataKey="queries" stroke="#16C653" strokeWidth={2} fill="url(#ssGradA)" dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1.5rem" }}>
-        {/* Top queries */}
-        <div className="card-ss">
-          <h2 style={{ fontSize: "1rem", marginBottom: "1.25rem" }}>Top Queries</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #DCE8E2" }}>
-                <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", color: "#65736D", fontWeight: 500 }}>Query</th>
-                <th style={{ textAlign: "right", padding: "0.5rem 0.75rem", color: "#65736D", fontWeight: 500 }}>Volume</th>
-                <th style={{ textAlign: "right", padding: "0.5rem 0.75rem", color: "#65736D", fontWeight: 500 }}>CTR</th>
-                <th style={{ textAlign: "right", padding: "0.5rem 0.75rem", color: "#65736D", fontWeight: 500 }}>Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topQueries.map((q) => (
-                <tr key={q.query} style={{ borderBottom: "1px solid #F0F5F2" }}>
-                  <td style={{ padding: "0.75rem", color: "#071F20", fontWeight: 500 }}>{q.query}</td>
-                  <td style={{ padding: "0.75rem", textAlign: "right", color: "#65736D" }}>{q.volume}</td>
-                  <td style={{ padding: "0.75rem", textAlign: "right", color: "#16C653", fontWeight: 600 }}>{q.ctr}</td>
-                  <td style={{ padding: "0.75rem", textAlign: "right", color: q.trend.startsWith("+") ? "#16C653" : "#EF4444", fontSize: "0.8125rem" }}>{q.trend}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+        {/* Monthly bar chart */}
+        <div className="card-cb">
+          <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#0B352B", marginBottom: "1.25rem" }}>Monthly Emissions (tCO₂e)</h3>
+          {monthly.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0F5F2" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#5A6B61" }} />
+                <YAxis tick={{ fontSize: 11, fill: "#5A6B61" }} />
+                <Tooltip
+                  contentStyle={{ background: "#fff", border: "1px solid #DDE8E2", borderRadius: "0.5rem", fontSize: "0.8rem" }}
+                  formatter={(val: unknown) => [typeof val === "number" ? `${val.toFixed(2)} tCO₂e` : ""]}
+                />
+                <Bar dataKey="scope1" name="Scope 1" stackId="a" fill="#174D36" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="scope2" name="Scope 2" stackId="a" fill="#D9AD55" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="scope3" name="Scope 3" stackId="a" fill="#2A4E8A" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 260, display: "flex", alignItems: "center", justifyContent: "center", color: "#5A6B61", fontSize: "0.875rem" }}>
+              Add activity data to see monthly trends
+            </div>
+          )}
         </div>
 
-        {/* Zero results */}
-        <div className="card-ss">
-          <h2 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>Zero Result Queries</h2>
-          <p style={{ color: "#65736D", fontSize: "0.8125rem", marginBottom: "1.25rem" }}>Queries that returned no results. Consider adding content for these topics.</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-            {zeroResults.map((z) => (
-              <div key={z.query} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.625rem 0.875rem", background: "#F7FAF8", borderRadius: "0.5rem" }}>
-                <span style={{ fontSize: "0.875rem", color: "#071F20", fontWeight: 500 }}>{z.query}</span>
-                <span style={{ fontSize: "0.8125rem", color: "#F59E0B", fontWeight: 600 }}>{z.volume}</span>
+        {/* Pie chart */}
+        <div className="card-cb">
+          <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1rem", color: "#0B352B", marginBottom: "1.25rem" }}>Emissions by Scope</h3>
+          {pieData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={3} dataKey="value">
+                    {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ background: "#fff", border: "1px solid #DDE8E2", borderRadius: "0.5rem", fontSize: "0.8rem" }}
+                    formatter={(val: unknown) => [typeof val === "number" ? `${val.toFixed(2)} tCO₂e` : ""]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {pieData.map((d) => (
+                  <div key={d.name} style={{ display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "2px", background: d.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.8rem", color: "#5A6B61" }}>{d.name}</span>
+                    </div>
+                    <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#242B27", fontVariantNumeric: "tabular-nums" }}>
+                      {total > 0 ? ((d.value / total) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#5A6B61", fontSize: "0.875rem" }}>
+              No emissions data
+            </div>
+          )}
         </div>
       </div>
     </div>

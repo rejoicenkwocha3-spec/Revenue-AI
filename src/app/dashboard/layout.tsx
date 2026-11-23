@@ -1,16 +1,19 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import DashboardSidebar from "@/components/DashboardSidebar";
-import DashboardHeader from "@/components/DashboardHeader";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#F7FAF8" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#F7F8F3" }}>
       <DashboardSidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <DashboardHeader />
-        <main style={{ flex: 1, padding: "1.75rem 2rem", overflowY: "auto" }}>
-          {children}
-        </main>
-      </div>
+      <main style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+        {children}
+      </main>
     </div>
   );
 }

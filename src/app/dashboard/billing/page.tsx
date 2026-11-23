@@ -1,85 +1,99 @@
-import Link from "next/link";
-import { CreditCard, ArrowRight, CheckCircle2 } from "lucide-react";
+"use client";
 
-const plans = [
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { CreditCard, ExternalLink, Info } from "lucide-react";
+
+const PLANS = [
   {
     name: "Starter",
-    price: "$47/mo",
-    href: "https://selar.com/47plan?currency=USD",
-    features: ["50K queries/month", "100K records", "3 projects", "API access"],
+    price: "$47",
+    period: "per month",
+    features: ["1 organisation", "Up to 500 emission records", "Scope 1, 2 and 3 tracking", "GHG Protocol reports", "Email support"],
+    selarUrl: "https://selar.com/47plan?currency=USD",
+    color: "#174D36",
+    bg: "#E8F2EC",
   },
   {
-    name: "Growth",
-    price: "$57/mo",
-    href: "https://selar.com/57plan?currency=USD",
-    features: ["500K queries/month", "1M records", "10 projects", "AI personalisation"],
-    featured: true,
+    name: "Professional",
+    price: "$57",
+    period: "per month",
+    features: ["5 organisations", "Unlimited emission records", "All Scope 1, 2 and 3 categories", "CDP, CSRD, ISSB reporting", "AI Climate Assistant", "Supplier engagement", "Priority support"],
+    selarUrl: "https://selar.com/57plan?currency=USD",
+    color: "#0B352B",
+    bg: "#174D36",
+    highlight: true,
   },
   {
-    name: "Scale",
-    price: "$97/mo",
-    href: "https://selar.com/97plan?currency=USD",
-    features: ["Unlimited queries", "Unlimited records", "Unlimited projects", "99.9% SLA"],
+    name: "Enterprise",
+    price: "$97",
+    period: "per month",
+    features: ["Unlimited organisations", "Unlimited emission records", "All frameworks including SECR", "Full AI Climate Assistant", "Team management", "API access", "Dedicated support"],
+    selarUrl: "https://selar.com/97plan?currency=USD",
+    color: "#174D36",
+    bg: "#E8F2EC",
   },
 ];
 
 export default function BillingPage() {
+  const [userEmail, setUserEmail] = useState("");
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUserEmail(user?.email || ""));
+  }, []);
+
   return (
-    <div>
-      <div style={{ marginBottom: "1.75rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#071F20", margin: "0 0 0.25rem" }}>Billing</h1>
-        <p style={{ color: "#65736D", fontSize: "0.9375rem", margin: 0 }}>Manage your subscription and payment details.</p>
+    <div style={{ padding: "2rem 2.5rem", maxWidth: "900px" }}>
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.625rem", color: "#0B352B", marginBottom: "0.25rem" }}>Billing</h1>
+        <p style={{ color: "#5A6B61", fontSize: "0.875rem" }}>Manage your ClimateBooks subscription</p>
       </div>
 
-      {/* Current plan */}
-      <div className="card-ss" style={{ marginBottom: "1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-          <div>
-            <div style={{ fontSize: "0.8125rem", color: "#65736D", marginBottom: "0.25rem" }}>Current Plan</div>
-            <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.5rem", color: "#071F20" }}>Free Trial</div>
-            <div style={{ color: "#65736D", fontSize: "0.875rem", marginTop: "0.25rem" }}>14-day trial. No credit card required.</div>
-          </div>
-          <Link href="/pricing" className="btn-primary">
-            Upgrade Plan <ArrowRight size={15} />
-          </Link>
-        </div>
+      <div style={{ background: "#FDF5E0", border: "1px solid #F0E0A8", borderRadius: "0.875rem", padding: "1rem 1.25rem", marginBottom: "2rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+        <Info size={15} style={{ color: "#8B6B10", flexShrink: 0, marginTop: "1px" }} />
+        <p style={{ fontSize: "0.8125rem", color: "#5A3A00", lineHeight: 1.6, margin: 0 }}>
+          Subscriptions are processed securely through Selar. After payment, your subscription status will be verified before full access is granted. Access is not granted solely by clicking a checkout button.
+        </p>
       </div>
 
-      {/* Plan cards */}
-      <h2 style={{ fontSize: "1.125rem", marginBottom: "1.25rem" }}>Available Plans</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
-        {plans.map((p) => (
-          <div key={p.name} style={{
-            background: p.featured ? "#063B38" : "#FFFFFF",
-            border: `1px solid ${p.featured ? "#16C653" : "#DCE8E2"}`,
-            borderRadius: "0.875rem",
-            padding: "1.5rem",
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
+        {PLANS.map((plan) => (
+          <div key={plan.name} style={{
+            background: plan.highlight ? plan.bg : "#FFFFFF",
+            border: `1.5px solid ${plan.highlight ? "#0B352B" : "#DDE8E2"}`,
+            borderRadius: "1.125rem",
+            padding: "1.75rem 1.5rem",
+            position: "relative",
           }}>
-            <div style={{ fontWeight: 700, color: p.featured ? "#16C653" : "#063B38", marginBottom: "0.25rem" }}>{p.name}</div>
-            <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.75rem", color: p.featured ? "#FFFFFF" : "#071F20", marginBottom: "1.25rem" }}>{p.price}</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-              {p.features.map((f) => (
-                <li key={f} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: p.featured ? "rgba(255,255,255,0.85)" : "#071F20" }}>
-                  <CheckCircle2 size={14} color="#16C653" />
+            {plan.highlight && (
+              <div style={{ position: "absolute", top: "-1px", left: "50%", transform: "translateX(-50%)", background: "#D9AD55", color: "#0B352B", fontSize: "0.65rem", fontWeight: 800, padding: "0.2rem 0.75rem", borderRadius: "0 0 0.5rem 0.5rem", whiteSpace: "nowrap" }}>
+                MOST POPULAR
+              </div>
+            )}
+            <div style={{ marginBottom: "0.25rem", fontSize: "0.75rem", fontWeight: 700, color: plan.highlight ? "rgba(255,255,255,0.6)" : "#9BAF9A", textTransform: "uppercase", letterSpacing: "0.08em" }}>{plan.name}</div>
+            <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2rem", color: plan.highlight ? "#FFFFFF" : "#0B352B", lineHeight: 1 }}>{plan.price}</div>
+            <div style={{ fontSize: "0.775rem", color: plan.highlight ? "rgba(255,255,255,0.5)" : "#9BAF9A", marginBottom: "1.25rem" }}>{plan.period}</div>
+            <ul style={{ listStyle: "none", margin: "0 0 1.5rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {plan.features.map((f) => (
+                <li key={f} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", fontSize: "0.8125rem", color: plan.highlight ? "rgba(255,255,255,0.8)" : "#5A6B61" }}>
+                  <span style={{ color: plan.highlight ? "#D9AD55" : "#174D36", marginTop: "1px", flexShrink: 0 }}>✓</span>
                   {f}
                 </li>
               ))}
             </ul>
-            <a href={p.href} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.375rem", padding: "0.625rem 1rem", background: p.featured ? "#16C653" : "#071F20", color: "#FFFFFF", borderRadius: "0.5rem", textDecoration: "none", fontWeight: 600, fontSize: "0.875rem" }}>
-              Select Plan <ArrowRight size={14} />
+            <a href={plan.selarUrl} target="_blank" rel="noopener noreferrer" className={plan.highlight ? "btn-gold" : "btn-primary"} style={{ width: "100%", textAlign: "center", justifyContent: "center", display: "flex", gap: "0.4rem", alignItems: "center", textDecoration: "none" }}>
+              Subscribe <ExternalLink size={13} />
             </a>
           </div>
         ))}
       </div>
 
-      {/* Payment method placeholder */}
-      <div className="card-ss">
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-          <CreditCard size={20} color="#65736D" />
-          <h2 style={{ fontSize: "1rem", margin: 0 }}>Payment Method</h2>
-        </div>
-        <p style={{ color: "#65736D", fontSize: "0.9375rem", margin: 0 }}>
-          Payment is processed securely through Selar. After upgrading, your subscription is managed via your Selar account.
+      <div className="card-cb">
+        <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "0.9375rem", color: "#0B352B", marginBottom: "0.75rem" }}>Subscription questions</h3>
+        <p style={{ fontSize: "0.8375rem", color: "#5A6B61", lineHeight: 1.65, margin: 0 }}>
+          For billing support or to discuss an enterprise arrangement, contact us at <strong>hello@climatebooks.io</strong>. Please include your account email: <code style={{ background: "#F7F8F3", padding: "0.1rem 0.4rem", borderRadius: "0.25rem", fontSize: "0.8rem" }}>{userEmail}</code>
         </p>
       </div>
     </div>

@@ -1,215 +1,220 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Link from "next/link";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 
 const plans = [
   {
     name: "Starter",
-    price: "$47",
-    billing: "per month",
-    desc: "Perfect for small businesses and developers getting started with AI-powered search.",
-    cta: "Get Started",
-    href: "https://selar.com/47plan?currency=USD",
-    featured: false,
+    selarUrl: "https://selar.com/47plan?currency=USD",
+    highlight: false,
+    description: "For small businesses beginning their climate journey.",
     features: [
-      "Up to 50,000 search queries/month",
-      "Up to 100,000 indexed records",
-      "AI-powered search and semantic retrieval",
-      "Instant search and autocomplete",
-      "Search analytics dashboard",
-      "3 search projects",
-      "API access and JavaScript SDK",
+      "1 organisation",
+      "Up to 2 users",
+      "Scope 1 and 2 tracking",
+      "Basic Scope 3 categories",
+      "Activity data entry",
+      "Standard emission factors",
+      "GHG Protocol report",
+      "CSV export",
       "Email support",
     ],
   },
   {
-    name: "Growth",
-    price: "$57",
-    billing: "per month",
-    desc: "For growing businesses that need advanced personalisation and deeper analytics.",
-    cta: "Get Started",
-    href: "https://selar.com/57plan?currency=USD",
-    featured: true,
+    name: "Professional",
+    selarUrl: "https://selar.com/57plan?currency=USD",
+    highlight: true,
+    badge: "Most Popular",
+    description: "For growing companies with serious sustainability ambitions.",
     features: [
-      "Up to 500,000 search queries/month",
-      "Up to 1,000,000 indexed records",
-      "Everything in Starter",
-      "AI personalisation",
-      "Recommendation engine",
-      "Search merchandising tools",
-      "10 search projects",
-      "AI search assistant",
-      "Priority email and chat support",
+      "Up to 3 organisations",
+      "Up to 10 users",
+      "Full Scope 1, 2 and 3 tracking",
+      "All 15 Scope 3 categories",
+      "AI Climate Assistant",
+      "Custom emission factors",
+      "Multi-framework reporting",
+      "Supplier engagement module",
+      "Decarbonisation planning",
+      "PDF and CSV exports",
+      "Priority email support",
     ],
   },
   {
-    name: "Scale",
-    price: "$97",
-    billing: "per month",
-    desc: "For high-volume businesses and agencies that require enterprise-grade performance and control.",
-    cta: "Get Started",
-    href: "https://selar.com/97plan?currency=USD",
-    featured: false,
+    name: "Enterprise",
+    selarUrl: "https://selar.com/97plan?currency=USD",
+    highlight: false,
+    description: "For large organisations with complex reporting requirements.",
     features: [
-      "Unlimited search queries",
-      "Unlimited indexed records",
-      "Everything in Growth",
-      "Unlimited search projects",
-      "Advanced analytics and exports",
-      "Team management and permissions",
-      "Custom search ranking models",
-      "Dedicated onboarding support",
-      "99.9% uptime SLA",
+      "Unlimited organisations",
+      "Unlimited users",
+      "Full platform access",
+      "Advanced AI insights",
+      "CSRD, ESRS and ISSB workflows",
+      "Audit and assurance tools",
+      "Team permissions",
+      "API access",
+      "Dedicated onboarding",
+      "Priority support",
+      "Custom integrations",
     ],
   },
 ];
 
 const faqs = [
   {
-    q: "Can I change plans at any time?",
-    a: "Yes. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle.",
+    q: "What emission factors does ClimateBooks use?",
+    a: "ClimateBooks uses recognised emission factor datasets. The source, publication year, geography and applicable unit are recorded for every factor. Users can also upload custom emission factors where required.",
   },
   {
-    q: "Is there a free trial?",
-    a: "Every plan includes a 14-day free trial with no credit card required. You can test the full platform before committing.",
+    q: "Is ClimateBooks compliant with GHG Protocol?",
+    a: "ClimateBooks is designed to support GHG Protocol-aligned carbon accounting. The platform records methodology, activity data, emission factors and calculation results in a transparent, auditable format. Compliance with any specific regulatory requirement depends on how your organisation uses the platform.",
   },
   {
-    q: "What happens if I exceed my query limit?",
-    a: "We will notify you when you approach your limit. Search continues to work and you are billed at a small per-query overage rate rather than experiencing downtime.",
+    q: "Can I manage multiple companies?",
+    a: "Yes. The Professional plan supports up to 3 organisations. The Enterprise plan supports unlimited organisations, making it suitable for holding companies, consultants and enterprise group structures.",
   },
   {
-    q: "Do I need a developer to get started?",
-    a: "No. The SearchSprout dashboard lets you index content, configure search and deploy an embeddable widget without any code. Developer access is available via API for custom integrations.",
+    q: "How does the AI Climate Assistant work?",
+    a: "The AI Assistant analyses your actual emissions data to answer questions about your carbon footprint, identify hotspots and recommend reduction opportunities. It is grounded in your records and approved climate accounting references. It never fabricates data or claims compliance without sufficient evidence.",
   },
   {
-    q: "Can I use SearchSprout for multiple websites?",
-    a: "Yes. Each plan includes multiple search projects. The Scale plan includes unlimited projects for agencies and enterprises managing many sites.",
+    q: "What reporting frameworks are supported?",
+    a: "ClimateBooks supports structured workflows for GHG Protocol, CDP, CSRD, ESRS, ISSB and SECR. Framework-specific reporting is available where the required data and methodology are supported within the platform.",
+  },
+  {
+    q: "What happens after I click Get Started on a plan?",
+    a: "Clicking the plan button takes you to a secure Selar checkout. After completing your subscription, you will receive access credentials. ClimateBooks verifies your subscription status before granting paid access.",
   },
 ];
 
 export default function PricingPage() {
   return (
-    <>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
-      <main>
-        {/* Hero */}
-        <section style={{ background: "#071F20", padding: "5rem 0 4rem", textAlign: "center" }}>
-          <div className="container-ss">
-            <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#FFFFFF", marginBottom: "1.25rem", lineHeight: 1.1 }}>
-              Simple, Transparent Pricing
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "1.125rem", maxWidth: "480px", margin: "0 auto", lineHeight: 1.65 }}>
-              Start free. Scale as you grow. All plans include the full SearchSprout platform with no feature restrictions.
-            </p>
-          </div>
-        </section>
 
-        {/* Pricing cards */}
-        <section style={{ background: "#F7FAF8", padding: "5rem 0" }}>
-          <div className="container-ss">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  style={{
-                    background: plan.featured ? "#063B38" : "#FFFFFF",
-                    border: plan.featured ? "2px solid #16C653" : "1px solid #DCE8E2",
-                    borderRadius: "1rem",
-                    padding: "2rem",
-                    boxShadow: plan.featured ? "0 8px 32px rgba(6,59,56,0.2)" : "0 1px 4px rgba(6,59,56,0.06)",
-                    position: "relative",
-                  }}
-                >
-                  {plan.featured && (
-                    <div style={{
-                      position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
-                      background: "#16C653", color: "#FFFFFF", fontSize: "0.8125rem", fontWeight: 700,
-                      padding: "0.3rem 1rem", borderRadius: "2rem", whiteSpace: "nowrap"
-                    }}>
-                      Most Popular
-                    </div>
-                  )}
+      <section style={{ background: "linear-gradient(160deg, #0B352B 0%, #174D36 100%)", padding: "5rem 0 4rem" }}>
+        <div className="container-cb" style={{ textAlign: "center", maxWidth: "640px" }}>
+          <span className="eyebrow">Pricing</span>
+          <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.25rem)", color: "#FFFFFF", marginTop: "0.75rem", marginBottom: "1.25rem", lineHeight: 1.1 }}>
+            Transparent pricing for every stage
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
+            Three clear plans designed for businesses at different stages of their climate journey. All plans include full pricing details on the checkout page.
+          </p>
+        </div>
+      </section>
 
-                  <div style={{ marginBottom: "1.5rem" }}>
-                    <div style={{ fontSize: "1rem", fontWeight: 700, color: plan.featured ? "#16C653" : "#063B38", marginBottom: "0.25rem" }}>{plan.name}</div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "0.375rem", marginBottom: "0.75rem" }}>
-                      <span style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "2.5rem", color: plan.featured ? "#FFFFFF" : "#071F20" }}>{plan.price}</span>
-                      <span style={{ fontSize: "0.9375rem", color: plan.featured ? "rgba(255,255,255,0.6)" : "#65736D" }}>{plan.billing}</span>
-                    </div>
-                    <p style={{ fontSize: "0.9rem", color: plan.featured ? "rgba(255,255,255,0.7)" : "#65736D", lineHeight: 1.55, margin: 0 }}>{plan.desc}</p>
+      {/* Plans */}
+      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", maxWidth: "960px", margin: "0 auto" }}>
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                style={{
+                  background: plan.highlight ? "#0B352B" : "#FFFFFF",
+                  border: `1.5px solid ${plan.highlight ? "#174D36" : "#DDE8E2"}`,
+                  borderRadius: "1.25rem",
+                  padding: "2rem 1.75rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1.25rem",
+                  position: "relative",
+                  boxShadow: plan.highlight ? "0 12px 48px rgba(11,53,43,0.2)" : "0 2px 8px rgba(11,53,43,0.05)",
+                }}
+              >
+                {plan.badge && (
+                  <div style={{
+                    position: "absolute", top: "-0.875rem", left: "50%", transform: "translateX(-50%)",
+                    background: "#D9AD55", color: "#0B352B",
+                    fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em",
+                    padding: "0.25rem 0.875rem", borderRadius: "999px", whiteSpace: "nowrap",
+                  }}>
+                    {plan.badge}
                   </div>
+                )}
 
-                  <a
-                    href={plan.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                      padding: "0.75rem",
-                      background: plan.featured ? "#16C653" : "#071F20",
-                      color: "#FFFFFF",
-                      borderRadius: "0.5rem",
-                      fontWeight: 600, fontSize: "0.9375rem",
-                      textDecoration: "none",
-                      marginBottom: "1.75rem",
-                      transition: "opacity 0.15s"
-                    }}
-                  >
-                    {plan.cta} <ArrowRight size={15} />
-                  </a>
-
-                  <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {plan.features.map((f) => (
-                      <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: plan.featured ? "rgba(255,255,255,0.85)" : "#071F20" }}>
-                        <CheckCircle2 size={15} color="#16C653" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+                <div>
+                  <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "1.375rem", color: plan.highlight ? "#FFFFFF" : "#0B352B" }}>
+                    {plan.name}
+                  </div>
+                  <div style={{ fontSize: "0.875rem", color: plan.highlight ? "rgba(255,255,255,0.55)" : "#5A6B61", marginTop: "0.375rem", lineHeight: 1.5 }}>
+                    {plan.description}
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <p style={{ textAlign: "center", color: "#65736D", fontSize: "0.875rem", marginTop: "2rem" }}>
-              All plans include a 14-day free trial. No credit card required to start.
-            </p>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
-          <div className="container-ss" style={{ maxWidth: "760px" }}>
-            <h2 style={{ textAlign: "center", fontSize: "clamp(1.5rem, 3vw, 2rem)", marginBottom: "3rem" }}>
-              Frequently Asked Questions
-            </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              {faqs.map((faq) => (
-                <div key={faq.q} className="card-ss">
-                  <h3 style={{ fontSize: "1rem", marginBottom: "0.625rem" }}>{faq.q}</h3>
-                  <p style={{ color: "#65736D", fontSize: "0.9375rem", lineHeight: 1.65, margin: 0 }}>{faq.a}</p>
+                <div style={{ fontSize: "0.75rem", color: plan.highlight ? "rgba(255,255,255,0.4)" : "#9BAF9A", fontStyle: "italic" }}>
+                  Full pricing details on checkout
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* CTA */}
-        <section style={{ background: "#063B38", padding: "5rem 0", textAlign: "center" }}>
-          <div className="container-ss">
-            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
-              Start Your Free Trial Today
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
-              No credit card required. Full platform access for 14 days.
-            </p>
-            <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
-              Start Building Free <ArrowRight size={16} />
-            </Link>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.625rem", flex: 1 }}>
+                  {plan.features.map((f) => (
+                    <li key={f} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
+                      <CheckCircle2 size={15} style={{ color: plan.highlight ? "#D9AD55" : "#174D36", flexShrink: 0, marginTop: "0.1rem" }} />
+                      <span style={{ fontSize: "0.875rem", color: plan.highlight ? "rgba(255,255,255,0.8)" : "#242B27", lineHeight: 1.5 }}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href={plan.selarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={plan.highlight ? "btn-gold" : "btn-primary"}
+                  style={{ width: "100%", textAlign: "center", justifyContent: "center" }}
+                >
+                  Get {plan.name} <ArrowRight size={15} />
+                </a>
+              </div>
+            ))}
           </div>
-        </section>
-      </main>
+
+          <p style={{ textAlign: "center", marginTop: "1.75rem", fontSize: "0.8125rem", color: "#5A6B61" }}>
+            Subscription access is verified after checkout. Paid features are not activated by clicking a button alone.
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+        <div className="container-cb" style={{ maxWidth: "760px" }}>
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <span className="eyebrow">Common Questions</span>
+            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginTop: "0.5rem" }}>
+              Frequently asked questions
+            </h2>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            {faqs.map((faq) => (
+              <div key={faq.q} style={{ border: "1px solid #DDE8E2", borderRadius: "0.875rem", padding: "1.25rem 1.5rem" }}>
+                <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: "0.9375rem", color: "#0B352B", marginBottom: "0.625rem" }}>
+                  {faq.q}
+                </div>
+                <div style={{ fontSize: "0.875rem", color: "#5A6B61", lineHeight: 1.65 }}>{faq.a}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ background: "#0B352B", padding: "4.5rem 0" }}>
+        <div className="container-cb" style={{ textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
+            Ready to start measuring your impact?
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.65)", marginBottom: "2rem" }}>
+            Choose the plan that fits your organisation and begin your climate programme today.
+          </p>
+          <Link href="/signup" className="btn-gold">
+            Get Started <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
       <Footer />
-    </>
+    </div>
   );
 }

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SearchSprout: AI-Powered Search and Discovery Platform",
-  description: "SearchSprout helps businesses deliver intelligent search experiences with AI-powered discovery, personalised results and actionable search insights.",
+  title: "ClimateBooks: AI-Powered Climate Accounting and Sustainability Platform",
+  description: "ClimateBooks helps businesses measure their carbon footprint, manage sustainability data and create meaningful climate reports with intelligent AI-powered tools.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

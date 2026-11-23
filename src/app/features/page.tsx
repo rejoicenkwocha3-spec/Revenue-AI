@@ -1,251 +1,266 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Link from "next/link";
-import { Search, Brain, Layers, Zap, MessageSquare, Star, BarChart3, Settings, Database, Code2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Leaf, Zap, Factory, BarChart3, FileText, MessageSquare, Target, Users, ShieldCheck, CheckCircle2 } from "lucide-react";
 
-const featureGroups = [
-  {
-    id: "ai-search",
-    icon: Brain,
-    title: "AI-Powered Search",
-    tagline: "Search That Understands Intent",
-    desc: "Move beyond simple keyword matching. SearchSprout uses large language models and neural retrieval to understand what users mean, not just what they type. Handle ambiguous queries, conversational search and complex natural language questions with confidence.",
-    items: [
-      "Natural language query understanding",
-      "Intent classification and query expansion",
-      "Typo tolerance and spelling correction",
-      "Multilingual search support",
-      "Query suggestion and autocomplete",
-      "Contextual result reranking",
-    ],
-  },
-  {
-    id: "hybrid-search",
-    icon: Layers,
-    title: "Hybrid Search",
-    tagline: "The Best of Keyword and Semantic",
-    desc: "Hybrid search combines traditional BM25 keyword matching with modern semantic vector retrieval. This combination delivers exact matches for specific queries while providing conceptual discovery when users search with natural language.",
-    items: [
-      "BM25 full-text ranking",
-      "Dense vector similarity search",
-      "Configurable hybrid weighting",
-      "Multi-field search boosting",
-      "Attribute-based filtering",
-      "Geo-search capabilities",
-    ],
-  },
-  {
-    id: "instant-search",
-    icon: Zap,
-    title: "Instant Search",
-    tagline: "Results as Fast as You Type",
-    desc: "Users expect instant results. SearchSprout delivers search responses in under 50 milliseconds, allowing you to build reactive search experiences that update results with every keystroke. No loading spinners, no delays.",
-    items: [
-      "Sub-50ms median response time",
-      "Debounced query optimisation",
-      "Incremental result loading",
-      "Client-side caching",
-      "Optimistic UI patterns",
-      "Mobile-first performance",
-    ],
-  },
-  {
-    id: "personalisation",
-    icon: Star,
-    title: "AI Personalisation",
-    tagline: "Results That Know Your Users",
-    desc: "Personalise search results for every user based on their behaviour, preferences and session context. Users see more relevant results the more they interact with your search experience, increasing engagement and conversion.",
-    items: [
-      "User profile-based reranking",
-      "Session signal integration",
-      "Collaborative filtering",
-      "Purchase and engagement history",
-      "A/B testing for personalisation rules",
-      "GDPR-compliant preference storage",
-    ],
-  },
-  {
-    id: "analytics",
-    icon: BarChart3,
-    title: "Search Analytics",
-    tagline: "Understand How Your Users Search",
-    desc: "Comprehensive analytics give you a complete picture of how users interact with your search experience. Use these insights to identify content gaps, optimise ranking and improve conversions.",
-    items: [
-      "Total search volume and trends",
-      "Popular queries and click-through rates",
-      "Zero result query tracking",
-      "Search conversion attribution",
-      "Result position performance",
-      "Date-range filtering and exports",
-    ],
-  },
-  {
-    id: "merchandising",
-    icon: Settings,
-    title: "Search Merchandising",
-    tagline: "Take Control of Your Search Results",
-    desc: "Give your business team full control over how search results are ranked and displayed. Promote important content, demote irrelevant results and create rules that reflect your business priorities without touching code.",
-    items: [
-      "Pin results to top positions",
-      "Promote selected content",
-      "Demote or hide unwanted results",
-      "Create query-specific ranking rules",
-      "Configure search redirects",
-      "Visual rule builder with live preview",
-    ],
-  },
-  {
-    id: "recommendations",
-    icon: Database,
-    title: "Recommendation Engine",
-    tagline: "Discover What Users Did Not Know to Search For",
-    desc: "Drive content discovery beyond the search bar. The SearchSprout recommendation engine surfaces relevant products, articles and content based on what users are viewing, browsing and engaging with.",
-    items: [
-      "Related content recommendations",
-      "Trending and popular content",
-      "Category-based discovery",
-      "Behavioural signal integration",
-      "Collaborative filtering models",
-      "Embeddable recommendation widgets",
-    ],
-  },
-  {
-    id: "ai-assistant",
-    icon: MessageSquare,
-    title: "AI Search Assistant",
-    tagline: "Conversational Answers from Your Content",
-    desc: "Let users ask questions in natural language and receive conversational answers grounded in your indexed content. The AI assistant retrieves relevant documents and synthesises accurate responses with source attribution.",
-    items: [
-      "Retrieval-augmented generation",
-      "Source citation for every answer",
-      "Multi-turn conversation support",
-      "Custom assistant persona",
-      "Hallucination safeguards",
-      "Answer quality monitoring",
-    ],
-  },
-  {
-    id: "developer-api",
-    icon: Code2,
-    title: "Search API and Developer Tools",
-    tagline: "Build Anything on Top of SearchSprout",
-    desc: "A complete developer toolkit for integrating SearchSprout into any application. Clean REST and GraphQL APIs, SDKs for all major languages, detailed documentation and a sandbox environment for testing.",
-    items: [
-      "REST and GraphQL API endpoints",
-      "SDKs: JavaScript, Python, PHP, Ruby, Go, Java",
-      "Secure API key management",
-      "Webhook support for real-time events",
-      "API request logs and monitoring",
-      "Rate limiting and usage quotas",
-    ],
-  },
+const scope3Categories = [
+  "Purchased goods and services",
+  "Capital goods",
+  "Fuel and energy-related activities",
+  "Upstream transportation and distribution",
+  "Waste generated in operations",
+  "Business travel",
+  "Employee commuting",
+  "Upstream leased assets",
+  "Downstream transportation and distribution",
+  "Processing of sold products",
+  "Use of sold products",
+  "End-of-life treatment of sold products",
+  "Downstream leased assets",
+  "Franchises",
+  "Investments",
+];
+
+const reportingFrameworks = [
+  { name: "GHG Protocol", desc: "The global standard for corporate greenhouse gas accounting and reporting." },
+  { name: "CDP", desc: "Annual climate, water and forest disclosure to investors and cities." },
+  { name: "CSRD", desc: "Corporate Sustainability Reporting Directive for EU companies." },
+  { name: "ESRS", desc: "European Sustainability Reporting Standards under CSRD." },
+  { name: "ISSB", desc: "IFRS Sustainability Disclosure Standards for investor-grade climate reporting." },
+  { name: "SECR", desc: "Streamlined Energy and Carbon Reporting for UK companies." },
 ];
 
 export default function FeaturesPage() {
   return (
-    <>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
-      <main>
-        {/* Hero */}
-        <section style={{ background: "#071F20", padding: "5rem 0 4rem", textAlign: "center" }}>
-          <div className="container-ss">
-            <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#FFFFFF", marginBottom: "1.25rem", lineHeight: 1.1 }}>
-              Every Feature You Need to Build Brilliant Search
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "1.125rem", maxWidth: "580px", margin: "0 auto 2.5rem", lineHeight: 1.65 }}>
-              SearchSprout combines AI search, semantic retrieval, personalisation, analytics and developer tools into one complete platform.
-            </p>
-            <div style={{ display: "flex", gap: "0.875rem", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/signup" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
-                Start Building Free <ArrowRight size={16} />
-              </Link>
-              <Link href="/pricing" className="btn-outline" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
-                View Pricing
-              </Link>
-            </div>
-          </div>
-        </section>
 
-        {/* Feature nav */}
-        <section style={{ background: "#F7FAF8", borderBottom: "1px solid #DCE8E2", padding: "1.25rem 0" }}>
-          <div className="container-ss">
-            <div style={{ display: "flex", gap: "0.75rem", overflowX: "auto", flexWrap: "wrap" }}>
-              {featureGroups.map((f) => (
-                <a
-                  key={f.id}
-                  href={`#${f.id}`}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "0.4rem",
-                    padding: "0.4rem 0.875rem", borderRadius: "2rem",
-                    background: "#FFFFFF", border: "1px solid #DCE8E2",
-                    fontSize: "0.875rem", fontWeight: 500, color: "#063B38",
-                    textDecoration: "none", whiteSpace: "nowrap"
-                  }}
-                >
-                  <f.icon size={14} />
-                  {f.title}
-                </a>
+      <section style={{ background: "linear-gradient(160deg, #0B352B 0%, #174D36 100%)", padding: "5rem 0 4rem" }}>
+        <div className="container-cb" style={{ textAlign: "center", maxWidth: "720px" }}>
+          <span className="eyebrow">Platform Features</span>
+          <h1 style={{ fontFamily: "var(--font-manrope)", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 3.25rem)", color: "#FFFFFF", marginTop: "0.75rem", marginBottom: "1.25rem", lineHeight: 1.1 }}>
+            Every tool your climate programme requires
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
+            From data collection and emissions calculation to AI-powered insights, decarbonisation planning and regulatory reporting.
+          </p>
+        </div>
+      </section>
+
+      {/* Carbon Footprint Measurement */}
+      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+            <div>
+              <span className="eyebrow">Carbon Footprint Measurement</span>
+              <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginTop: "0.5rem", marginBottom: "1rem" }}>
+                Measure your complete greenhouse gas footprint
+              </h2>
+              <p style={{ color: "#5A6B61", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+                ClimateBooks provides a structured environment to measure greenhouse gas emissions across your operations and value chain. Every calculation uses the formula:
+              </p>
+              <div style={{ background: "#F7F8F3", border: "1px solid #DDE8E2", borderRadius: "0.75rem", padding: "1.25rem 1.5rem", marginBottom: "1.5rem", fontFamily: "monospace", fontSize: "0.9rem", color: "#0B352B" }}>
+                Emissions = Activity Data × Emission Factor
+              </div>
+              <p style={{ color: "#5A6B61", lineHeight: 1.7 }}>
+                Results are recorded in kilograms or tonnes of CO₂ equivalent (kgCO₂e or tCO₂e) with full transparency over data quality, verification status and calculation methodology.
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+              {[
+                "Activity quantity and measurement unit",
+                "Emission factor and factor source",
+                "Reporting period and calculation methodology",
+                "Result in kgCO₂e or tCO₂e",
+                "Data quality and verification status",
+                "Complete calculation audit trail",
+              ].map((item) => (
+                <div key={item} style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                  <CheckCircle2 size={16} style={{ color: "#174D36", flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.9rem", color: "#242B27" }}>{item}</span>
+                </div>
               ))}
             </div>
           </div>
-        </section>
+        </div>
+        <style>{`@media(max-width:768px){section>div>div{grid-template-columns:1fr !important;gap:2rem !important}}`}</style>
+      </section>
 
-        {/* Features */}
-        {featureGroups.map((f, i) => (
-          <section
-            key={f.id}
-            id={f.id}
-            style={{ background: i % 2 === 0 ? "#FFFFFF" : "#F7FAF8", padding: "5rem 0" }}
-          >
-            <div className="container-ss">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
-                <div style={{ order: i % 2 === 0 ? 0 : 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                    <div style={{ width: 48, height: 48, borderRadius: "0.75rem", background: "#E8F8EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <f.icon size={24} color="#16C653" />
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#16C653", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>{f.tagline}</div>
-                  <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", marginBottom: "1rem", lineHeight: 1.2 }}>{f.title}</h2>
-                  <p style={{ color: "#65736D", fontSize: "1rem", lineHeight: 1.65, marginBottom: "1.75rem" }}>{f.desc}</p>
-                  <Link href="/signup" className="btn-primary">
-                    Try {f.title} Free <ArrowRight size={15} />
-                  </Link>
+      {/* Scope 1 */}
+      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+            <span className="badge-scope1" style={{ marginBottom: "1rem", display: "inline-flex" }}>Scope 1</span>
+            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginBottom: "1rem" }}>
+              Direct Emissions
+            </h2>
+            <p style={{ color: "#5A6B61", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+              Track direct greenhouse gas emissions from sources owned or controlled by your organisation.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.875rem" }}>
+              {["Company vehicles", "Fuel combustion", "Industrial processes", "Refrigerants", "Company equipment", "On-site generation"].map((item) => (
+                <div key={item} style={{ background: "#FFFFFF", border: "1px solid #DDE8E2", borderRadius: "0.625rem", padding: "0.875rem 1rem", display: "flex", gap: "0.6rem", alignItems: "center" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#174D36", flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.875rem", color: "#242B27" }}>{item}</span>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <div style={{ order: i % 2 === 0 ? 1 : 0 }}>
-                  <div className="card-ss">
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                      {f.items.map((item) => (
-                        <li key={item} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "0.9375rem", color: "#071F20" }}>
-                          <CheckCircle2 size={16} color="#16C653" style={{ flexShrink: 0 }} />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+      {/* Scope 2 */}
+      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+            <span className="badge-scope2" style={{ marginBottom: "1rem", display: "inline-flex" }}>Scope 2</span>
+            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginBottom: "1rem" }}>
+              Indirect Energy Emissions
+            </h2>
+            <p style={{ color: "#5A6B61", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+              Track indirect greenhouse gas emissions from the generation of purchased energy consumed by your organisation.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.875rem" }}>
+              {["Purchased electricity", "District heating", "District cooling", "Purchased steam", "Renewable energy tracking", "Location-based and market-based"].map((item) => (
+                <div key={item} style={{ background: "#FDF5E0", border: "1px solid #F0E0A8", borderRadius: "0.625rem", padding: "0.875rem 1rem", display: "flex", gap: "0.6rem", alignItems: "center" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8B6B10", flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.875rem", color: "#242B27" }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Scope 3 */}
+      <section style={{ background: "#F7F8F3", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+            <span className="badge-scope3" style={{ marginBottom: "1rem", display: "inline-flex" }}>Scope 3</span>
+            <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginBottom: "1rem" }}>
+              Value Chain Emissions
+            </h2>
+            <p style={{ color: "#5A6B61", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+              Track all 15 GHG Protocol Scope 3 categories across your upstream and downstream value chain.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.625rem" }}>
+              {scope3Categories.map((cat, i) => (
+                <div key={cat} style={{ background: "#EAF0F8", border: "1px solid #C5D8F0", borderRadius: "0.625rem", padding: "0.75rem 1rem", display: "flex", gap: "0.6rem", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#2A4E8A", width: 20, flexShrink: 0 }}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span style={{ fontSize: "0.8375rem", color: "#242B27" }}>{cat}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Assistant */}
+      <section style={{ background: "#0B352B", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+            <div>
+              <span className="eyebrow">AI Climate Assistant</span>
+              <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#FFFFFF", marginTop: "0.5rem", marginBottom: "1rem" }}>
+                Intelligence grounded in your data
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+                ClimateBooks' AI assistant analyses your actual emissions records to answer questions, surface insights and prepare disclosures. It never fabricates data, invents emission factors or claims regulatory compliance without sufficient evidence.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {[
+                  "What is our total carbon footprint?",
+                  "Which activities contribute most to our emissions?",
+                  "How have our emissions changed this year?",
+                  "What are our biggest Scope 3 emission sources?",
+                  "Recommend opportunities to reduce our emissions.",
+                  "Generate a sustainability performance summary.",
+                ].map((q) => (
+                  <div key={q} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
+                    <MessageSquare size={14} style={{ color: "#D9AD55", flexShrink: 0, marginTop: "0.15rem" }} />
+                    <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.875rem", fontStyle: "italic" }}>{q}</span>
                   </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ background: "#F7F8F3", borderRadius: "1rem", padding: "1.5rem" }}>
+                <span className="eyebrow" style={{ marginBottom: "1rem", display: "block" }}>Reporting Frameworks</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                  {reportingFrameworks.map((f) => (
+                    <div key={f.name} style={{ display: "flex", gap: "0.875rem" }}>
+                      <div style={{ background: "#174D36", color: "#fff", fontSize: "0.65rem", fontWeight: 700, padding: "0.2rem 0.5rem", borderRadius: "0.25rem", height: "fit-content", whiteSpace: "nowrap", flexShrink: 0 }}>
+                        {f.name}
+                      </div>
+                      <span style={{ fontSize: "0.8125rem", color: "#5A6B61", lineHeight: 1.5 }}>{f.desc}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </section>
-        ))}
-
-        {/* CTA */}
-        <section style={{ background: "#063B38", padding: "5rem 0", textAlign: "center" }}>
-          <div className="container-ss">
-            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "#FFFFFF", marginBottom: "1rem" }}>
-              All Features Included on Every Plan
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
-              No feature gating. Every SearchSprout plan includes the full platform. Scale your usage, not your feature access.
-            </p>
-            <Link href="/pricing" className="btn-primary" style={{ padding: "0.75rem 2rem", fontSize: "1rem" }}>
-              View Pricing Plans <ArrowRight size={16} />
-            </Link>
           </div>
-        </section>
-      </main>
+        </div>
+        <style>{`@media(max-width:768px){section>div>div{grid-template-columns:1fr !important}}`}</style>
+      </section>
+
+      {/* Decarbonisation + Supplier */}
+      <section style={{ background: "#FFFFFF", padding: "5rem 0" }}>
+        <div className="container-cb">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+            {[
+              {
+                icon: Target,
+                title: "Decarbonisation Planning",
+                desc: "Set net zero targets and science-based reduction goals. Create climate action plans and assign reduction initiatives. Track progress against your baseline year and model reduction scenarios.",
+                items: ["Net zero and interim targets", "Science-based target alignment", "Climate action plan builder", "Scenario modelling", "Progress dashboards"],
+              },
+              {
+                icon: Users,
+                title: "Supplier Management",
+                desc: "Collect and manage supplier sustainability information. Invite suppliers to submit their emissions data, track submission status and review responses as part of your Scope 3 management programme.",
+                items: ["Supplier invitation workflows", "Customisable data requests", "Submission tracking", "Response review and verification", "Supplier emissions aggregation"],
+              },
+            ].map((item) => (
+              <div key={item.title} className="card-cb" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ width: 48, height: 48, borderRadius: "0.75rem", background: "#E8F2EC", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <item.icon size={22} style={{ color: "#174D36" }} />
+                </div>
+                <h3 style={{ fontFamily: "var(--font-manrope)", fontWeight: 800, fontSize: "1.1875rem", color: "#0B352B" }}>{item.title}</h3>
+                <p style={{ color: "#5A6B61", fontSize: "0.875rem", lineHeight: 1.65 }}>{item.desc}</p>
+                <ul style={{ display: "flex", flexDirection: "column", gap: "0.4rem", listStyle: "none", padding: 0 }}>
+                  {item.items.map((i) => (
+                    <li key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <CheckCircle2 size={14} style={{ color: "#174D36", flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.845rem", color: "#242B27" }}>{i}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        <style>{`@media(max-width:640px){section>div>div{grid-template-columns:1fr !important}}`}</style>
+      </section>
+
+      {/* CTA */}
+      <section style={{ background: "#F7F8F3", padding: "4.5rem 0" }}>
+        <div className="container-cb" style={{ textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-manrope)", fontSize: "clamp(1.5rem, 3vw, 2.25rem)", color: "#0B352B", marginBottom: "1rem" }}>
+            Start measuring your impact today
+          </h2>
+          <p style={{ color: "#5A6B61", marginBottom: "2rem" }}>
+            Create your ClimateBooks account and begin tracking emissions in minutes.
+          </p>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/signup" className="btn-primary">Get Started <ArrowRight size={16} /></Link>
+            <Link href="/pricing" className="btn-ghost">View Pricing</Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
-    </>
+    </div>
   );
 }
