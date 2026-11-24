@@ -2,7 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PLANS, planFromSelarText, type Plan } from "@/config/plans";
-import { logActivity, notify, orgMemberIds } from "@/lib/activity";
+import { audit, notify, orgMemberIds } from "@/lib/audit";
 
 /** Collects every string value in a nested payload with its key path. */
 function walk(v: unknown, path: string[] = [], out: { path: string; value: string }[] = []) {
@@ -69,7 +69,7 @@ export async function applyPayment(eventRowId: string, p: ParsedPayment, forOrgI
   if (!orgId) {
     if (!p.email) return { ok: false, note: "No customer email in the notification" };
     const { data: profile } = await admin.from("profiles").select("id, default_org_id").eq("email", p.email).maybeSingle();
-    if (!profile) return { ok: false, note: `No LinguaDub account for ${p.email}. It can be claimed after sign up.` };
+    if (!profile) return { ok: false, note: `No Revenue AI account for ${p.email}. It can be claimed after sign up.` };
     const { data: owned } = await admin.from("organisations").select("id").eq("owner_id", profile.id).limit(1);
     orgId = owned?.[0]?.id ?? profile.default_org_id;
   }
@@ -91,7 +91,7 @@ export async function applyPayment(eventRowId: string, p: ParsedPayment, forOrgI
     current_period_end: end.toISOString(),
   });
   await admin.from("payment_events").update({ processed: true, org_id: orgId, process_note: `Activated ${p.plan.name} until ${end.toISOString().slice(0, 10)}` }).eq("id", eventRowId);
-  await logActivity({ orgId, action: "billing.activated", details: { plan: p.plan.name } });
+  await audit({ orgId, actorType: "system", action: "billing.activated", details: { plan: p.plan.name, reference: p.eventId } });
   await notify({ userIds: await orgMemberIds(orgId, ["owner", "admin"]), orgId, title: `${p.plan.name} plan is active`, body: `Your payment was verified. The plan renews on ${end.toISOString().slice(0, 10)}.`, link: "/dashboard/billing" });
   return { ok: true, note: "activated", orgId };
 }

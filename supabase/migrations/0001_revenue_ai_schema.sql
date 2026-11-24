@@ -509,7 +509,7 @@ create table if not exists revenue_ai.ai_agent_activities (
   account_id uuid references revenue_ai.accounts(id) on delete cascade,
   target_user_id uuid references auth.users(id) on delete set null,
   proposed_action jsonb,
-  status text not null default 'pending' check (status in ('info','pending','approved','rejected','completed','failed')),
+  status text not null default 'pending' check (status in ('info','pending','approved','rejected','completed','failed','superseded')),
   priority int not null default 50,
   decided_by uuid references auth.users(id) on delete set null,
   decided_at timestamptz,

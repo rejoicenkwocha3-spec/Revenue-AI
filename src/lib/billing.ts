@@ -1,24 +1,22 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlan, trialMinutes, TRIAL_STORAGE_GB, type Plan } from "@/config/plans";
+import { FREE_LIMITS, getPlan, type AgentKey, type Plan } from "@/config/plans";
 import { ApiError } from "@/lib/api";
 
 export interface Entitlements {
   plan: Plan | null;
+  planName: string;
   subscription: { id: string; status: string; currentPeriodEnd: string | null; currentPeriodStart: string } | null;
   periodStart: string;
-  minutesIncluded: number;
-  minutesUsed: number;
-  minutesRemaining: number;
-  storageBytesIncluded: number;
-  storageBytesUsed: number;
-  targetLanguagesPerProject: number;
   seats: number;
-  voiceClones: number;
+  maxOpportunities: number | null;
+  aiQueriesPerMonth: number;
+  aiQueriesUsed: number;
+  agents: AgentKey[];
+  maxIntegrations: number | null;
 }
 
-const GB = 1024 ** 3;
-
+/** Plan limits come only from verified subscriptions (activated by Selar notifications). */
 export async function getEntitlements(orgId: string): Promise<Entitlements> {
   const admin = createAdminClient();
   const nowIso = new Date().toISOString();
@@ -31,56 +29,60 @@ export async function getEntitlements(orgId: string): Promise<Entitlements> {
     .order("current_period_end", { ascending: false, nullsFirst: true })
     .limit(1)
     .maybeSingle();
-
   const plan = sub ? getPlan(sub.plan_id) ?? null : null;
   const monthStart = new Date();
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
-  const periodStart = sub?.current_period_start ?? monthStart.toISOString();
-
-  const [{ data: usage }, { data: storage }] = await Promise.all([
-    admin.from("usage_records").select("quantity").eq("org_id", orgId).eq("kind", "dub_minutes").gte("created_at", periodStart),
-    admin.rpc("org_storage_bytes", { p_org: orgId }),
-  ]);
-  const minutesUsed = Math.round((usage ?? []).reduce((a, r) => a + Number(r.quantity), 0) * 100) / 100;
-  const minutesIncluded = plan ? plan.monthlyMinutes : trialMinutes();
-
+  const periodStart = sub?.current_period_start && new Date(sub.current_period_start) > monthStart ? sub.current_period_start : monthStart.toISOString();
+  const { count } = await admin.from("usage_records").select("id", { count: "exact", head: true }).eq("org_id", orgId).eq("kind", "ai_query").gte("created_at", periodStart);
   return {
     plan,
-    subscription: sub
-      ? { id: sub.id, status: sub.status, currentPeriodEnd: sub.current_period_end, currentPeriodStart: sub.current_period_start }
-      : null,
+    planName: plan?.name ?? FREE_LIMITS.name,
+    subscription: sub ? { id: sub.id, status: sub.status, currentPeriodEnd: sub.current_period_end, currentPeriodStart: sub.current_period_start } : null,
     periodStart,
-    minutesIncluded,
-    minutesUsed,
-    minutesRemaining: Math.max(0, minutesIncluded - minutesUsed),
-    storageBytesIncluded: (plan ? plan.storageGb : TRIAL_STORAGE_GB) * GB,
-    storageBytesUsed: Number(storage ?? 0),
-    targetLanguagesPerProject: plan ? plan.targetLanguagesPerProject : 1,
-    seats: plan ? plan.seats : 1,
-    voiceClones: plan ? plan.voiceClones : 0,
+    seats: plan?.seats ?? FREE_LIMITS.seats,
+    maxOpportunities: plan ? plan.maxOpportunities : FREE_LIMITS.maxOpportunities,
+    aiQueriesPerMonth: plan?.aiQueriesPerMonth ?? FREE_LIMITS.aiQueriesPerMonth,
+    aiQueriesUsed: count ?? 0,
+    agents: plan?.agents ?? FREE_LIMITS.agents,
+    maxIntegrations: plan ? plan.maxIntegrations : FREE_LIMITS.maxIntegrations,
   };
 }
 
-export async function assertMinutesAvailable(orgId: string, minutesNeeded: number) {
+export async function assertAiQueryAvailable(orgId: string) {
   const e = await getEntitlements(orgId);
-  if (e.minutesIncluded === 0) {
-    throw new ApiError(402, "An active subscription is required to generate dubs. Choose a plan on the Billing page.", "subscription_required");
-  }
-  if (minutesNeeded > e.minutesRemaining) {
-    throw new ApiError(
-      402,
-      `This dub needs ${minutesNeeded.toFixed(1)} minutes but ${e.minutesRemaining.toFixed(1)} remain in this billing period.`,
-      "minutes_exhausted",
-    );
+  if (e.aiQueriesUsed >= e.aiQueriesPerMonth) {
+    throw new ApiError(402, `Your ${e.planName} plan includes ${e.aiQueriesPerMonth} AI questions a month and they are used up. Upgrade on the Billing page.`, "ai_limit");
   }
   return e;
 }
 
-export async function assertStorageAvailable(orgId: string, bytes: number) {
+export async function assertOpportunityCapacity(orgId: string, adding = 1) {
   const e = await getEntitlements(orgId);
-  if (e.storageBytesUsed + bytes > e.storageBytesIncluded) {
-    throw new ApiError(402, "This upload would exceed your storage allowance. Delete unused media or upgrade your plan.", "storage_exhausted");
+  if (e.maxOpportunities == null) return e;
+  const { count } = await createAdminClient().from("opportunities").select("id", { count: "exact", head: true }).eq("org_id", orgId);
+  if ((count ?? 0) + adding > e.maxOpportunities) {
+    throw new ApiError(402, `Your ${e.planName} plan allows ${e.maxOpportunities} opportunities. Upgrade on the Billing page to add more.`, "opportunity_limit");
   }
   return e;
+}
+
+export async function assertAgentAllowed(orgId: string, agent: AgentKey) {
+  const e = await getEntitlements(orgId);
+  if (!e.agents.includes(agent)) throw new ApiError(402, `This agent is not included in the ${e.planName} plan. Upgrade on the Billing page.`, "agent_not_in_plan");
+  return e;
+}
+
+export async function assertIntegrationCapacity(orgId: string) {
+  const e = await getEntitlements(orgId);
+  if (e.maxIntegrations == null) return e;
+  const { count } = await createAdminClient().from("integrations").select("id", { count: "exact", head: true }).eq("org_id", orgId).eq("status", "connected");
+  if ((count ?? 0) >= e.maxIntegrations) {
+    throw new ApiError(402, e.maxIntegrations === 0 ? "Integrations need an active plan. Choose one on the Billing page." : `Your ${e.planName} plan allows ${e.maxIntegrations} connected integrations.`, "integration_limit");
+  }
+  return e;
+}
+
+export async function recordUsage(orgId: string, userId: string | null, kind: "ai_query" | "agent_run") {
+  await createAdminClient().from("usage_records").insert({ org_id: orgId, user_id: userId, kind });
 }

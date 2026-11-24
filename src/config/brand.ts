@@ -1,27 +1,22 @@
 /**
  * Brand configuration.
- *
- * BRAND_MARK selects the logo used across the website, the app and the favicon.
- * "uploaded" is the artwork supplied by the LinguaDub team (public/brand/linguadub-mark.png).
- * The six concept marks presented on the selection board are available as
- * "concept1" through "concept6". Change this one value to switch the brand mark.
+ * The selected mark is Concept 1 (Revenue Growth) from the logo selection board.
+ * The other concepts remain available in src/components/brand/Logo.tsx.
  */
-export type BrandMark = "uploaded" | "concept1" | "concept2" | "concept3" | "concept4" | "concept5" | "concept6";
-
-export const BRAND_MARK: BrandMark = "uploaded";
-
 export const BRAND = {
-  name: "LinguaDub",
-  tagline: "Every Voice. Every Language. Everywhere.",
+  name: "Revenue AI",
+  tagline: "Know Your Numbers. Predict Your Growth.",
+  altTagline: "Turn Every Revenue Signal Into Growth.",
   description:
-    "LinguaDub transforms videos and audio into natural sounding multilingual experiences using AI powered dubbing, voice translation and intelligent localization.",
+    "Revenue AI gives businesses a clearer view of their sales pipeline, smarter revenue forecasts and actionable AI insights to help teams identify opportunities, reduce deal risks and grow revenue with confidence.",
   colors: {
-    navy: "#101B3F",
-    blue: "#2463EB",
-    purple: "#7047EB",
-    lavender: "#F0EDFF",
-    coral: "#FF786B",
-    background: "#F7F8FC",
+    primary: "#315BDB",
+    navy: "#101C3D",
+    electric: "#4778F5",
+    purple: "#7865E9",
+    background: "#F5F7FC",
     white: "#FFFFFF",
+    ink: "#202B45",
+    success: "#19A875",
   },
 } as const;

@@ -23,7 +23,7 @@ export function FormMessage({ kind, children }: { kind: "error" | "success" | "i
 export function SubmitButton({ loading, children }: { loading: boolean; children: React.ReactNode }) {
   return (
     <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-      {loading && <Loader2 size={16} className="ld-spin" />}
+      {loading && <Loader2 size={16} className="ra-spin" />}
       {children}
     </button>
   );
