@@ -1,38 +1,32 @@
 import { requireAppContext } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/app/ui";
+import { SettingsTabs } from "@/components/app/SettingsTabs";
 import { can, ROLE_LABELS } from "@/lib/permissions";
-import { capabilities } from "@/lib/providers";
+import { aiConfigured, AI_MODEL } from "@/lib/ai/claude";
 import { SettingsForms } from "./SettingsForms";
 
 export const metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const ctx = await requireAppContext();
-  const caps = capabilities();
-  const rows: [string, string | null][] = [
-    ["Speech recognition", caps.stt ? `${caps.stt.name}${caps.stt.diarization ? " with speaker identification" : ""}` : null],
-    ["Translation", caps.translation?.name ?? null],
-    ["Voice generation", caps.tts?.name ?? null],
-    ["Voice cloning", caps.cloning?.name ?? null],
-    ["Lip synchronisation", null],
-    ["Rendering", "Built in (ffmpeg)"],
-  ];
+  const supabase = await createClient();
+  const [{ data: org }, { data: profile }] = await Promise.all([
+    supabase.from("organisations").select("currency, fiscal_year_start_month").eq("id", ctx.orgId).single(),
+    supabase.from("profiles").select("job_title").eq("id", ctx.userId).single(),
+  ]);
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <PageHeader title="Settings" description="Your profile, password and workspace." />
-      <SettingsForms fullName={ctx.fullName} email={ctx.email} orgName={ctx.orgName} canEditOrg={can(ctx.role, "team.manage")} roleLabel={ROLE_LABELS[ctx.role]} />
+    <div className="mx-auto max-w-5xl space-y-5">
+      <PageHeader title="Settings" description="Your profile, password and organisation." />
+      <SettingsTabs current="general" role={ctx.role} />
+      <SettingsForms fullName={ctx.fullName} jobTitle={profile?.job_title ?? ""} email={ctx.email} orgName={ctx.orgName} currency={org?.currency ?? "USD"} fiscal={org?.fiscal_year_start_month ?? 1} canEditOrg={can(ctx.role, "team.manage")} roleLabel={ROLE_LABELS[ctx.role]} />
       <section className="card p-6">
-        <h2 className="text-lg font-bold">Connected AI providers</h2>
-        <p className="mt-1 text-sm text-muted">Providers are configured with server environment variables. Features stay off until their provider is connected.</p>
+        <h2 className="text-lg font-bold">AI configuration</h2>
+        <p className="mt-1 text-sm text-muted">AI runs on the server only. Keys are never sent to the browser.</p>
         <dl className="mt-4 divide-y divide-line text-sm">
-          {rows.map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-4 py-2.5">
-              <dt className="text-body">{k}</dt>
-              <dd className={v ? "font-semibold text-navy" : "text-muted"}>{v ?? "Not connected"}</dd>
-            </div>
-          ))}
+          <div className="flex justify-between gap-4 py-2.5"><dt>Conversational assistant and agent summaries</dt><dd className={aiConfigured() ? "font-semibold text-success" : "text-muted"}>{aiConfigured() ? `Connected (${AI_MODEL})` : "Not configured"}</dd></div>
+          <div className="flex justify-between gap-4 py-2.5"><dt>Rule based intelligence, deal health, forecasting and agents</dt><dd className="font-semibold text-success">Always on</dd></div>
         </dl>
-        <p className="mt-3 text-xs text-muted">{caps.targetLanguages.length} target languages available with the current providers.</p>
       </section>
     </div>
   );
