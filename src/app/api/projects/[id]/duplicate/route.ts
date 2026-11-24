@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { handle, json, ApiError } from "@/lib/api";
 import { projectAccess } from "@/lib/access";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -30,7 +31,7 @@ export const POST = handle(async (_req: Request, { params }: { params: Promise<{
   const { data: media } = await admin.from("media_files").select("*").eq("project_id", id);
   for (const m of media ?? []) {
     const newPath = String(m.storage_path).replace(`${project.org_id}/${id}/`, `${project.org_id}/${copy.id}/`);
-    const { error: cpErr } = await admin.storage.from(m.bucket).copy(m.storage_path, newPath);
+    const { error: cpErr } = await admin.storage.from(bucketName(m.bucket)).copy(m.storage_path, newPath);
     if (cpErr) throw new ApiError(500, `Could not copy media: ${cpErr.message}`);
     const { id: _omit, created_at: _c, ...rest } = m;
     void _omit; void _c;

@@ -40,8 +40,8 @@ export function Workspace({ data }: { data: WorkspaceData }) {
       const sb = createClient();
       channel = sb
         .channel(`project-${project.id}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "processing_jobs", filter: `project_id=eq.${project.id}` }, () => refresh())
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "projects", filter: `id=eq.${project.id}` }, () => refresh())
+        .on("postgres_changes", { event: "*", schema: "linguadub", table: "processing_jobs", filter: `project_id=eq.${project.id}` }, () => refresh())
+        .on("postgres_changes", { event: "UPDATE", schema: "linguadub", table: "projects", filter: `id=eq.${project.id}` }, () => refresh())
         .subscribe();
     } catch {
       /* realtime unavailable: polling below keeps the view current */

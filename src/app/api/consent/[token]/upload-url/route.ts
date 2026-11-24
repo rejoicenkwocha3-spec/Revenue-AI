@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { z } from "zod";
 import { handle, json, parseBody, ApiError } from "@/lib/api";
 import { consentByToken } from "@/lib/consent-server";
@@ -20,8 +21,8 @@ export const POST = handle(async (req: Request, { params }: { params: Promise<{ 
   const ext = base.includes("webm") ? "webm" : base.includes("ogg") ? "ogg" : base.includes("wav") ? "wav" : base.includes("mp4") || base.includes("m4a") ? "m4a" : "mp3";
   const path = `${c.org_id}/consents/${c.id}.${ext}`;
   const admin = createAdminClient();
-  await admin.storage.from("voice-samples").remove([path]);
-  const { data, error } = await admin.storage.from("voice-samples").createSignedUploadUrl(path);
+  await admin.storage.from(bucketName("voice-samples")).remove([path]);
+  const { data, error } = await admin.storage.from(bucketName("voice-samples")).createSignedUploadUrl(path);
   if (error || !data) throw new ApiError(500, error?.message ?? "Could not prepare upload.");
   return json({ path, signedUrl: data.signedUrl });
 });

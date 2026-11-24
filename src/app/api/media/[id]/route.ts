@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { handle, json, ApiError, requireUser } from "@/lib/api";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { can } from "@/lib/permissions";
@@ -11,7 +12,7 @@ export const DELETE = handle(async (_req: Request, { params }: { params: Promise
   const membership = m && ctx.memberships.find((x) => x.orgId === m.org_id);
   if (!m || !membership) throw new ApiError(404, "File not found.");
   if (!can(membership.role, "project.delete")) throw new ApiError(403, "Your role does not allow deleting media.");
-  await admin.storage.from(m.bucket).remove([m.storage_path]);
+  await admin.storage.from(bucketName(m.bucket)).remove([m.storage_path]);
   await admin.from("media_files").delete().eq("id", id);
   if (m.project_id && m.kind !== "extracted_audio") {
     await admin.from("projects").update({ status: "draft", status_detail: "Source media was deleted. Upload a new file." }).eq("id", m.project_id);

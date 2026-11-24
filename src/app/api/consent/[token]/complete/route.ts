@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { z } from "zod";
 import { handle, json, ApiError } from "@/lib/api";
 import { consentByToken } from "@/lib/consent-server";
@@ -32,7 +33,7 @@ export const POST = handle(async (req: Request, { params }: { params: Promise<{ 
   if (norm(body.signatureName) !== norm(c.voice_owner_name)) throw new ApiError(400, `Type your full name exactly as shown: ${c.voice_owner_name}.`);
   if (!body.recordingPath.startsWith(`${c.org_id}/consents/${c.id}.`)) throw new ApiError(400, "Record the consent statement first.");
   const folder = `${c.org_id}/consents`;
-  const { data: listed } = await admin.storage.from("voice-samples").list(folder, { search: c.id });
+  const { data: listed } = await admin.storage.from(bucketName("voice-samples")).list(folder, { search: c.id });
   if (!listed?.some((o) => `${folder}/${o.name}` === body.recordingPath)) throw new ApiError(400, "The consent recording did not upload. Record it again.");
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;

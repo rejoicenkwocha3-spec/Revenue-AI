@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { z } from "zod";
 import { handle, json, parseBody, ApiError } from "@/lib/api";
 import { orgAccess } from "@/lib/access";
@@ -17,7 +18,7 @@ export const POST = handle(async (req: Request) => {
   if (c.status !== "verified") throw new ApiError(403, "The voice owner has not verified consent yet.");
   if (!SAMPLE_AUDIO_TYPES.includes(body.mimeType)) throw new ApiError(415, "Upload MP3, WAV, M4A, OGG, WEBM or FLAC audio.");
   const path = `${c.org_id}/samples/${c.id}/${Date.now()}_${safeFileName(body.fileName)}`;
-  const { data, error } = await admin.storage.from("voice-samples").createSignedUploadUrl(path);
+  const { data, error } = await admin.storage.from(bucketName("voice-samples")).createSignedUploadUrl(path);
   if (error || !data) throw new ApiError(500, error?.message ?? "Could not prepare upload.");
   return json({ path, signedUrl: data.signedUrl });
 });

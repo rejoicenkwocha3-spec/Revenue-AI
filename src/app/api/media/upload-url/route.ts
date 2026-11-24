@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { z } from "zod";
 import { handle, json, parseBody, ApiError } from "@/lib/api";
 import { projectAccess } from "@/lib/access";
@@ -23,7 +24,7 @@ export const POST = handle(async (req: Request) => {
   await assertStorageAvailable(project.org_id, body.sizeBytes);
   const objectPath = `${project.org_id}/${project.id}/original/${Date.now()}_${safeFileName(body.fileName)}`;
   const admin = createAdminClient();
-  const { data, error } = await admin.storage.from("media").createSignedUploadUrl(objectPath);
+  const { data, error } = await admin.storage.from(bucketName("media")).createSignedUploadUrl(objectPath);
   if (error || !data) throw new ApiError(500, `Could not prepare the upload: ${error?.message}`);
   return json({ path: objectPath, token: data.token, signedUrl: data.signedUrl, kind });
 });

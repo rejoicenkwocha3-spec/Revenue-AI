@@ -1,6 +1,8 @@
 # Deploy LinguaDub in 6 steps
 
-1. **Supabase:** create a project. In the SQL editor, run `supabase/migrations/0001_linguadub_schema.sql`.
+1. **Supabase:** use a new project or an existing one. LinguaDub keeps everything in its own `linguadub` schema and its own `linguadub-*` file buckets, so it does not touch other apps' tables, policies, users or files.
+   In the SQL editor, run `supabase/migrations/0001_linguadub_schema.sql` (safe to run again).
+   **Then expose the schema:** Project Settings > API (Data API) > **Exposed schemas**: add `linguadub`, and save. Without this the app cannot read its tables.
    Authentication > URL Configuration: set Site URL to your live domain and add `https://YOUR-DOMAIN/**` to Redirect URLs.
    Storage settings: raise the file size limit if you accept large videos.
 2. **Vercel:** Add New Project, import this repository, choose the branch to publish.

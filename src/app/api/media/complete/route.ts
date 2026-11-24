@@ -1,3 +1,4 @@
+import { bucketName } from "@/config/buckets";
 import { z } from "zod";
 import { handle, json, parseBody, ApiError } from "@/lib/api";
 import { projectAccess } from "@/lib/access";
@@ -26,7 +27,7 @@ export const POST = handle(async (req: Request) => {
   const admin = createAdminClient();
   const folder = body.path.slice(0, body.path.lastIndexOf("/"));
   const name = body.path.slice(body.path.lastIndexOf("/") + 1);
-  const { data: listed } = await admin.storage.from("media").list(folder, { search: name, limit: 5 });
+  const { data: listed } = await admin.storage.from(bucketName("media")).list(folder, { search: name, limit: 5 });
   const obj = listed?.find((o) => o.name === name);
   if (!obj) throw new ApiError(400, "The upload did not finish. Try again.");
   const size = Number((obj.metadata as { size?: number } | null)?.size ?? 0);
@@ -34,7 +35,7 @@ export const POST = handle(async (req: Request) => {
   // One source file per project: replace any earlier upload.
   const { data: previous } = await admin.from("media_files").select("id, storage_path, bucket").eq("project_id", project.id).in("kind", ["video", "audio"]);
   if (previous?.length) {
-    await admin.storage.from("media").remove(previous.map((p) => p.storage_path));
+    await admin.storage.from(bucketName("media")).remove(previous.map((p) => p.storage_path));
     await admin.from("media_files").delete().in("id", previous.map((p) => p.id));
   }
   const { data, error } = await admin

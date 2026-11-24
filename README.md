@@ -78,7 +78,7 @@ A feature only switches on when its provider key is present. Languages shown in 
 
 1. **Install:** `npm install`
 2. **Create a Supabase project.**
-3. **Run the migration:** paste `supabase/migrations/0001_linguadub_schema.sql` into the SQL editor, or run `supabase db push`. It creates every table, RLS policy, the private storage buckets (`media`, `generated`, `exports`, `voice-samples`), the job queue function and Realtime publication entries. It can be re-run safely.
+3. **Run the migration and expose the schema:** LinguaDub lives in its own `linguadub` Postgres schema with `linguadub-*` storage buckets, so it can share a project with other apps. After running the SQL, add `linguadub` under Project Settings > API > Exposed schemas. Paste `supabase/migrations/0001_linguadub_schema.sql` into the SQL editor, or run `supabase db push`. It creates every table, RLS policy, the private storage buckets (`media`, `generated`, `exports`, `voice-samples`), the job queue function and Realtime publication entries. It can be re-run safely.
 4. **Configure Auth** (Authentication settings):
    - Site URL: your production URL.
    - Redirect URLs: add `https://YOUR_DOMAIN/**` and `http://localhost:3000/**`.
