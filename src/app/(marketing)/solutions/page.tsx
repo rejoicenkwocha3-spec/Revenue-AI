@@ -31,7 +31,7 @@ export default function SolutionsPage() {
               <p className="mt-3 text-sm"><span className="font-semibold text-ink">The challenge:</span> <span className="text-body">{s.challenge}</span></p>
               <p className="mt-4 text-xs font-bold uppercase tracking-wide text-muted">How Revenue AI helps</p>
               <ul className="mt-2 space-y-2">{s.solves.map((x) => <li key={x} className="flex gap-2.5 text-sm text-ink"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue" />{x}</li>)}</ul>
-              <Link href="/signup" className="btn btn-outline btn-sm mt-6">Get started for {s.title} <ArrowRight size={14} /></Link>
+              <Link href="/signup" className="btn btn-outline btn-sm mt-6 whitespace-normal text-left">Get started for {s.title} <ArrowRight size={14} /></Link>
             </article>
           ))}
         </div>

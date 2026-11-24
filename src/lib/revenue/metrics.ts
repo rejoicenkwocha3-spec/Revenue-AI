@@ -150,14 +150,25 @@ export function funnel(d: OrgData) {
   });
 }
 
-/** Share of closed deals that reached or passed each stage and went on to win. */
+/**
+ * Share of closed deals that reached each open stage and went on to win.
+ * Won deals passed every stage. A lost deal reached the open stage it was lost from, taken from stage history;
+ * when history is missing it is counted as reaching only the first stage.
+ */
 export function stageConversion(d: OrgData) {
-  const positions = new Map(d.stages.map((s) => [s.id, s.position]));
+  const open = d.stages.filter((s) => s.kind === "open");
+  const lostStageNames = new Set(d.stages.filter((s) => s.kind === "lost").map((s) => s.name));
+  const firstPos = open[0]?.position ?? 0;
+  const lostFrom = new Map<string, number>();
+  for (const h of [...d.history].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
+    if (h.field === "stage" && h.new_value && lostStageNames.has(h.new_value) && h.old_value) {
+      const pos = open.find((s) => s.name === h.old_value)?.position;
+      if (pos != null) lostFrom.set(h.opportunity_id, pos);
+    }
+  }
   const closed = d.opportunities.filter((o) => o.status !== "open");
-  return d.stages.filter((s) => s.kind === "open").map((s) => {
-    // A closed deal "reached" a stage if it won (passed every stage) or was lost at or after this stage.
-    // Lost deals keep the stage they were lost in only as their final stage, so this is an approximation stated in the UI.
-    const reached = closed.filter((o) => o.status === "won" || (o.stage_id && (positions.get(o.stage_id) ?? 0) >= s.position));
+  return open.map((s) => {
+    const reached = closed.filter((o) => o.status === "won" || (lostFrom.get(o.id) ?? firstPos) >= s.position);
     const won = reached.filter((o) => o.status === "won");
     return { stage: s.name, reached: reached.length, won: won.length, rate: reached.length ? (won.length / reached.length) * 100 : null };
   });

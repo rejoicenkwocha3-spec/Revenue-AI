@@ -48,7 +48,7 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
       ) : (
         <Board currency={data.currency} stages={openStages.map((x) => ({ id: x.id, name: x.name, kind: x.kind, probability: x.probability }))} deals={rows.filter((r) => r.status === "open")} />
       )}
-      <Card title="Pipeline conversion" description="Share of closed deals that reached each stage and were won. Based on each closed deal's final stage, so it approximates true stage to stage conversion.">
+      <Card title="Pipeline conversion" description="Share of closed deals that reached each stage and were won. Lost deals count up to the stage they were lost from, using stage history.">
         {conv.length ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {conv.map((c) => <div key={c.stage} className="rounded-lg bg-canvas p-3"><p className="text-xs text-muted">{c.stage}</p><p className="font-display text-xl font-extrabold text-navy">{pct(c.rate)}</p><p className="text-xs text-muted">{c.won} won of {c.reached}</p></div>)}
