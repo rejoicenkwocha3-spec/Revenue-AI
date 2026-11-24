@@ -50,7 +50,7 @@ export function LoginForm() {
   return (
     <div>
       <h1 className="text-3xl font-extrabold">Welcome back</h1>
-      <p className="mt-2 text-muted">Log in to your LinguaDub workspace.</p>
+      <p className="mt-2 text-muted">Log in to your Revenue AI organisation.</p>
       <form onSubmit={onSubmit} className="mt-8 space-y-4" noValidate>
         {!supabaseReady() && <NotConfigured />}
         {verified && <FormMessage kind="success">Your email is verified. Log in to continue.</FormMessage>}
@@ -65,7 +65,7 @@ export function LoginForm() {
         <SubmitButton loading={loading}>Log in</SubmitButton>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
-        New to LinguaDub? <Link href="/signup" className="font-semibold text-blue hover:underline">Create an account</Link>
+        New to Revenue AI? <Link href="/signup" className="font-semibold text-blue hover:underline">Create an account</Link>
       </p>
     </div>
   );

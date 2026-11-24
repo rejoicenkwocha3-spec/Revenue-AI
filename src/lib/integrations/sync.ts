@@ -50,10 +50,6 @@ async function stageResolver(orgId: string, mapping: Record<string, unknown>) {
 
 const lookup = (rows: { id: string; external_id: string }[]) => new Map(rows.map((r) => [r.external_id, r.id]));
 
-async function existingMap(table: string, orgId: string, source: string) {
-  const { data } = await createAdminClient().from(table).select("id, external_id").eq("org_id", orgId).eq("external_source", source).limit(50000);
-  return lookup((data ?? []) as { id: string; external_id: string }[]);
-}
 
 async function syncHubspot(x: Ctx, c: Counters) {
   const { token } = await accessToken(x.integrationId, x.key);

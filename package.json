@@ -1,5 +1,5 @@
 {
-  "name": "linguadub",
+  "name": "revenue-ai",
   "version": "1.0.0",
   "private": true,
   "engines": {
@@ -10,7 +10,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "worker": "node scripts/worker.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

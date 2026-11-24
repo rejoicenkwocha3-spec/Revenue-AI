@@ -170,7 +170,7 @@ export default async function DealPage({ params }: { params: Promise<{ id: strin
           <Card title="Change history">
             {history.length ? <ul className="space-y-2 text-xs">{history.slice(0, 12).map((x, i) => <li key={i} className="text-body"><span className="font-semibold capitalize text-ink">{x.field.replace("_", " ")}</span> {x.old_value ? `${x.old_value} to ` : ""}{x.new_value ?? "cleared"} <span className="text-muted">· {timeAgo(x.created_at)}</span></li>)}</ul> : <p className="text-sm text-muted">No changes recorded yet.</p>}
           </Card>
-          {o.status === "open" && h.factors.length > 0 && <Notice>Deal health is a rule based assessment of the recorded data, not a prediction of the buyer's decision.</Notice>}
+          {o.status === "open" && h.factors.length > 0 && <Notice>Deal health is a rule based assessment of the recorded data, not a prediction of the buyer&apos;s decision.</Notice>}
         </div>
       </div>
     </div>

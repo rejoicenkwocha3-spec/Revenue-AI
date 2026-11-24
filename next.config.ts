@@ -1,15 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // ffmpeg-static ships a native binary that must stay outside the server bundle.
-  serverExternalPackages: ["ffmpeg-static"],
-  outputFileTracingIncludes: {
-    "/api/jobs/**": ["./node_modules/ffmpeg-static/ffmpeg"],
-    "/api/projects/**": ["./node_modules/ffmpeg-static/ffmpeg"],
-    "/api/media/**": ["./node_modules/ffmpeg-static/ffmpeg"],
-  },
-  experimental: {
-    serverActions: { bodySizeLimit: "4mb" },
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
   },
 };
 

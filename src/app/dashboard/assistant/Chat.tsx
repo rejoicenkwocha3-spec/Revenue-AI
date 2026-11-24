@@ -54,7 +54,7 @@ export function Chat({ initialQuestion, conversationId: initialConv, history, ai
       setError((e as Error).message);
     } finally { setBusy(false); }
   }
-  useEffect(() => { if (initialQuestion && !asked.current) { asked.current = true; ask(initialQuestion); } }); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (initialQuestion && !asked.current) { asked.current = true; ask(initialQuestion); } });
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, busy]);
 
   return (
@@ -62,7 +62,7 @@ export function Chat({ initialQuestion, conversationId: initialConv, history, ai
       <div className="flex-1 space-y-4 overflow-y-auto p-5">
         {msgs.length === 0 && (
           <div>
-            <p className="text-sm text-muted">Ask about your pipeline, forecast, deals, customers or team. Answers use only your organisation's records{aiOn ? "" : " and are computed directly from them"}.</p>
+            <p className="text-sm text-muted">Ask about your pipeline, forecast, deals, customers or team. Answers use only your organisation&apos;s records{aiOn ? "" : " and are computed directly from them"}.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {EXAMPLES.map((e) => <button key={e} type="button" onClick={() => ask(e)} className="rounded-full border border-line bg-white px-3 py-1.5 text-left text-xs font-medium text-ink hover:border-blue hover:text-blue">{e}</button>)}
             </div>

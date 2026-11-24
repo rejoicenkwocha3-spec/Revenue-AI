@@ -10,7 +10,7 @@ export function SignupForm() {
   const router = useRouter();
   const params = useSearchParams();
   const invite = params.get("invite");
-  const [form, setForm] = useState({ name: "", email: params.get("email") ?? "", password: "", workspace: "" });
+  const [form, setForm] = useState({ name: "", email: params.get("email") ?? "", password: "", workspace: "", title: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export function SignupForm() {
         password: form.password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-          data: { full_name: form.name.trim(), workspace_name: form.workspace.trim() || undefined },
+          data: { full_name: form.name.trim(), company_name: form.workspace.trim() || undefined, job_title: form.title.trim() || undefined },
         },
       });
       if (error) throw error;
@@ -57,7 +57,7 @@ export function SignupForm() {
   if (sent) {
     return (
       <div className="text-center">
-        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-lavender text-purple"><MailCheck size={26} /></span>
+        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue"><MailCheck size={26} /></span>
         <h1 className="mt-6 text-3xl font-extrabold">Check your email</h1>
         <p className="mt-3 text-muted">
           We sent a verification link to <span className="font-semibold text-navy">{form.email}</span>. Open it to activate your account.
@@ -70,17 +70,18 @@ export function SignupForm() {
   return (
     <div>
       <h1 className="text-3xl font-extrabold">Create your account</h1>
-      <p className="mt-2 text-muted">Start dubbing your content into new languages.</p>
+      <p className="mt-2 text-muted">Bring your pipeline, forecasts and revenue insights together.</p>
       <form onSubmit={onSubmit} className="mt-8 space-y-4" noValidate>
         {!supabaseReady() && <NotConfigured />}
-        {invite && <FormMessage kind="info">Create an account with the invited email address to join the team.</FormMessage>}
+        {invite && <FormMessage kind="info">Create an account with the invited email address to join the organisation.</FormMessage>}
         {error && <FormMessage kind="error">{error}</FormMessage>}
         <Field id="name" label="Full name" autoComplete="name" value={form.name} onChange={set("name")} error={errors.name} />
         <Field id="email" label="Work email" type="email" autoComplete="email" value={form.email} onChange={set("email")} error={errors.email} />
         <Field id="password" label="Password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} error={errors.password} placeholder="At least 8 characters" />
-        {!invite && <Field id="workspace" label="Workspace name (optional)" value={form.workspace} onChange={set("workspace")} placeholder="Acme Studios" />}
+        {!invite && <Field id="workspace" label="Company name" value={form.workspace} onChange={set("workspace")} placeholder="Acme Inc" />}
+        <Field id="title" label="Job title (optional)" value={form.title} onChange={set("title")} placeholder="VP of Sales" />
         <SubmitButton loading={loading}>Create account</SubmitButton>
-        <p className="text-center text-xs text-muted">By creating an account you agree to use voice features only with the permission of each voice owner.</p>
+        <p className="text-center text-xs text-muted">You will verify your email before your organisation is activated.</p>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account? <Link href="/login" className="font-semibold text-blue hover:underline">Log in</Link>

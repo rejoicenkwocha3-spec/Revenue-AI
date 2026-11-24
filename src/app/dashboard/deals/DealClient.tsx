@@ -29,7 +29,7 @@ export function StakeholderAdd({ oppId, contacts }: { oppId: string; contacts: {
   const [id, setId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (!contacts.length) return <p className="mt-3 text-xs text-muted">Add contacts to this deal's account to link them as stakeholders.</p>;
+  if (!contacts.length) return <p className="mt-3 text-xs text-muted">Add contacts to this deal&apos;s account to link them as stakeholders.</p>;
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
       <label htmlFor="stakeholder" className="sr-only">Contact</label>
