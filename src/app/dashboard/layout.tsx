@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Sidebar } from "@/components/app/Sidebar";
 import { Topbar } from "@/components/app/Topbar";
 import { getAppContext } from "@/lib/session";
@@ -10,6 +11,7 @@ import { SetupRequired } from "@/components/app/SetupRequired";
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s | LinguaDub" } };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  await connection();
   if (!supabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) return <SetupRequired />;
   const ctx = await getAppContext();
   if (!ctx) redirect("/login");

@@ -395,6 +395,7 @@ create table if not exists public.payment_events (
   id uuid primary key default gen_random_uuid(),
   provider text not null,
   event_id text not null,
+  org_id uuid references public.organisations(id) on delete set null,
   customer_email text,
   plan_id text,
   amount numeric,
@@ -576,7 +577,7 @@ create policy favs_all on public.voice_favourites for all using (user_id = auth.
   with check (user_id = auth.uid() and public.is_org_member(org_id));
 create policy notifications_select on public.notifications for select using (user_id = auth.uid());
 create policy notifications_update on public.notifications for update using (user_id = auth.uid()) with check (user_id = auth.uid());
--- payment_events: no client access (service role only)
+create policy payments_select on public.payment_events for select using (org_id is not null and public.can_admin(org_id));
 
 -- ============================================================
 -- STORAGE: private buckets, first path segment is the org id
