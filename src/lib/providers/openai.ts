@@ -2,7 +2,8 @@ import { providerFetch, normaliseLanguage } from "./http";
 import type { SpeechToTextProvider, TextToSpeechProvider, TranslationProvider, VoiceInfo, SynthesisInput } from "./types";
 import { LANGUAGES, languageName } from "@/config/languages";
 
-const BASE = "https://api.openai.com/v1";
+// OPENAI_BASE_URL allows OpenAI compatible gateways (for example Azure or a corporate proxy).
+const BASE = (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
 const ID = "openai";
 const auth = () => ({ authorization: `Bearer ${process.env.OPENAI_API_KEY}` });
 

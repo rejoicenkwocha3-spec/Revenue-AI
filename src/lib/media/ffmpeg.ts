@@ -132,12 +132,15 @@ export async function buildTrack(params: {
 }
 
 /** Replaces the audio of a video with the dubbed track, optionally embedding a subtitle stream. */
-export async function muxVideo(params: { video: string; audio: string; output: string; subtitles?: { file: string; language: string } | null }) {
+export async function muxVideo(params: { video: string; audio: string; output: string; subtitles?: { file: string; language: string } | null; durationSeconds?: number | null }) {
   const args = ["-y", "-i", params.video, "-i", params.audio];
   if (params.subtitles) args.push("-i", params.subtitles.file);
   args.push("-map", "0:v:0", "-map", "1:a:0");
   if (params.subtitles) args.push("-map", "2:s:0", "-c:s", "mov_text", "-metadata:s:s:0", `language=${params.subtitles.language}`);
-  args.push("-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", params.output);
+  // No -shortest: the subtitle stream ends at the last cue and would cut the video short.
+  // The dub track is built to the full media length, so the output keeps the original duration.
+  if (params.durationSeconds) args.push("-t", params.durationSeconds.toFixed(3));
+  args.push("-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", params.output);
   await runFfmpeg(args);
 }
 

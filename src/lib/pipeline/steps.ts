@@ -319,7 +319,8 @@ async function generateStep(job: JobRow, deadline: number): Promise<StepResult> 
     if (done.get(seg.id as string) === h) { skipped++; continue; }
 
     if (Date.now() > deadline - 25_000) {
-      throw new JobDeferred({ generated, remaining: ordered.length - generated - skipped });
+      const prev = Number(((job.result ?? {}) as { generatedTotal?: number }).generatedTotal ?? 0);
+      throw new JobDeferred({ generatedTotal: prev + generated, remaining: ordered.length - generated - skipped });
     }
     const audio = await provider.synthesize({ text, voiceId: sp.voice_id as string, language: target, emotion, accent: sp.accent as string | null });
     const objectPath = `${job.org_id}/${job.project_id}/${target}/segments/${seg.id}.mp3`;
@@ -340,14 +341,19 @@ async function generateStep(job: JobRow, deadline: number): Promise<StepResult> 
     generated++;
   }
 
-  // Bill the dubbed minutes once per completed generation run.
+  // Bill once per completed run, in proportion to the lines actually voiced: unchanged lines reuse
+  // their audio and are not charged again. A first full generation bills the full media length.
   const project = await getProject(job.project_id);
-  const minutes = Math.ceil(((Number(project.duration_seconds) || 0) / 60) * 10) / 10;
+  const progress = (job.result ?? {}) as { generatedTotal?: number };
+  const voicedTotal = generated + Number(progress.generatedTotal ?? 0);
+  const voiceable = ordered.filter((s) => String(s.text ?? "").trim()).length || 1;
+  const fullMinutes = ((Number(project.duration_seconds) || 0) / 60) * Math.min(1, voicedTotal / voiceable);
+  const minutes = voicedTotal ? Math.max(0.1, Math.ceil(fullMinutes * 10) / 10) : 0;
   const { data: billed } = await admin.from("usage_records").select("id").eq("job_id", job.id).limit(1);
-  if (!billed?.length) {
+  if (!billed?.length && minutes > 0) {
     await admin.from("usage_records").insert({ org_id: job.org_id, project_id: job.project_id, job_id: job.id, kind: "dub_minutes", quantity: minutes });
   }
-  return { result: { generated, skipped, minutes }, next: [{ type: "synchronise", targetLanguage: target }] };
+  return { result: { generated: voicedTotal, skipped: Math.max(0, skipped - Number(progress.generatedTotal ?? 0)), minutes }, next: [{ type: "synchronise", targetLanguage: target }] };
 }
 
 /* STEP 9: align generated speech with the original timing. */
@@ -502,11 +508,11 @@ async function renderStep(job: JobRow): Promise<StepResult> {
       }
       const out = path.join(dir, `${base}.mp4`);
       try {
-        await muxVideo({ video, audio: trackFile, output: out, subtitles });
+        await muxVideo({ video, audio: trackFile, output: out, subtitles, durationSeconds: Number(project.duration_seconds) || null });
       } catch (e) {
         // Some containers reject a copied video stream with soft subtitles: retry without embedding.
         if (!subtitles) throw e;
-        await muxVideo({ video, audio: trackFile, output: out, subtitles: null });
+        await muxVideo({ video, audio: trackFile, output: out, subtitles: null, durationSeconds: Number(project.duration_seconds) || null });
       }
       const p = `${prefix}/${base}.mp4`;
       await uploadFile(BUCKETS.exports, p, out, "video/mp4");
