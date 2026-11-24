@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Film, AudioLines, Languages, Loader2, Play, Pause, Pencil, Check, RefreshCcw, Wand2, Download, AlertTriangle, CircleCheck, Clock3, UploadCloud,
@@ -249,50 +249,18 @@ export function Inspector({
   refresh: () => void;
   currentAudioPath: string | null;
 }) {
-  const [text, setText] = useState("");
-  const [source, setSource] = useState("");
-  const [timing, setTiming] = useState({ start: 0, end: 0, speed: 1, pause: 0, offset: 0 });
-  const [emotion, setEmotion] = useState<string>("");
-  const [saving, setSaving] = useState(false);
   const [gen, setGen] = useState(false);
   const [embed, setEmbed] = useState(true);
-  const [audio] = useState(() => (typeof Audio !== "undefined" ? new Audio() : null));
-
-  useEffect(() => {
-    setText(translation?.text ?? "");
-    setSource(segment?.source_text ?? "");
-    setEmotion(translation?.emotion ?? "");
-    setTiming(translation ? { start: translation.start_ms, end: translation.end_ms, speed: translation.speed, pause: translation.pause_ms, offset: translation.offset_ms } : { start: segment?.start_ms ?? 0, end: segment?.end_ms ?? 0, speed: 1, pause: 0, offset: 0 });
-  }, [translation, segment]);
-
-  const can = data.permissions.translate;
-  const speaker = data.speakers.find((s) => s.id === segment?.speaker_id);
-  const dirty = translation && (text !== translation.text || emotion !== (translation.emotion ?? "") || timing.start !== translation.start_ms || timing.end !== translation.end_ms || timing.speed !== translation.speed || timing.pause !== translation.pause_ms || timing.offset !== translation.offset_ms);
-
-  async function save(status?: "approved" | "edited") {
-    if (!translation) return;
-    setSaving(true);
-    onError(null);
-    try {
-      if (source !== segment?.source_text && segment) await api(`/api/transcript-segments/${segment.id}`, { method: "PATCH", body: { text: source } });
-      const r = await api<{ segment: WsTranslation }>(`/api/segments/${translation.id}`, {
-        method: "PATCH",
-        body: { text, emotion: emotion || null, startMs: timing.start, endMs: timing.end, speed: timing.speed, pauseMs: timing.pause, offsetMs: timing.offset, ...(status ? { status } : {}) },
-      });
-      onSaved({ ...r.segment, speed: Number(r.segment.speed) });
-    } catch (e) {
-      onError((e as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   const langJobs = data.jobs.filter((j) => j.target_language === lang);
   const running = data.jobs.some((j) => j.status === "queued" || j.status === "running");
   const trCount = data.translations.filter((t) => t.target_language === lang).length;
   const unassigned = data.speakers.filter((s) => !s.voice_id);
   const minutes = Math.ceil(((data.project.durationSeconds ?? 0) / 60) * 10) / 10;
   const lastGen = langJobs.find((j) => j.type === "generate_voice");
+  // Remount the editor whenever the line or its saved values change, so drafts start from the latest data.
+  const editorKey = translation
+    ? [translation.id, translation.text, translation.status, translation.start_ms, translation.end_ms, translation.speed, translation.pause_ms, translation.offset_ms, translation.emotion, segment?.source_text].join("|")
+    : `seg:${segment?.id ?? "none"}:${segment?.source_text ?? ""}`;
 
   return (
     <div>
@@ -303,7 +271,7 @@ export function Inspector({
               <Check1 ok={trCount > 0} label={trCount ? `${trCount} translated lines` : "Translation not ready"} />
               <Check1 ok={data.speakers.length > 0 && unassigned.length === 0} label={unassigned.length ? `${unassigned.length} speaker${unassigned.length > 1 ? "s" : ""} without a voice` : "Every speaker has a voice"} />
               <Check1 ok={!!data.caps.ttsProvider} label={data.caps.ttsProvider ? `Voices by ${data.caps.ttsProvider}` : "No voice provider configured"} />
-              <Check1 ok={minutes <= data.limits.minutesRemaining} label={`Uses ${minutes} min of ${data.limits.minutesRemaining.toFixed(1)} remaining`} />
+              <Check1 ok={minutes <= data.limits.minutesRemaining} label={`Uses up to ${minutes} min of ${data.limits.minutesRemaining.toFixed(1)} remaining`} />
             </ul>
             {data.project.mediaKind === "video" && (
               <label className="mt-3 flex items-center gap-2 text-sm text-body"><input type="checkbox" checked={embed} onChange={(e) => setEmbed(e.target.checked)} /> Embed subtitles in the MP4</label>
@@ -322,64 +290,121 @@ export function Inspector({
               </button>
             )}
             {minutes > data.limits.minutesRemaining && <p className="mt-2 text-xs text-danger">Not enough minutes left. <Link href="/dashboard/billing" className="underline">Upgrade your plan</Link>.</p>}
-            <p className="mt-2 text-xs text-muted">Unchanged lines reuse their audio, so regenerating after edits only voices what changed.</p>
+            <p className="mt-2 text-xs text-muted">Unchanged lines reuse their audio and are not billed again, so regenerating after edits only voices what changed.</p>
           </>
         )}
       </Section>
 
       <Section title={segment ? `Line ${segment.idx + 1}` : "Line editor"}>
         {!segment ? <p className="text-sm text-muted">Select a line on the timeline or in the dialogue list.</p> : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="chip" style={{ background: `${speaker?.color ?? "#2463EB"}1F`, color: speaker?.color ?? "#2463EB" }}>{speaker?.display_name ?? "Speaker"}</span>
-              <span className="font-mono text-muted">{formatMs(segment.start_ms)} · {formatMs(segment.end_ms)}</span>
-            </div>
-            <div>
-              <label htmlFor="src" className="label text-xs">Original</label>
-              <textarea id="src" disabled={!can} className="input min-h-[64px] text-sm" value={source} onChange={(e) => setSource(e.target.value)} />
-            </div>
-            {!translation ? <p className="text-sm text-muted">No {lang ? languageName(lang) : ""} translation for this line yet.</p> : (
-              <>
-                <div>
-                  <label htmlFor="tr" className="label text-xs flex justify-between"><span>{languageName(lang)}</span><span className={cn("font-normal", translation.status === "approved" ? "text-success" : "text-muted")}>{cap(translation.status)}</span></label>
-                  <textarea id="tr" disabled={!can} className="input min-h-[84px] text-sm" value={text} onChange={(e) => setText(e.target.value)} />
-                  <p className="mt-1 text-[11px] text-muted tabular-nums">{text.length} characters · original {segment.source_text.length}</p>
-                </div>
-                <div>
-                  <label htmlFor="emo" className="label text-xs">Emotion</label>
-                  <select id="emo" disabled={!can} className="input py-1.5 text-sm" value={emotion} onChange={(e) => setEmotion(e.target.value)}>
-                    <option value="">Use speaker setting ({cap(speaker?.emotion ?? "neutral")})</option>
-                    {EMOTIONS.map((e) => <option key={e} value={e}>{cap(e)}</option>)}
-                  </select>
-                </div>
-                <fieldset className="grid grid-cols-2 gap-2" disabled={!can}>
-                  <legend className="label text-xs">Timing</legend>
-                  <NumField id="st" label="Start (s)" value={timing.start / 1000} step={0.01} onChange={(v) => setTiming((t) => ({ ...t, start: Math.round(v * 1000) }))} />
-                  <NumField id="en" label="End (s)" value={timing.end / 1000} step={0.01} onChange={(v) => setTiming((t) => ({ ...t, end: Math.round(v * 1000) }))} />
-                  <NumField id="pa" label="Pause (ms)" value={timing.pause} step={50} onChange={(v) => setTiming((t) => ({ ...t, pause: Math.round(v) }))} />
-                  <NumField id="of" label="Offset (ms)" value={timing.offset} step={50} onChange={(v) => setTiming((t) => ({ ...t, offset: Math.round(v) }))} />
-                  <div className="col-span-2">
-                    <label htmlFor="sp" className="flex justify-between text-xs text-muted"><span>Speed</span><span className="tabular-nums">{timing.speed.toFixed(2)}x</span></label>
-                    <input id="sp" type="range" min={0.5} max={2} step={0.05} value={timing.speed} className="w-full accent-[#7047EB]" onChange={(e) => setTiming((t) => ({ ...t, speed: Number(e.target.value) }))} />
-                  </div>
-                  <p className="col-span-2 text-[11px] text-muted tabular-nums">Segment duration {((timing.end - timing.start) / 1000).toFixed(2)} s</p>
-                </fieldset>
-                {can && (
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className="btn btn-outline btn-sm flex-1" disabled={saving || !dirty} onClick={() => save()}>{saving ? <Loader2 size={14} className="ld-spin" /> : null} Save</button>
-                    <button type="button" className="btn btn-dark btn-sm flex-1" disabled={saving || translation.status === "approved" && !dirty} onClick={() => save("approved")}><Check size={14} /> Approve line</button>
-                  </div>
-                )}
-                {currentAudioPath && audio && (
-                  <button type="button" className="btn btn-ghost btn-sm w-full" onClick={async () => { audio.src = await openSigned("generated", currentAudioPath); audio.play(); }}>
-                    <Play size={14} /> Play generated line
-                  </button>
-                )}
-              </>
-            )}
-          </div>
+          <LineEditor key={editorKey} data={data} lang={lang} segment={segment} translation={translation} onSaved={onSaved} onError={onError} currentAudioPath={currentAudioPath} />
         )}
       </Section>
+    </div>
+  );
+}
+
+function LineEditor({
+  data, lang, segment, translation, onSaved, onError, currentAudioPath,
+}: {
+  data: WorkspaceData;
+  lang: string | null;
+  segment: WsSegment;
+  translation: WsTranslation | null;
+  onSaved: (t: WsTranslation) => void;
+  onError: (m: string | null) => void;
+  currentAudioPath: string | null;
+}) {
+  const [text, setText] = useState(translation?.text ?? "");
+  const [source, setSource] = useState(segment.source_text);
+  const [emotion, setEmotion] = useState<string>(translation?.emotion ?? "");
+  const [timing, setTiming] = useState(() =>
+    translation
+      ? { start: translation.start_ms, end: translation.end_ms, speed: translation.speed, pause: translation.pause_ms, offset: translation.offset_ms }
+      : { start: segment.start_ms, end: segment.end_ms, speed: 1, pause: 0, offset: 0 },
+  );
+  const [saving, setSaving] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const can = data.permissions.translate;
+  const speaker = data.speakers.find((s) => s.id === segment.speaker_id);
+  const dirty =
+    !!translation &&
+    (text !== translation.text || source !== segment.source_text || emotion !== (translation.emotion ?? "") || timing.start !== translation.start_ms || timing.end !== translation.end_ms ||
+      timing.speed !== translation.speed || timing.pause !== translation.pause_ms || timing.offset !== translation.offset_ms);
+
+  async function save(status?: "approved" | "edited") {
+    if (!translation) return;
+    setSaving(true);
+    onError(null);
+    try {
+      if (source !== segment.source_text) await api(`/api/transcript-segments/${segment.id}`, { method: "PATCH", body: { text: source } });
+      const r = await api<{ segment: WsTranslation }>(`/api/segments/${translation.id}`, {
+        method: "PATCH",
+        body: { text, emotion: emotion || null, startMs: timing.start, endMs: timing.end, speed: timing.speed, pauseMs: timing.pause, offsetMs: timing.offset, ...(status ? { status } : {}) },
+      });
+      onSaved({ ...r.segment, speed: Number(r.segment.speed) });
+    } catch (e) {
+      onError((e as Error).message);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-xs">
+        <span className="chip" style={{ background: `${speaker?.color ?? "#2463EB"}1F`, color: speaker?.color ?? "#2463EB" }}>{speaker?.display_name ?? "Speaker"}</span>
+        <span className="font-mono text-muted">{formatMs(segment.start_ms)} · {formatMs(segment.end_ms)}</span>
+      </div>
+      <div>
+        <label htmlFor="src" className="label text-xs">Original</label>
+        <textarea id="src" disabled={!can} className="input min-h-[64px] text-sm" value={source} onChange={(e) => setSource(e.target.value)} />
+      </div>
+      {!translation ? <p className="text-sm text-muted">No {lang ? languageName(lang) : ""} translation for this line yet.</p> : (
+        <>
+          <div>
+            <label htmlFor="tr" className="label text-xs flex justify-between"><span>{languageName(lang)}</span><span className={cn("font-normal", translation.status === "approved" ? "text-success" : "text-muted")}>{cap(translation.status)}</span></label>
+            <textarea id="tr" disabled={!can} className="input min-h-[84px] text-sm" value={text} onChange={(e) => setText(e.target.value)} />
+            <p className="mt-1 text-[11px] text-muted tabular-nums">{text.length} characters · original {segment.source_text.length}</p>
+          </div>
+          <div>
+            <label htmlFor="emo" className="label text-xs">Emotion</label>
+            <select id="emo" disabled={!can} className="input py-1.5 text-sm" value={emotion} onChange={(e) => setEmotion(e.target.value)}>
+              <option value="">Use speaker setting ({cap(speaker?.emotion ?? "neutral")})</option>
+              {EMOTIONS.map((e) => <option key={e} value={e}>{cap(e)}</option>)}
+            </select>
+          </div>
+          <fieldset className="grid grid-cols-2 gap-2" disabled={!can}>
+            <legend className="label text-xs">Timing</legend>
+            <NumField id="st" label="Start (s)" value={timing.start / 1000} step={0.01} onChange={(v) => setTiming((t) => ({ ...t, start: Math.round(v * 1000) }))} />
+            <NumField id="en" label="End (s)" value={timing.end / 1000} step={0.01} onChange={(v) => setTiming((t) => ({ ...t, end: Math.round(v * 1000) }))} />
+            <NumField id="pa" label="Pause (ms)" value={timing.pause} step={50} onChange={(v) => setTiming((t) => ({ ...t, pause: Math.round(v) }))} />
+            <NumField id="of" label="Offset (ms)" value={timing.offset} step={50} onChange={(v) => setTiming((t) => ({ ...t, offset: Math.round(v) }))} />
+            <div className="col-span-2">
+              <label htmlFor="sp" className="flex justify-between text-xs text-muted"><span>Speed</span><span className="tabular-nums">{timing.speed.toFixed(2)}x</span></label>
+              <input id="sp" type="range" min={0.5} max={2} step={0.05} value={timing.speed} className="w-full accent-[#7047EB]" onChange={(e) => setTiming((t) => ({ ...t, speed: Number(e.target.value) }))} />
+            </div>
+            <p className="col-span-2 text-[11px] text-muted tabular-nums">Segment duration {((timing.end - timing.start) / 1000).toFixed(2)} s</p>
+          </fieldset>
+          {can && (
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="btn btn-outline btn-sm flex-1" disabled={saving || !dirty} onClick={() => save()}>{saving ? <Loader2 size={14} className="ld-spin" /> : null} Save</button>
+              <button type="button" className="btn btn-dark btn-sm flex-1" disabled={saving || (translation.status === "approved" && !dirty)} onClick={() => save("approved")}><Check size={14} /> Approve line</button>
+            </div>
+          )}
+          {currentAudioPath && (
+            <button type="button" className="btn btn-ghost btn-sm w-full" onClick={async () => {
+              try {
+                const url = await openSigned("generated", currentAudioPath);
+                if (!audioRef.current) audioRef.current = new Audio();
+                audioRef.current.src = url;
+                await audioRef.current.play();
+              } catch (e) { onError((e as Error).message); }
+            }}>
+              <Play size={14} /> Play generated line
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -446,7 +471,7 @@ export function History({ data, onError, refresh }: { data: WorkspaceData; onErr
   const [busy, setBusy] = useState<string | null>(null);
   const [offsets, setOffsets] = useState<Record<string, number>>(() => Object.fromEntries(data.subtitles.map((s) => [s.language, s.timing_offset_ms])));
   async function download(bucket: string, path: string) {
-    try { window.location.href = await openSigned(bucket, path, true); } catch (e) { onError((e as Error).message); }
+    try { window.location.assign(await openSigned(bucket, path, true)); } catch (e) { onError((e as Error).message); }
   }
   const subtitleLangs = Array.from(new Set(data.subtitles.map((s) => s.language)));
   return (

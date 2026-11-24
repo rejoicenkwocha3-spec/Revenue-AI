@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, Pause, Star, Search, Loader2, Check, Fingerprint } from "lucide-react";
 import { Modal } from "@/components/app/Modal";
 import { api } from "@/lib/client-api";
@@ -57,15 +57,17 @@ export const sampleText = (lang: string) => SAMPLE[lang] ?? SAMPLE.en;
 export function useVoicePreview() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
-  const [audio] = useState(() => (typeof Audio !== "undefined" ? new Audio() : null));
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    if (!audio) return;
+    const audio = new Audio();
+    audioRef.current = audio;
     const end = () => setPlaying(null);
     audio.addEventListener("ended", end);
     return () => { audio.pause(); audio.removeEventListener("ended", end); };
-  }, [audio]);
+  }, []);
   async function toggle(v: Voice, language: string, text?: string, emotion?: string, accent?: string | null) {
+    const audio = audioRef.current;
     if (!audio) return;
     const key = `${v.provider}:${v.voiceId}:${text ?? ""}`;
     setError(null);

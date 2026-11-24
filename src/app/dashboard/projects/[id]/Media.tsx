@@ -24,9 +24,9 @@ export const Player = forwardRef<PlayerHandle, PlayerProps>(function Player({ so
   const mediaRef = useRef<HTMLVideoElement>(null);
   const dubRef = useRef<HTMLAudioElement>(null);
   const [src, setSrc] = useState<string | null>(null);
-  const [dubSrc, setDubSrc] = useState<string | null>(null);
+  const [dub, setDub] = useState<{ track: string; url: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"original" | "dub">("original");
+  const [requestedMode, setMode] = useState<"original" | "dub">("original");
   const [subs, setSubs] = useState<"off" | "source" | "target">("target");
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
@@ -39,12 +39,14 @@ export const Player = forwardRef<PlayerHandle, PlayerProps>(function Player({ so
     return () => { alive = false; };
   }, [source]);
   useEffect(() => {
-    setDubSrc(null);
-    if (!dubTrack) { setMode("original"); return; }
+    if (!dubTrack) return;
     let alive = true;
-    openSigned("generated", dubTrack).then((u) => alive && setDubSrc(u)).catch(() => undefined);
+    openSigned("generated", dubTrack).then((url) => alive && setDub({ track: dubTrack, url })).catch(() => undefined);
     return () => { alive = false; };
   }, [dubTrack]);
+  // A signed URL only applies to the track it was issued for; switching language falls back to the original.
+  const dubSrc = dub && dub.track === dubTrack ? dub.url : null;
+  const mode = dubSrc ? requestedMode : "original";
 
   const sync = useCallback(() => {
     const v = mediaRef.current;

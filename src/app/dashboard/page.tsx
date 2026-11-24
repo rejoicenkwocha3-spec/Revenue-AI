@@ -64,7 +64,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         </Notice>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard label="Total projects" value={total} icon={FolderKanban} tone="navy" />
         <StatCard label="Completed dubs" value={completed} icon={CheckCircle2} tone="blue" />
         <StatCard label="Processing" value={processing} icon={Loader} tone="purple" sub={processing ? "Running in the background" : "Nothing in progress"} />

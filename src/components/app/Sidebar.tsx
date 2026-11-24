@@ -88,8 +88,6 @@ export function Sidebar({ unread }: { unread: number }) {
 
 export function MobileNav({ unread }: { unread: number }) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {

@@ -24,7 +24,6 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  useEffect(() => setOpen(false), [pathname]);
 
   return (
     <header
@@ -74,14 +73,14 @@ export function Navbar() {
           <ul className="container-ld flex flex-col py-3">
             {LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className={cn("block rounded-lg px-2 py-3 text-base font-medium", pathname === l.href ? "text-blue" : "text-navy")}>
+                <Link href={l.href} onClick={() => setOpen(false)} className={cn("block rounded-lg px-2 py-3 text-base font-medium", pathname === l.href ? "text-blue" : "text-navy")}>
                   {l.label}
                 </Link>
               </li>
             ))}
             <li className="mt-2 grid grid-cols-2 gap-2 pb-2">
-              <Link href="/login" className="btn btn-outline">Log in</Link>
-              <Link href="/signup" className="btn btn-primary">Start Dubbing</Link>
+              <Link href="/login" onClick={() => setOpen(false)} className="btn btn-outline">Log in</Link>
+              <Link href="/signup" onClick={() => setOpen(false)} className="btn btn-primary">Start Dubbing</Link>
             </li>
           </ul>
         </div>

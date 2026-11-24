@@ -18,19 +18,17 @@ export function Workspace({ data }: { data: WorkspaceData }) {
   const router = useRouter();
   const playerRef = useRef<PlayerHandle>(null);
   const { project } = data;
-  const [lang, setLang] = useState<string | null>(project.targetLanguages[0] ?? null);
+  const [chosenLang, setLang] = useState<string | null>(project.targetLanguages[0] ?? null);
+  // Fall back to the first target if the chosen language was removed.
+  const lang = chosenLang && project.targetLanguages.includes(chosenLang) ? chosenLang : project.targetLanguages[0] ?? null;
   const [selected, setSelected] = useState<string | null>(null);
   const [currentMs, setCurrentMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [overrides, setOverrides] = useState<Record<string, WsTranslation>>({});
+  // Local saves, each tied to the server row it replaced; a refresh brings new rows and drops them.
+  const [overrides, setOverrides] = useState<Record<string, { base: WsTranslation; value: WsTranslation }>>({});
   const [bottom, setBottom] = useState<"timeline" | "dialogue">("timeline");
   const [approving, setApproving] = useState(false);
 
-  useEffect(() => setOverrides({}), [data.translations]);
-  useEffect(() => {
-    if (lang && !project.targetLanguages.includes(lang)) setLang(project.targetLanguages[0] ?? null);
-    if (!lang && project.targetLanguages.length) setLang(project.targetLanguages[0]);
-  }, [project.targetLanguages, lang]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
   const active = data.jobs.some((j) => ACTIVE.includes(j.status));
@@ -63,7 +61,11 @@ export function Workspace({ data }: { data: WorkspaceData }) {
 
   const translations = useMemo(() => {
     const m = new Map<string, WsTranslation>();
-    for (const t of data.translations) if (t.target_language === lang) m.set(t.segment_id, overrides[t.id] ?? t);
+    for (const t of data.translations) {
+      if (t.target_language !== lang) continue;
+      const o = overrides[t.id];
+      m.set(t.segment_id, o && o.base === t ? o.value : t);
+    }
     return m;
   }, [data.translations, lang, overrides]);
 
@@ -176,7 +178,10 @@ export function Workspace({ data }: { data: WorkspaceData }) {
             segment={segment}
             translation={translation}
             currentAudioPath={segAudio}
-            onSaved={(t) => setOverrides((o) => ({ ...o, [t.id]: t }))}
+            onSaved={(t) => {
+              const base = data.translations.find((x) => x.id === t.id);
+              if (base) setOverrides((o) => ({ ...o, [t.id]: { base, value: t } }));
+            }}
             onError={setError}
             refresh={refresh}
           />

@@ -10,7 +10,7 @@ export function DownloadButton({ bucket, path, label }: { bucket: string; path: 
     <span className="inline-flex items-center gap-2">
       <button type="button" className="btn btn-outline btn-sm" disabled={busy} onClick={async () => {
         setBusy(true); setErr(null);
-        try { window.location.href = await openSigned(bucket, path, true); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+        try { window.location.assign(await openSigned(bucket, path, true)); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
       }}>
         {busy ? <Loader2 size={13} className="ld-spin" /> : <Download size={13} />} {label ?? "Download"}
       </button>

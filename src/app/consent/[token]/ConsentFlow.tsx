@@ -8,7 +8,7 @@ import { FormMessage } from "@/components/auth/AuthUi";
 interface Consent { ownerName: string; ownerEmail: string; orgName: string; statement: string; status: string; commercialUse: boolean }
 
 export function ConsentFlow({ token, consent }: { token: string; consent: Consent }) {
-  const [sessionEmail, setSessionEmail] = useState<string | null | undefined>(undefined);
+  const [sessionEmail, setSessionEmail] = useState<string | null | undefined>(() => (supabaseReady() ? undefined : null));
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
   const [recording, setRecording] = useState<Blob | null>(null);
@@ -23,7 +23,7 @@ export function ConsentFlow({ token, consent }: { token: string; consent: Consen
   const chunks = useRef<Blob[]>([]);
 
   useEffect(() => {
-    if (!supabaseReady()) return setSessionEmail(null);
+    if (!supabaseReady()) return;
     createClient().auth.getUser().then(({ data }) => setSessionEmail(data.user?.email?.toLowerCase() ?? null));
   }, []);
   const verified = sessionEmail === consent.ownerEmail.toLowerCase();

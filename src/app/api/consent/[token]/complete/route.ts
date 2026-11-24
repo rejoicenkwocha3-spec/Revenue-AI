@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { handle, json, parseBody, ApiError } from "@/lib/api";
+import { handle, json, ApiError } from "@/lib/api";
 import { consentByToken } from "@/lib/consent-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
