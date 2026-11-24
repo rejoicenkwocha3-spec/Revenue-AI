@@ -1,19 +1,22 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+
 export const metadata: Metadata = {
-  title: "TrueAuthor: AI-Powered Academic Integrity and Writing Intelligence Platform",
-  description: "TrueAuthor helps students, educators and institutions evaluate writing originality, understand text similarity and improve academic integrity with intelligent writing analysis.",
+  title: { default: "LinguaDub: AI Video Dubbing and Localization", template: "%s | LinguaDub" },
+  description:
+    "LinguaDub transforms videos and audio into natural sounding multilingual experiences using AI powered dubbing, voice translation and intelligent localization.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
 };
+
+export const viewport: Viewport = { themeColor: "#101B3F" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
       <body>{children}</body>
     </html>
   );
