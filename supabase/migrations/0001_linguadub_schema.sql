@@ -523,7 +523,11 @@ alter table public.activity_logs enable row level security;
 do $$
 declare r record;
 begin
-  for r in select policyname, tablename from pg_policies where schemaname = 'public' loop
+  for r in select policyname, tablename from pg_policies where schemaname = 'public'
+    and tablename in ('profiles','organisations','organisation_members','team_invitations','languages','projects','media_files',
+      'voice_consents','voice_profiles','voice_favourites','transcriptions','speakers','transcript_segments','translation_segments',
+      'generated_audio','subtitles','processing_jobs','export_records','usage_records','subscriptions','payment_events',
+      'notifications','activity_logs') loop
     execute format('drop policy if exists %I on public.%I', r.policyname, r.tablename);
   end loop;
 end $$;
