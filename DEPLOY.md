@@ -15,3 +15,4 @@ Plan names, prices and limits are in `src/config/plans.ts`. Never paste secret k
 
 ## Deploying from the Revenue AI branch
 Vercel builds the repository's default branch first. In the project's Settings > Environments > Production, set Branch Tracking to `claude/revenue-ai-saas-liwjqa`. Each push to that branch then creates a production deployment.
+Depolyed
