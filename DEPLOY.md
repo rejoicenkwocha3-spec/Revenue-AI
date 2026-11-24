@@ -12,3 +12,6 @@
 6. Sign up, verify your email, then on the Overview page use **Load example data** to explore, and **Remove example data** when finished.
 
 Plan names, prices and limits are in `src/config/plans.ts`. Never paste secret keys into chat or commit them.
+
+## Deploying from the Revenue AI branch
+Vercel builds the repository's default branch first. In the project's Settings > Environments > Production, set Branch Tracking to `claude/revenue-ai-saas-liwjqa`. Each push to that branch then creates a production deployment.
