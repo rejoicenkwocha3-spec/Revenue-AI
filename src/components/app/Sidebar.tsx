@@ -3,29 +3,34 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, FolderKanban, PlusCircle, Film, AudioLines, Library, Fingerprint, FileText, Languages, Captions,
-  Download, Users, Bell, CreditCard, Settings, X, Menu,
+  LayoutDashboard, Brain, KanbanSquare, Briefcase, ScanSearch, TrendingUp, Building2, Contact, CalendarCheck, MessageSquareText, Bot,
+  BarChart3, FileText, Trophy, Target, Plug, Bell, CreditCard, Settings, X, Menu,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/projects", label: "My Projects", icon: FolderKanban, exact: true },
-  { href: "/dashboard/projects/new", label: "New Dubbing Project", icon: PlusCircle, exact: true },
-  { section: "Media" },
-  { href: "/dashboard/videos", label: "Video Library", icon: Film },
-  { href: "/dashboard/audio", label: "Audio Library", icon: AudioLines },
-  { section: "Voices" },
-  { href: "/dashboard/voices", label: "Voice Library", icon: Library },
-  { href: "/dashboard/voice-cloning", label: "Voice Cloning", icon: Fingerprint },
-  { section: "Localization" },
-  { href: "/dashboard/transcriptions", label: "Transcriptions", icon: FileText },
-  { href: "/dashboard/translations", label: "Translations", icon: Languages },
-  { href: "/dashboard/subtitles", label: "Subtitles", icon: Captions },
-  { href: "/dashboard/exports", label: "Export History", icon: Download },
+  { href: "/dashboard/intelligence", label: "Revenue Intelligence", icon: Brain },
+  { section: "Pipeline" },
+  { href: "/dashboard/pipeline", label: "Pipeline", icon: KanbanSquare },
+  { href: "/dashboard/opportunities", label: "Opportunities", icon: Briefcase },
+  { href: "/dashboard/deals", label: "Deal Inspection", icon: ScanSearch },
+  { href: "/dashboard/forecasting", label: "Forecasting", icon: TrendingUp },
+  { section: "Customers" },
+  { href: "/dashboard/accounts", label: "Accounts", icon: Building2 },
+  { href: "/dashboard/contacts", label: "Contacts", icon: Contact },
+  { href: "/dashboard/activities", label: "Sales Activities", icon: CalendarCheck },
+  { section: "AI" },
+  { href: "/dashboard/assistant", label: "AI Assistant", icon: MessageSquareText },
+  { href: "/dashboard/agents", label: "AI Agents", icon: Bot },
+  { section: "Performance" },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/reports", label: "Reports", icon: FileText },
+  { href: "/dashboard/performance", label: "Team Performance", icon: Trophy },
+  { href: "/dashboard/targets", label: "Targets and Quotas", icon: Target },
   { section: "Workspace" },
-  { href: "/dashboard/team", label: "Team", icon: Users },
+  { href: "/dashboard/integrations", label: "Integrations", icon: Plug },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell, badge: true },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
@@ -36,35 +41,17 @@ function NavList({ unread, onNavigate }: { unread: number; onNavigate?: () => vo
   return (
     <ul className="space-y-0.5">
       {NAV.map((item, i) => {
-        if ("section" in item) {
-          return (
-            <li key={i} className="px-3 pb-1.5 pt-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7E87B0]">
-              {item.section}
-            </li>
-          );
-        }
+        if ("section" in item) return <li key={i} className="px-3 pb-1 pt-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[#7480A6]">{item.section}</li>;
         const exact = "exact" in item && item.exact;
-        const active = exact
-          ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(item.href + "/");
-        const projectWorkspace = item.href === "/dashboard/projects" && /^\/dashboard\/projects\/(?!new)[^/]+/.test(pathname);
+        const active = exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/") || (item.href === "/dashboard/settings" && pathname.startsWith("/dashboard/team"));
         const Icon = item.icon;
         return (
           <li key={item.href}>
-            <Link
-              href={item.href}
-              onClick={onNavigate}
-              aria-current={active || projectWorkspace ? "page" : undefined}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-[0.875rem] font-medium transition-colors",
-                active || projectWorkspace ? "bg-white/10 text-white" : "text-[#B4BBDA] hover:bg-white/5 hover:text-white",
-              )}
-            >
-              <Icon size={17} className={cn(active || projectWorkspace ? "text-[#9DB8FF]" : "text-[#7E87B0] group-hover:text-[#B4BBDA]")} />
+            <Link href={item.href} onClick={onNavigate} aria-current={active ? "page" : undefined}
+              className={cn("group flex items-center gap-3 rounded-lg px-3 py-[7px] text-[0.85rem] font-medium transition-colors", active ? "bg-white/10 text-white" : "text-[#AEB8DA] hover:bg-white/5 hover:text-white")}>
+              <Icon size={16} className={cn(active ? "text-[#8FA9FF]" : "text-[#7480A6] group-hover:text-[#AEB8DA]")} />
               <span className="flex-1">{item.label}</span>
-              {"badge" in item && item.badge && unread > 0 && (
-                <span className="rounded-full bg-coral px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{unread > 99 ? "99+" : unread}</span>
-              )}
+              {"badge" in item && item.badge && unread > 0 && <span className="rounded-full bg-electric px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{unread > 99 ? "99+" : unread}</span>}
             </Link>
           </li>
         );
@@ -75,13 +62,9 @@ function NavList({ unread, onNavigate }: { unread: number; onNavigate?: () => vo
 
 export function Sidebar({ unread }: { unread: number }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col bg-navy lg:flex">
-      <div className="flex h-16 items-center px-5">
-        <Logo dark size={28} href="/dashboard" />
-      </div>
-      <nav className="flex-1 overflow-y-auto px-3 pb-6" aria-label="Application">
-        <NavList unread={unread} />
-      </nav>
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[256px] flex-col bg-navy lg:flex">
+      <div className="flex h-16 items-center px-5"><Logo dark size={28} href="/dashboard" /></div>
+      <nav className="flex-1 overflow-y-auto px-3 pb-6" aria-label="Application"><NavList unread={unread} /></nav>
     </aside>
   );
 }
@@ -90,15 +73,11 @@ export function MobileNav({ unread }: { unread: number }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
   return (
     <>
-      <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-navy hover:bg-canvas lg:hidden" aria-label="Open navigation" onClick={() => setOpen(true)}>
-        <Menu size={20} />
-      </button>
+      <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-navy hover:bg-canvas lg:hidden" aria-label="Open navigation" onClick={() => setOpen(true)}><Menu size={20} /></button>
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button type="button" aria-label="Close navigation" className="absolute inset-0 bg-navy/40" onClick={() => setOpen(false)} />
@@ -107,9 +86,7 @@ export function MobileNav({ unread }: { unread: number }) {
               <Logo dark size={26} href="/dashboard" />
               <button type="button" onClick={() => setOpen(false)} className="text-white" aria-label="Close navigation"><X size={20} /></button>
             </div>
-            <nav className="flex-1 overflow-y-auto px-3 pb-6" aria-label="Application">
-              <NavList unread={unread} onNavigate={() => setOpen(false)} />
-            </nav>
+            <nav className="flex-1 overflow-y-auto px-3 pb-6" aria-label="Application"><NavList unread={unread} onNavigate={() => setOpen(false)} /></nav>
           </div>
         </div>
       )}

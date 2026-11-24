@@ -165,7 +165,8 @@ create table if not exists revenue_ai.accounts (
   updated_at timestamptz not null default now()
 );
 create index if not exists accounts_org_idx on revenue_ai.accounts(org_id, name);
-create unique index if not exists accounts_external_idx on revenue_ai.accounts(org_id, external_source, external_id) where external_id is not null;
+drop index if exists revenue_ai.accounts_external_idx;
+create unique index accounts_external_idx on revenue_ai.accounts(org_id, external_source, external_id);
 
 create table if not exists revenue_ai.contacts (
   id uuid primary key default gen_random_uuid(),
@@ -188,7 +189,8 @@ create table if not exists revenue_ai.contacts (
 );
 create index if not exists contacts_org_idx on revenue_ai.contacts(org_id, last_name);
 create index if not exists contacts_account_idx on revenue_ai.contacts(account_id);
-create unique index if not exists contacts_external_idx on revenue_ai.contacts(org_id, external_source, external_id) where external_id is not null;
+drop index if exists revenue_ai.contacts_external_idx;
+create unique index contacts_external_idx on revenue_ai.contacts(org_id, external_source, external_id);
 
 create table if not exists revenue_ai.pipeline_stages (
   id uuid primary key default gen_random_uuid(),
@@ -235,7 +237,8 @@ create table if not exists revenue_ai.opportunities (
 create index if not exists opportunities_org_idx on revenue_ai.opportunities(org_id, status, close_date);
 create index if not exists opportunities_owner_idx on revenue_ai.opportunities(owner_id);
 create index if not exists opportunities_account_idx on revenue_ai.opportunities(account_id);
-create unique index if not exists opportunities_external_idx on revenue_ai.opportunities(org_id, external_source, external_id) where external_id is not null;
+drop index if exists revenue_ai.opportunities_external_idx;
+create unique index opportunities_external_idx on revenue_ai.opportunities(org_id, external_source, external_id);
 
 -- Buyer stakeholders on a deal
 create table if not exists revenue_ai.opportunity_contacts (
@@ -296,7 +299,8 @@ create table if not exists revenue_ai.sales_activities (
 );
 create index if not exists sales_activities_org_idx on revenue_ai.sales_activities(org_id, occurred_at desc);
 create index if not exists sales_activities_opp_idx on revenue_ai.sales_activities(opportunity_id, occurred_at desc);
-create unique index if not exists sales_activities_external_idx on revenue_ai.sales_activities(org_id, external_source, external_id) where external_id is not null;
+drop index if exists revenue_ai.sales_activities_external_idx;
+create unique index sales_activities_external_idx on revenue_ai.sales_activities(org_id, external_source, external_id);
 
 create table if not exists revenue_ai.meetings (
   id uuid primary key default gen_random_uuid(),
@@ -316,7 +320,8 @@ create table if not exists revenue_ai.meetings (
   created_at timestamptz not null default now()
 );
 create index if not exists meetings_org_idx on revenue_ai.meetings(org_id, starts_at desc);
-create unique index if not exists meetings_external_idx on revenue_ai.meetings(org_id, external_source, external_id) where external_id is not null;
+drop index if exists revenue_ai.meetings_external_idx;
+create unique index meetings_external_idx on revenue_ai.meetings(org_id, external_source, external_id);
 
 create table if not exists revenue_ai.tasks (
   id uuid primary key default gen_random_uuid(),

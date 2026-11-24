@@ -13,6 +13,7 @@ import { summariseFindings } from "@/lib/ai/claude";
 import { audit, notify, orgMemberIds } from "@/lib/audit";
 import { assertAgentAllowed, recordUsage } from "@/lib/billing";
 import { ApiError } from "@/lib/api";
+import { postToSlack } from "@/lib/integrations/sync";
 import type { AgentKey } from "@/config/plans";
 import type { OrgData } from "@/lib/revenue/types";
 
@@ -103,6 +104,7 @@ export async function runAgent(params: { orgId: string; agent: AgentKey; reader:
   const pending = rows.filter((r) => r.status === "pending").length - autoCompleted;
   if (pending > 0) {
     await notify({ userIds: await orgMemberIds(orgId, ["owner", "admin", "sales_manager", "revops"]), orgId, title: `${def.name} has ${pending} action${pending > 1 ? "s" : ""} awaiting approval`, link: "/dashboard/agents?status=pending" });
+    await postToSlack(orgId, `${def.name} has ${pending} recommended action${pending > 1 ? "s" : ""} awaiting approval in Revenue AI.`).catch(() => false);
   }
   return { runId, findings: recs.length, pending, autoCompleted };
 }

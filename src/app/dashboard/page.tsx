@@ -1,167 +1,138 @@
 import Link from "next/link";
-import { FolderKanban, CheckCircle2, Loader, Clock, Languages, HardDrive, Plus, Activity, ArrowRight } from "lucide-react";
-import { requireAppContext } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
-import { getEntitlements } from "@/lib/billing";
-import { PageHeader, StatCard, StatusBadge, EmptyState, Notice } from "@/components/app/ui";
-import { formatBytes, formatDuration, timeAgo } from "@/lib/utils";
-import { languageName } from "@/config/languages";
-import { describeActivity } from "@/lib/activity-text";
+import { AlertTriangle, BadgeDollarSign, Briefcase, CircleCheck, CircleX, Gauge, LineChart, Percent, Scale, Target, TrendingUp, Layers, Sparkles, Database } from "lucide-react";
+import { pageData, periodFromParams } from "@/lib/page";
+import { summarize, monthlySeries, funnel, byDimension, memberName, accountName } from "@/lib/revenue/metrics";
+import { computeForecast, forecastAccuracy } from "@/lib/revenue/forecast";
+import { revenueInsights } from "@/lib/revenue/insights";
+import { money, pct } from "@/lib/format";
+import { timeAgo } from "@/lib/utils";
+import { can } from "@/lib/permissions";
+import { PageHeader, StatCard, Card, HealthBadge, Badge, Evidence, ProjectionTag, ActualTag, EmptyState, Notice } from "@/components/app/ui";
+import { RevenueTrendChart, FunnelChart, HBarChart, ForecastActualChart } from "@/components/app/charts";
+import { PeriodPicker } from "@/components/app/PeriodPicker";
+import { SampleDataButton } from "./SampleDataButton";
 
 export const metadata = { title: "Overview" };
 
-const PROCESSING = ["queued", "uploading", "transcribing", "translating", "generating_voice", "synchronising", "rendering"];
-
-export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
-  const ctx = await requireAppContext();
+export default async function OverviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const supabase = await createClient();
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setUTCMonth(sixMonthsAgo.getUTCMonth() - 5, 1);
-  sixMonthsAgo.setUTCHours(0, 0, 0, 0);
+  const { ctx, data, health, supabase } = await pageData();
+  const period = periodFromParams(sp, data.fiscalStartMonth, data.now);
+  const c = data.currency;
+  const atRiskIds = new Set([...health.values()].filter((h) => h.health === "at_risk").map((h) => h.opportunityId));
+  const s = summarize(data, period, atRiskIds);
+  const f = computeForecast(data, period, health);
+  const insights = revenueInsights(data, health, computeForecast(data, periodFromParams({}, data.fiscalStartMonth, data.now), health));
+  const empty = data.opportunities.length === 0 && data.transactions.length === 0;
 
-  const [{ data: projects }, { data: usageAll }, { data: activity }, ent] = await Promise.all([
-    supabase.from("projects").select("id, name, status, target_languages, source_language, duration_seconds, updated_at, media_kind").eq("org_id", ctx.orgId).order("updated_at", { ascending: false }),
-    supabase.from("usage_records").select("quantity, created_at").eq("org_id", ctx.orgId).eq("kind", "dub_minutes"),
-    supabase.from("activity_logs").select("id, action, details, created_at, user_id, project_id, profiles:user_id(full_name)").eq("org_id", ctx.orgId).order("created_at", { ascending: false }).limit(8),
-    getEntitlements(ctx.orgId),
-  ]);
-
-  const list = projects ?? [];
-  const total = list.length;
-  const completed = list.filter((p) => p.status === "completed").length;
-  const processing = list.filter((p) => PROCESSING.includes(p.status)).length;
-  const minutesProcessed = (usageAll ?? []).reduce((a, r) => a + Number(r.quantity), 0);
-  const languages = Array.from(new Set(list.flatMap((p) => (p.target_languages as string[]) ?? [])));
-
-  // monthly usage for the last six months
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(sixMonthsAgo);
-    d.setUTCMonth(d.getUTCMonth() + i);
-    return { key: `${d.getUTCFullYear()}-${d.getUTCMonth()}`, label: d.toLocaleString("en", { month: "short", timeZone: "UTC" }), value: 0 };
-  });
-  for (const r of usageAll ?? []) {
-    const d = new Date(r.created_at);
-    const m = months.find((x) => x.key === `${d.getUTCFullYear()}-${d.getUTCMonth()}`);
-    if (m) m.value += Number(r.quantity);
-  }
-  const maxMonth = Math.max(1, ...months.map((m) => m.value));
-  const storagePct = Math.min(100, (ent.storageBytesUsed / Math.max(1, ent.storageBytesIncluded)) * 100);
-  const minutesPct = ent.minutesIncluded ? Math.min(100, (ent.minutesUsed / ent.minutesIncluded) * 100) : 0;
+  const { data: snapshots } = await supabase.from("forecast_snapshots").select("period_start, period_end, expected_case, submitted_amount, created_at").eq("org_id", ctx.orgId).order("created_at", { ascending: false }).limit(200);
+  const accuracy = forecastAccuracy(data, (snapshots ?? []).map((x) => ({ ...x, expected_case: Number(x.expected_case), submitted_amount: x.submitted_amount == null ? null : Number(x.submitted_amount) })));
+  const risky = [...health.values()].filter((h) => h.health !== "healthy").map((h) => ({ h, o: data.opportunities.find((o) => o.id === h.opportunityId)! })).sort((a, b) => a.h.score - b.h.score || b.o.amount - a.o.amount).slice(0, 6);
+  const recent = data.activities.slice(0, 7);
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
-        title={`Welcome, ${ctx.fullName.split(" ")[0]}`}
-        description={`Here is what is happening in ${ctx.orgName}.`}
-        actions={<Link href="/dashboard/projects/new" className="btn btn-primary btn-sm"><Plus size={16} /> New dubbing project</Link>}
+        title={`Welcome back, ${ctx.fullName.split(" ")[0]}`}
+        description={<>Revenue performance for <span className="font-semibold text-ink">{period.label}</span>. Actual results come from booked revenue; projections are marked and explain their assumptions.</>}
+        actions={<PeriodPicker period={period} basePath="/dashboard" fiscal={data.fiscalStartMonth} />}
       />
-      {sp.password === "updated" && <Notice tone="success" className="mb-5">Your password has been updated.</Notice>}
-      {!ent.plan && (
-        <Notice tone="warning" className="mb-5">
-          Your workspace has no active plan, so dubbing is {ent.minutesIncluded ? `limited to ${ent.minutesIncluded} trial minutes` : "paused"}.{" "}
-          <Link href="/dashboard/billing" className="font-semibold underline">Choose a plan</Link>
-        </Notice>
+
+      {empty && (
+        <Card>
+          <EmptyState icon={Database} title="Your revenue workspace is ready" body="Add opportunities, connect your CRM or load clearly labelled example records to explore every feature. Every dashboard number is calculated from the records in this workspace.">
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <Link href="/dashboard/opportunities?new=1" className="btn btn-primary btn-sm">Add an opportunity</Link>
+              <Link href="/dashboard/integrations" className="btn btn-outline btn-sm">Connect a CRM</Link>
+              {can(ctx.role, "deal.manage_any") && <SampleDataButton />}
+            </div>
+          </EmptyState>
+        </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <StatCard label="Total projects" value={total} icon={FolderKanban} tone="navy" />
-        <StatCard label="Completed dubs" value={completed} icon={CheckCircle2} tone="blue" />
-        <StatCard label="Processing" value={processing} icon={Loader} tone="purple" sub={processing ? "Running in the background" : "Nothing in progress"} />
-        <StatCard label="Minutes processed" value={minutesProcessed.toFixed(1)} icon={Clock} tone="coral" sub="All time, across every language" />
+      <section aria-label="Key metrics" className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <StatCard label="Total revenue" value={money(s.totalRevenue, c, true)} icon={BadgeDollarSign} tone="blue" sub={<><ActualTag />Booked in period</>} />
+        <StatCard label="Forecasted revenue" value={money(f.expectedCase, c, true)} icon={TrendingUp} tone="purple" projection sub={`Range ${money(f.worstCase, c, true)} to ${money(f.bestCaseTotal, c, true)}`} />
+        <StatCard label="Total pipeline" value={money(s.pipelineValue, c, true)} icon={Layers} tone="blue" sub={`${s.openDeals} open deals`} />
+        <StatCard label="Weighted pipeline" value={money(s.weightedPipeline, c, true)} icon={Scale} tone="purple" sub="Amount × probability" />
+        <StatCard label="Closed won" value={money(s.closedWonValue, c, true)} icon={CircleCheck} tone="green" sub={`${s.closedWonCount} deals`} />
+        <StatCard label="Closed lost" value={money(s.closedLostValue, c, true)} icon={CircleX} tone="red" sub={`${s.closedLostCount} deals`} />
+        <StatCard label="Deals at risk" value={s.dealsAtRisk} icon={AlertTriangle} tone="amber" sub={<Link href="/dashboard/deals?health=at_risk" className="text-blue hover:underline">Inspect deals</Link>} />
+        <StatCard label="Average deal size" value={money(s.avgDealSize, c, true)} icon={Briefcase} tone="navy" sub="Won deals in period" />
+        <StatCard label="Win rate" value={pct(s.winRate)} icon={Percent} tone="green" sub={`${s.closedWonCount} won of ${s.closedWonCount + s.closedLostCount} decided`} />
+        <StatCard label="Quota attainment" value={s.target ? pct(s.quotaAttainment) : "No target"} icon={Target} tone="blue" sub={s.target ? `of ${money(s.target, c, true)}` : <Link href="/dashboard/targets" className="text-blue hover:underline">Set a target</Link>} />
+        <StatCard label="Annual recurring revenue" value={money(s.arr, c, true)} icon={LineChart} tone="navy" sub={`MRR ${money(s.mrr, c, true)}`} />
+        <StatCard label="Sales cycle" value={s.salesCycleDays != null ? `${s.salesCycleDays} days` : "No data"} icon={Gauge} tone="amber" sub="Created to closed won" />
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Card className="xl:col-span-2" title="Revenue performance" description="Monthly booked revenue (actual) and weighted pipeline by expected close month (projection).">
+          <RevenueTrendChart data={monthlySeries(data, 12, 3)} />
+        </Card>
+        <Card title="Pipeline funnel" description="Open deal value by stage" actions={<Link href="/dashboard/pipeline" className="text-sm font-semibold text-blue">Open pipeline</Link>}>
+          {s.openDeals ? <FunnelChart data={funnel(data)} /> : <p className="text-sm text-muted">No open deals yet.</p>}
+        </Card>
       </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-3">
-        <section className="card p-6 xl:col-span-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Monthly usage</h2>
-            <p className="text-sm text-muted tabular-nums">
-              {ent.minutesUsed.toFixed(1)} of {ent.minutesIncluded} min this period
-            </p>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-canvas">
-            <div className="h-full rounded-full bg-blue" style={{ width: `${minutesPct}%` }} />
-          </div>
-          <div className="mt-8 grid h-44 grid-cols-6 items-end gap-3 border-b border-line">
-            {months.map((m) => (
-              <div key={m.key} className="flex h-full flex-col items-center justify-end gap-2">
-                <span className="text-xs font-semibold tabular-nums text-navy">{m.value ? m.value.toFixed(1) : ""}</span>
-                <div className="w-full max-w-12 rounded-t-md bg-blue/85" style={{ height: `${Math.max(m.value ? 4 : 0, (m.value / maxMonth) * 100)}%` }} />
-              </div>
-            ))}
-          </div>
-          <div className="mt-2 grid grid-cols-6 gap-3 text-center text-xs text-muted">
-            {months.map((m) => <span key={m.key}>{m.label}</span>)}
-          </div>
-        </section>
-
-        <section className="grid gap-5">
-          <div className="card p-6">
-            <div className="flex items-center gap-2"><Languages size={18} className="text-purple" /><h2 className="text-lg font-bold">Languages used</h2></div>
-            {languages.length ? (
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {languages.map((l) => <span key={l} className="chip bg-lavender text-purple">{languageName(l)}</span>)}
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-muted">Target languages appear here once you create a project.</p>
-            )}
-          </div>
-          <div className="card p-6">
-            <div className="flex items-center gap-2"><HardDrive size={18} className="text-blue" /><h2 className="text-lg font-bold">Storage</h2></div>
-            <p className="mt-3 text-sm tabular-nums text-body">{formatBytes(ent.storageBytesUsed)} of {formatBytes(ent.storageBytesIncluded)}</p>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-canvas"><div className="h-full rounded-full bg-purple" style={{ width: `${storagePct}%` }} /></div>
-          </div>
-        </section>
-      </div>
-
-      <div className="mt-5 grid gap-5 xl:grid-cols-3">
-        <section className="card xl:col-span-2">
-          <div className="flex items-center justify-between border-b border-line px-6 py-4">
-            <h2 className="text-lg font-bold">Recent projects</h2>
-            <Link href="/dashboard/projects" className="inline-flex items-center gap-1 text-sm font-semibold text-blue">View all <ArrowRight size={14} /></Link>
-          </div>
-          {list.length === 0 ? (
-            <div className="p-6">
-              <EmptyState icon={FolderKanban} title="No projects yet" body="Create your first dubbing project to upload media and start localizing." action={{ href: "/dashboard/projects/new", label: "Create a project" }} />
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Card title="AI generated insights" description="From your records by the revenue insights rules" className="xl:col-span-2" actions={<Link href="/dashboard/intelligence" className="text-sm font-semibold text-blue">All intelligence</Link>}>
+          {insights.length ? (
+            <ul className="grid gap-3 md:grid-cols-2">
+              {insights.slice(0, 4).map((i) => (
+                <li key={i.title} className="rounded-xl border border-line p-4">
+                  <div className="flex flex-wrap items-center gap-2"><Badge tone={i.severity}>{i.severity}</Badge>{i.isProjection ? <ProjectionTag /> : <ActualTag />}</div>
+                  <p className="mt-2 font-semibold text-ink">{i.title}</p>
+                  <p className="mt-1 text-sm text-body">{i.body}</p>
+                  <Evidence items={i.evidence.slice(0, 3)} />
+                </li>
+              ))}
+            </ul>
+          ) : <p className="text-sm text-muted">Insights appear once there are deals, revenue and activity to analyse.</p>}
+        </Card>
+        <Card title="Forecast versus actual" description="Last forecast snapshot before each period ended, against booked revenue">
+          {accuracy.length ? (
+            <ForecastActualChart data={accuracy.slice(-6).map((a) => ({ label: a.periodStart.slice(0, 7), forecast: Math.round(a.forecast), actual: Math.round(a.actual) }))} />
+          ) : (
+            <div className="space-y-3 text-sm">
+              <Notice>No completed forecast periods yet. Save forecast snapshots on the Forecasting page and accuracy is tracked automatically when each period ends.</Notice>
+              <div className="flex items-center justify-between rounded-lg bg-canvas px-3 py-2"><span>This period so far</span><span className="font-semibold tabular-nums">{money(f.closedWon, c)}</span></div>
+              <div className="flex items-center justify-between rounded-lg bg-lavender px-3 py-2"><span className="inline-flex items-center gap-1.5"><Sparkles size={13} />Expected case</span><span className="font-semibold tabular-nums">{money(f.expectedCase, c)}</span></div>
             </div>
-          ) : (
+          )}
+        </Card>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Card title="Revenue by sales representative" description={`Booked in ${period.label}`}>
+          {byDimension(data, period, "owner").length ? <HBarChart data={byDimension(data, period, "owner").slice(0, 8)} /> : <p className="text-sm text-muted">No revenue booked in this period.</p>}
+        </Card>
+        <Card title="Deal risk overview" description="Lowest health open deals" actions={<Link href="/dashboard/deals" className="text-sm font-semibold text-blue">Inspect</Link>} bodyClass="p-0">
+          {risky.length ? (
             <ul className="divide-y divide-line">
-              {list.slice(0, 6).map((p) => (
-                <li key={p.id}>
-                  <Link href={`/dashboard/projects/${p.id}`} className="flex flex-wrap items-center gap-3 px-6 py-3.5 hover:bg-canvas/60">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-navy">{p.name}</p>
-                      <p className="text-xs text-muted">
-                        {p.source_language ? languageName(p.source_language) : "Auto detect"} to {(p.target_languages as string[]).map(languageName).join(", ") || "no targets"}
-                        {p.duration_seconds ? ` · ${formatDuration(Number(p.duration_seconds))}` : ""}
-                      </p>
-                    </div>
-                    <StatusBadge status={p.status} />
-                    <span className="w-20 text-right text-xs text-muted">{timeAgo(p.updated_at)}</span>
-                  </Link>
+              {risky.map(({ h, o }) => (
+                <li key={o.id} className="px-5 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Link href={`/dashboard/deals/${o.id}`} className="truncate font-semibold text-ink hover:text-blue">{o.name}</Link>
+                    <HealthBadge health={h.health} score={h.score} />
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-muted">{money(o.amount, c)} · {h.factors[0]?.title ?? "Low engagement"}</p>
                 </li>
               ))}
             </ul>
-          )}
-        </section>
-        <section className="card">
-          <div className="flex items-center gap-2 border-b border-line px-6 py-4"><Activity size={17} className="text-coral" /><h2 className="text-lg font-bold">Recent activity</h2></div>
-          {(activity ?? []).length === 0 ? (
-            <p className="px-6 py-6 text-sm text-muted">Activity from your team appears here.</p>
-          ) : (
+          ) : <p className="p-5 text-sm text-muted">No open deals need attention.</p>}
+        </Card>
+        <Card title="Recent activities" actions={<Link href="/dashboard/activities" className="text-sm font-semibold text-blue">All activity</Link>} bodyClass="p-0">
+          {recent.length ? (
             <ul className="divide-y divide-line">
-              {(activity ?? []).map((a) => (
-                <li key={a.id} className="px-6 py-3 text-sm">
-                  <p className="text-body">
-                    <span className="font-semibold text-navy">{(a.profiles as unknown as { full_name: string } | null)?.full_name ?? "LinguaDub"}</span>{" "}
-                    {describeActivity(a.action, a.details as Record<string, unknown>)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted">{timeAgo(a.created_at)}</p>
+              {recent.map((a) => (
+                <li key={a.id} className="px-5 py-3 text-sm">
+                  <p className="truncate font-medium text-ink"><span className="capitalize text-muted">{a.type}:</span> {a.subject}</p>
+                  <p className="truncate text-xs text-muted">{memberName(data, a.user_id)} · {a.opportunity_id ? data.opportunities.find((o) => o.id === a.opportunity_id)?.name : accountName(data, a.account_id)} · {timeAgo(a.occurred_at)}</p>
                 </li>
               ))}
             </ul>
-          )}
-        </section>
+          ) : <p className="p-5 text-sm text-muted">Logged calls, emails and meetings appear here.</p>}
+        </Card>
       </div>
     </div>
   );

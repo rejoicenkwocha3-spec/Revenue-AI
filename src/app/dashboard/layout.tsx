@@ -8,7 +8,7 @@ import { supabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { SetupRequired } from "@/components/app/SetupRequired";
 
-export const metadata: Metadata = { title: { default: "Dashboard", template: "%s | LinguaDub" } };
+export const metadata: Metadata = { title: { default: "Dashboard", template: "%s | Revenue AI" } };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await connection();
@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-canvas">
       <Sidebar unread={unread} />
-      <div className="lg:pl-[264px]">
+      <div className="lg:pl-[256px]">
         <Topbar ctx={ctx} unread={unread} />
         <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>

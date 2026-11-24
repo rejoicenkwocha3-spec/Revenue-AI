@@ -56,3 +56,7 @@ export function timeAgo(d: string | Date): string {
 export function safeFileName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._]+/g, "_").slice(-120);
 }
+
+export function initials(name: string): string {
+  return name.split(/\s+/).filter(Boolean).map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "U";
+}
