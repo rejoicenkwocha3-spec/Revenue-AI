@@ -438,10 +438,10 @@ async function cuesFor(projectId: string, language: string | null): Promise<Cue[
 }
 
 /** Writes SRT and VTT for one language and records them. Exported for manual regeneration. */
-export async function writeSubtitles(orgId: string, projectId: string, language: string, isSource: boolean) {
+export async function writeSubtitles(orgId: string, projectId: string, language: string, isSource: boolean, offsetOverride?: number) {
   const admin = createAdminClient();
   const { data: prev } = await admin.from("subtitles").select("timing_offset_ms").eq("project_id", projectId).eq("language", language).limit(1);
-  const offset = prev?.[0]?.timing_offset_ms ?? 0;
+  const offset = offsetOverride ?? prev?.[0]?.timing_offset_ms ?? 0;
   const cues = applyOffset(await cuesFor(projectId, isSource ? null : language), offset);
   for (const format of ["srt", "vtt"] as const) {
     const body = format === "srt" ? toSrt(cues) : toVtt(cues);

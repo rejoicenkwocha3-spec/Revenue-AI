@@ -54,7 +54,7 @@ alter table public.profiles
 
 create table if not exists public.organisation_members (
   org_id uuid not null references public.organisations(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   role public.member_role not null default 'viewer',
   created_at timestamptz not null default now(),
   primary key (org_id, user_id)
@@ -424,7 +424,7 @@ create index if not exists notifications_user_idx on public.notifications(user_i
 create table if not exists public.activity_logs (
   id uuid primary key default gen_random_uuid(),
   org_id uuid not null references public.organisations(id) on delete cascade,
-  user_id uuid references auth.users(id) on delete set null,
+  user_id uuid references public.profiles(id) on delete set null,
   project_id uuid references public.projects(id) on delete cascade,
   action text not null,
   details jsonb not null default '{}',
